@@ -1,0 +1,134 @@
+<%- include('../partials/head', { title: 'Kelola Inventaris' }) %>
+
+<main class="admin-page" id="adminPage">
+
+  <%- include('../partials/sidebar', { active: 'inventaris' }) %>
+
+  <section class="main-content">
+
+    <%- include('../partials/topbar', {
+      pageTitle: 'Kelola Inventaris',
+      pageSubtitle: 'Tambah, edit, hapus, dan cari data inventaris.'
+    }) %>
+
+    <div class="table-card">
+
+      <div class="table-top">
+
+        <h2>Data Inventaris</h2>
+
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+
+          <a href="/admin/inventaris/export/pdf" class="btn-danger">PDF</a>
+          <a href="/admin/inventaris/export/excel" class="btn-success">Excel</a>
+          <a href="/admin/inventaris/export/word" class="btn-secondary">Word</a>
+          <a href="/admin/inventaris/create" class="btn-primary">+ Tambah Inventaris</a>
+
+        </div>
+
+      </div>
+
+      <form method="GET" class="search-form">
+
+        <input
+          type="text"
+          name="search"
+          placeholder="Cari kode, nup, nama barang, merk, tipe, kategori..."
+          value="<%= search || '' %>"
+        >
+
+        <button class="btn-primary" type="submit">Cari</button>
+
+        <a class="btn-secondary" href="/admin/inventaris">Reset</a>
+
+      </form>
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Kode Barang</th>
+            <th>NUP</th>
+            <th>Nama Barang</th>
+            <th>Merk</th>
+            <th>Tipe</th>
+            <th>Kategori</th>
+            <th>Tgl Buku</th>
+            <th>Tgl Perolehan</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+
+        <tbody>
+
+          <% if (!inventaris || inventaris.length === 0) { %>
+            <tr>
+              <td colspan="10" class="empty-state">
+                Data inventaris kosong
+              </td>
+            </tr>
+          <% } %>
+
+          <% inventaris.forEach(item => { %>
+
+            <tr>
+
+              <td><%= item.id_inventaris || '-' %></td>
+              <td><%= item.kode_barang || '-' %></td>
+              <td><%= item.nup || '-' %></td>
+              <td><%= item.nama_barang || '-' %></td>
+              <td><%= item.merk || '-' %></td>
+              <td><%= item.tipe || '-' %></td>
+              <td>
+                <span class="badge badge-blue">
+                  <%= item.kategori || '-' %>
+                </span>
+              </td>
+              <td><%= formatDate(item.tanggal_buku_pertama) || '-' %></td>
+              <td><%= formatDate(item.tanggal_perolehan) || '-' %></td>
+
+              <td>
+
+                <div class="actions">
+
+                  <a
+                    href="/admin/inventaris/edit/<%= item.id_inventaris %>"
+                    class="btn-warning"
+                  >
+                    Edit
+                  </a>
+
+                  <form
+                    class="inline"
+                    action="/admin/inventaris/delete/<%= item.id_inventaris %>"
+                    method="POST"
+                  >
+                    <button
+                      type="submit"
+                      onclick="return confirm('Yakin hapus inventaris ini?')"
+                      class="btn-danger"
+                    >
+                      Hapus
+                    </button>
+                  </form>
+
+                </div>
+
+              </td>
+
+            </tr>
+
+          <% }) %>
+
+        </tbody>
+
+      </table>
+
+    </div>
+
+  </section>
+
+</main>
+
+<%- include('../partials/footer') %>

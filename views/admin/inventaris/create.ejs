@@ -1,0 +1,78 @@
+<%- include('../partials/head', { title: 'Tambah Inventaris' }) %>
+
+<main class="admin-page" id="adminPage">
+
+  <%- include('../partials/sidebar', { active: 'inventaris' }) %>
+
+  <section class="main-content">
+
+    <%- include('../partials/topbar', {
+      pageTitle: 'Tambah Inventaris',
+      pageSubtitle: 'Form tambah inventaris sesuai tabel inventaris.'
+    }) %>
+
+    <form action="/admin/inventaris/create" method="POST" class="form-card">
+
+      <div class="form-group">
+        <label>Kode Barang</label>
+        <input type="text" name="kode_barang" value="<%= oldInput?.kode_barang || '' %>" required>
+      </div>
+
+      <div class="form-group">
+        <label>NUP</label>
+        <input type="text" name="nup" value="<%= oldInput?.nup || '' %>">
+      </div>
+
+      <div class="form-group">
+        <label>Nama Barang</label>
+        <input type="text" name="nama_barang" value="<%= oldInput?.nama_barang || '' %>" required>
+      </div>
+
+      <div class="form-group">
+        <label>Merk</label>
+        <input type="text" name="merk" value="<%= oldInput?.merk || '' %>">
+      </div>
+
+      <div class="form-group">
+        <label>Tipe</label>
+        <input type="text" name="tipe" value="<%= oldInput?.tipe || '' %>">
+      </div>
+
+      <div class="form-group">
+        <label>Kategori</label>
+        <select name="kategori" required>
+          <option value="alat" <%= oldInput?.kategori === 'alat' ? 'selected' : '' %>>alat</option>
+          <option value="habis_pakai" <%= oldInput?.kategori === 'habis_pakai' ? 'selected' : '' %>>habis_pakai</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Tanggal Buku Pertama</label>
+        <input
+          type="date"
+          name="tanggal_buku_pertama"
+          value="<%= oldInput?.tanggal_buku_pertama || '' %>"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Tanggal Perolehan</label>
+        <input
+          type="date"
+          name="tanggal_perolehan"
+          value="<%= oldInput?.tanggal_perolehan || '' %>"
+        >
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">Simpan</button>
+        <a href="/admin/inventaris" class="btn-secondary">Kembali</a>
+      </div>
+
+    </form>
+
+  </section>
+
+</main>
+
+<%- include('../partials/footer') %>

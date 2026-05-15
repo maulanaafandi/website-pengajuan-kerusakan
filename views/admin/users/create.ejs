@@ -1,0 +1,14 @@
+<%- include('../partials/head', { title: 'Tambah User' }) %>
+<main class="admin-page" id="adminPage">
+  <%- include('../partials/sidebar', { active: 'users' }) %>
+  <section class="main-content">
+    <%- include('../partials/topbar', { pageTitle: 'Tambah User', pageSubtitle: 'Form tambah akun berdasarkan kolom tabel user.' }) %>
+    <form action="/admin/users/create" method="POST" class="form-card">
+      <div class="form-group"><label>Email</label><input type="email" name="email" value="<%= oldInput.email || '' %>" required></div>
+      <div class="form-group"><label>Password</label><input type="text" name="password" placeholder="Kosongkan untuk default user123"></div>
+      <div class="form-group"><label>Role</label><select name="role" required><% ['mahasiswa','dosen','satpam','tendik','plp','admin'].forEach(role => { %><option value="<%= role %>" <%= oldInput.role === role ? 'selected' : '' %>><%= role %></option><% }) %></select></div>
+      <div class="form-group"><label>Kaleb</label><select name="kaleb"><option value="0" <%= oldInput.kaleb === '0' ? 'selected' : '' %>>0</option><option value="1" <%= oldInput.kaleb === '1' ? 'selected' : '' %>>1</option></select></div>
+      <div class="form-actions"><button type="submit" class="btn-primary">Simpan</button><a href="/admin/users" class="btn-secondary">Kembali</a></div>
+    </form>
+  </section>
+<%- include('../partials/footer') %>

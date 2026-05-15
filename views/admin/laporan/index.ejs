@@ -1,0 +1,110 @@
+<%- include('../partials/head', { title: 'Validasi Pengajuan' }) %>
+<main class="admin-page" id="adminPage">
+  <%- include('../partials/sidebar', { active: status === 'selesai' ? 'laporan-selesai' : 'laporan' }) %>
+  <section class="main-content">
+    <%- include('../partials/topbar', { pageTitle: 'Validasi Pengajuan', pageSubtitle: 'Kelola dan validasi pengajuan barang' }) %>
+
+    <div class="table-card">
+      <form method="GET" action="/admin/laporan" class="toolbar">
+        <div class="filter-left">
+          <select name="status" class="control">
+            <option value="">Semua Status</option>
+            <option value="diproses" <%= status === 'diproses' ? 'selected' : '' %>>Diproses</option>
+            <option value="ditolak" <%= status === 'ditolak' ? 'selected' : '' %>>Ditolak</option>
+            <option value="selesai" <%= status === 'selesai' ? 'selected' : '' %>>Selesai</option>
+          </select>
+          <input type="date" name="tanggal" class="control" value="<%= tanggal || '' %>" aria-label="Pilih tanggal">
+          <button class="btn-primary" type="submit">Filter</button>
+          <% if ((search && search.length) || (status && status.length) || (tanggal && tanggal.length)) { %>
+            <a href="/admin/laporan" class="btn-secondary">Reset</a>
+          <% } %>
+        </div>
+        <div class="filter-right">
+          <div class="search-box">
+            <input type="text" name="search" placeholder="Cari nomor/user..." value="<%= search || '' %>">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          </div>
+        </div>
+      </form>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th style="width:58px">No</th>
+              <th>Nomor Pengajuan</th>
+              <th>User</th>
+              <th>Tanggal</th>
+              <th>Barang</th>
+              <th>Jumlah</th>
+              <th>Status</th>
+              <th class="center">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (!laporan || laporan.length === 0) { %>
+              <tr>
+                <td colspan="8" class="empty-state">Data pengajuan masih kosong</td>
+              </tr>
+            <% } %>
+
+            <% laporan.forEach((item, index) => { %>
+              <% const statusValue = item.status || 'diproses'; %>
+              <% const statusClass = statusValue === 'selesai' ? 'badge-green' : statusValue === 'ditolak' ? 'badge-red' : 'badge-yellow'; %>
+              <% const nomor = 'PGJ-' + ((item.tanggal || '').slice(0,4) || new Date().getFullYear()) + '-' + String(item.id_laporan).padStart(4, '0'); %>
+              <tr>
+                <td><%= index + 1 %></td>
+                <td><%= nomor %></td>
+                <td>
+                  <strong><%= item.email || '-' %></strong>
+                  <small><%= item.role ? (item.role.charAt(0).toUpperCase() + item.role.slice(1)) : 'Administrator' %></small>
+                </td>
+                <td>
+                  <span><%= formatDate(item.tanggal) || '-' %></span>
+                </td>
+                <td>
+                  <strong><%= item.nama_barang || '-' %></strong>
+                  <small><%= item.kode_barang || '-' %><% if (item.merk) { %> - <%= item.merk %><% } %></small>
+                </td>
+                <td><%= item.jumlah || item.kondisi || '-' %></td>
+                <td><span class="badge <%= statusClass %>"><%= statusValue %></span></td>
+                <td>
+                  <div class="actions" style="justify-content:center">
+                    <% if (statusValue === 'diproses') { %>
+                      <form class="inline" action="/admin/laporan/status/<%= item.id_laporan %>" method="POST">
+                        <input type="hidden" name="status" value="selesai">
+                        <button type="submit" class="btn-success" onclick="return confirm('Setujui dan tandai pengajuan ini selesai?')">Setujui</button>
+                      </form>
+                      <form class="inline" action="/admin/laporan/status/<%= item.id_laporan %>" method="POST">
+                        <input type="hidden" name="status" value="ditolak">
+                        <button type="submit" class="btn-danger" onclick="return confirm('Tolak pengajuan ini?')">Tolak</button>
+                      </form>
+                      <form class="inline" action="/admin/laporan/status/<%= item.id_laporan %>" method="POST">
+                        <input type="hidden" name="status" value="selesai">
+                        <button type="submit" class="btn-warning" onclick="return confirm('Tandai pengajuan ini selesai?')">Selesai</button>
+                      </form>
+                    <% } else { %>
+                      <span class="muted">-</span>
+                    <% } %>
+                    <a href="/admin/laporan/detail/<%= item.id_laporan %>" class="btn-view" title="Detail laporan user">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:20px;height:20px"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <span>Menampilkan 1 sampai <%= laporan && laporan.length ? laporan.length : 0 %> dari <%= laporan && laporan.length ? laporan.length : 0 %> data</span>
+        <div class="pagination">
+          <span class="page-btn">‹</span>
+          <span class="page-btn active">1</span>
+          <span class="page-btn">›</span>
+        </div>
+      </div>
+    </div>
+  </section>
+<%- include('../partials/footer') %>

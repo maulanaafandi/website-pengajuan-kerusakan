@@ -1,0 +1,37 @@
+<div class="topbar">
+  <div class="topbar-left">
+    <button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 6h16M4 12h16M4 18h16" stroke-width="2.4" stroke-linecap="round"/></svg>
+    </button>
+    <div class="topbar-title">
+      <strong><%= pageTitle %></strong>
+      <span><%= pageSubtitle %></span>
+    </div>
+  </div>
+
+  <div class="admin-dropdown">
+    <div class="admin-mini-avatar" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10Zm0 2c-4.2 0-8 2.15-8 4.8V22h16v-3.2c0-2.65-3.8-4.8-8-4.8Z"/></svg>
+    </div>
+    <button type="button" class="admin-badge" id="topLogoutBtn"><span>Admin</span>⌄</button>
+  </div>
+</div>
+
+<div class="page-heading">
+  <div>
+    <h1><%= pageTitle %></h1>
+    <p><%= pageSubtitle %></p>
+  </div>
+  <div class="breadcrumb">
+    <a href="/dashboard">Dashboard</a>
+    <span class="divider">/</span>
+    <span><%= pageTitle %></span>
+  </div>
+</div>
+
+<% if (success && success.length > 0) { %>
+  <div class="popup-alert popup-success"><%= success[0] %></div>
+<% } %>
+<% if (error && error.length > 0) { %>
+  <div class="popup-alert popup-error"><%= error[0] %></div>
+<% } %>

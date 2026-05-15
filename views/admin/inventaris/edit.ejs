@@ -1,0 +1,82 @@
+<%- include('../partials/head', { title: 'Edit Inventaris' }) %>
+
+<main class="admin-page" id="adminPage">
+
+  <%- include('../partials/sidebar', { active: 'inventaris' }) %>
+
+  <section class="main-content">
+
+    <%- include('../partials/topbar', {
+      pageTitle: 'Edit Inventaris',
+      pageSubtitle: 'Ubah data inventaris.'
+    }) %>
+
+    <form
+      action="/admin/inventaris/edit/<%= item.id_inventaris %>"
+      method="POST"
+      class="form-card"
+    >
+
+      <div class="form-group">
+        <label>Kode Barang</label>
+        <input type="text" name="kode_barang" value="<%= item.kode_barang || '' %>" required>
+      </div>
+
+      <div class="form-group">
+        <label>NUP</label>
+        <input type="text" name="nup" value="<%= item.nup || '' %>">
+      </div>
+
+      <div class="form-group">
+        <label>Nama Barang</label>
+        <input type="text" name="nama_barang" value="<%= item.nama_barang || '' %>" required>
+      </div>
+
+      <div class="form-group">
+        <label>Merk</label>
+        <input type="text" name="merk" value="<%= item.merk || '' %>">
+      </div>
+
+      <div class="form-group">
+        <label>Tipe</label>
+        <input type="text" name="tipe" value="<%= item.tipe || '' %>">
+      </div>
+
+      <div class="form-group">
+        <label>Kategori</label>
+        <select name="kategori" required>
+          <option value="alat" <%= item.kategori === 'alat' ? 'selected' : '' %>>alat</option>
+          <option value="habis_pakai" <%= item.kategori === 'habis_pakai' ? 'selected' : '' %>>habis_pakai</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Tanggal Buku Pertama</label>
+        <input
+          type="date"
+          name="tanggal_buku_pertama"
+          value="<%= item.tanggal_buku_pertama ? item.tanggal_buku_pertama.toISOString().split('T')[0] : '' %>"
+        >
+      </div>
+
+      <div class="form-group">
+        <label>Tanggal Perolehan</label>
+        <input
+          type="date"
+          name="tanggal_perolehan"
+          value="<%= item.tanggal_perolehan ? item.tanggal_perolehan.toISOString().split('T')[0] : '' %>"
+        >
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn-primary">Update</button>
+        <a href="/admin/inventaris" class="btn-secondary">Kembali</a>
+      </div>
+
+    </form>
+
+  </section>
+
+</main>
+
+<%- include('../partials/footer') %>

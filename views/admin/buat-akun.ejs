@@ -1,0 +1,84 @@
+<%- include('partials/head', { title: 'Buat Akun | Admin PENS' }) %>
+
+<main class="admin-page" id="adminPage">
+  <%- include('partials/sidebar', { active: 'buat-akun' }) %>
+
+  <section class="main-content">
+    <%- include('partials/topbar', {
+      pageTitle: 'Buat Akun',
+      pageSubtitle: 'Tambahkan akun pengguna sistem pengajuan barang PENS Surabaya.'
+    }) %>
+
+    <div class="form-card">
+      <form action="/admin/buat-akun" method="POST" id="buatAkunForm">
+        <div class="form-group">
+          <label for="email">Email PENS</label>
+          <input
+            type="email"
+            id="email"
+            name="email"
+            value="<%= oldInput.email || '' %>"
+            placeholder="contoh: user@pens.ac.id"
+            autocomplete="off"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <label for="role">Role Pengguna</label>
+          <select id="role" name="role" required>
+            <option value="">Pilih role pengguna</option>
+            <option value="mahasiswa" <%= oldInput.role === 'mahasiswa' ? 'selected' : '' %>>Mahasiswa</option>
+            <option value="dosen" <%= oldInput.role === 'dosen' ? 'selected' : '' %>>Dosen</option>
+            <option value="satpam" <%= oldInput.role === 'satpam' ? 'selected' : '' %>>Satpam</option>
+            <option value="tendik" <%= oldInput.role === 'tendik' ? 'selected' : '' %>>Tendik</option>
+            <option value="plp" <%= oldInput.role === 'plp' ? 'selected' : '' %>>PLP</option>
+          </select>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-primary">Buat Akun</button>
+          <a href="/admin/users" class="btn-secondary">Lihat Pengguna</a>
+        </div>
+      </form>
+
+      <p style="margin-top:18px;color:#667085;line-height:1.6">
+        Password default akun baru:
+        <strong style="color:#154879">user123</strong>
+      </p>
+    </div>
+  </section>
+
+<%- include('partials/footer') %>
+
+<script>
+  const emailInput = document.getElementById('email');
+  const form = document.getElementById('buatAkunForm');
+
+  function normalizePensEmail() {
+    let value = emailInput.value.trim().toLowerCase();
+
+    if (!value) return;
+
+    if (!value.includes('@')) {
+      value = value + '@pens.ac.id';
+    }
+
+    if (!value.endsWith('@pens.ac.id')) {
+      alert('Email harus menggunakan domain @pens.ac.id');
+      emailInput.focus();
+      return false;
+    }
+
+    emailInput.value = value;
+    return true;
+  }
+
+  emailInput.addEventListener('blur', normalizePensEmail);
+
+  form.addEventListener('submit', function(e) {
+    if (!normalizePensEmail()) {
+      e.preventDefault();
+    }
+  });
+</script>

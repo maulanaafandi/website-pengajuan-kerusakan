@@ -1,0 +1,50 @@
+<%- include('partials/head', { title: 'Pengaturan Admin' }) %>
+<main class="admin-page" id="adminPage">
+  <%- include('partials/sidebar', { active: 'pengaturan' }) %>
+  <section class="main-content">
+    <%- include('partials/topbar', { pageTitle: 'Pengaturan', pageSubtitle: 'Kelola akses admin, sesi login, dan pintasan pengaturan sistem PENS Surabaya.' }) %>
+
+    <section class="settings-grid">
+      <article class="settings-card profile-card">
+        <div class="settings-icon big">⚙️</div>
+        <div>
+          <h2>Profil Admin</h2>
+          <p>Informasi akun admin yang sedang login.</p>
+        </div>
+        <div class="settings-info">
+          <div><span>Email</span><strong><%= admin.email || '-' %></strong></div>
+          <div><span>Role</span><strong><%= admin.role || '-' %></strong></div>
+          <div><span>Akses Kaleb</span><strong><%= admin.kaleb || '0' %></strong></div>
+        </div>
+      </article>
+
+      <article class="settings-card">
+        <div class="settings-icon">👤</div>
+        <h2>Manajemen Akun</h2>
+        <p>Buat akun baru untuk mahasiswa, dosen, satpam, tendik, atau PLP.</p>
+        <a href="/admin/buat-akun" class="btn-primary">Buat Akun</a>
+      </article>
+
+      <article class="settings-card">
+        <div class="settings-icon">📋</div>
+        <h2>Daftar Pengguna</h2>
+        <p>Lihat, cari, edit, dan hapus data pengguna sistem.</p>
+        <a href="/admin/users" class="btn-secondary">Kelola Pengguna</a>
+      </article>
+
+      <article class="settings-card">
+        <div class="settings-icon">✅</div>
+        <h2>Validasi Pengajuan</h2>
+        <p>Validasi pengajuan barang hingga status selesai.</p>
+        <a href="/admin/laporan" class="btn-success">Buka Validasi</a>
+      </article>
+
+      <article class="settings-card wide">
+        <div class="settings-icon">🔐</div>
+        <h2>Sesi Login</h2>
+        <p>Sesi admin dibuat bertahan 7 hari selama server tidak di-restart. Jadi ketika tab/browser ditutup, admin tidak langsung diminta login ulang.</p>
+        <div class="setting-note">Jika masih ter-logout setelah server restart, itu normal untuk mode development karena session tersimpan di memory Express.</div>
+      </article>
+    </section>
+  </section>
+<%- include('partials/footer') %>

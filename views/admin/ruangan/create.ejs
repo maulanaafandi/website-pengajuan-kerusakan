@@ -1,0 +1,13 @@
+<%- include('../partials/head', { title: 'Tambah Ruangan' }) %>
+<main class="admin-page" id="adminPage">
+  <%- include('../partials/sidebar', { active: 'ruangan' }) %>
+  <section class="main-content">
+    <%- include('../partials/topbar', { pageTitle: 'Tambah Ruangan', pageSubtitle: 'Form tambah ruangan sesuai tabel ruangan.' }) %>
+    <form action="/admin/ruangan/create" method="POST" class="form-card">
+      <div class="form-group"><label>Nama Ruangan</label><input type="text" name="nama_ruangan" value="<%= oldInput.nama_ruangan || '' %>" required></div>
+      <div class="form-group"><label>Kode Ruangan</label><input type="text" name="kode_ruangan" value="<%= oldInput.kode_ruangan || '' %>" required></div>
+      <div class="form-group"><label>Lokasi</label><select name="lokasi" required><option value="pamolokan" <%= oldInput.lokasi === 'pamolokan' ? 'selected' : '' %>>pamolokan</option><option value="batuan" <%= oldInput.lokasi === 'batuan' ? 'selected' : '' %>>batuan</option></select></div>
+      <div class="form-actions"><button type="submit" class="btn-primary">Simpan</button><a href="/admin/ruangan" class="btn-secondary">Kembali</a></div>
+    </form>
+  </section>
+<%- include('../partials/footer') %>

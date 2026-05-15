@@ -1,0 +1,74 @@
+<%- include('../partials/head', { title: 'Detail Laporan User' }) %>
+<main class="admin-page" id="adminPage">
+  <%- include('../partials/sidebar', { active: 'laporan' }) %>
+  <section class="main-content">
+    <%- include('../partials/topbar', { pageTitle: 'Detail Laporan User', pageSubtitle: 'Lihat detail laporan dan berikan keterangan untuk user.' }) %>
+
+    <div class="detail-grid" style="display:grid;grid-template-columns:1.2fr .8fr;gap:20px;align-items:start">
+      <div class="form-card" style="max-width:100%">
+        <div class="table-top" style="margin:0 0 20px 0">
+          <h2>Informasi Laporan</h2>
+          <a href="/admin/laporan" class="btn-secondary">← Kembali</a>
+        </div>
+
+        <div class="info-list" style="display:grid;gap:14px">
+          <div class="info-row"><span>ID Laporan</span><strong>#<%= laporan.id_laporan %></strong></div>
+          <div class="info-row"><span>Pelapor</span><strong><%= laporan.email || '-' %></strong></div>
+          <div class="info-row"><span>Role</span><strong><%= laporan.role || '-' %></strong></div>
+          <div class="info-row"><span>Tanggal</span><strong><%= laporan.tanggal || '-' %> <%= laporan.jam || '' %></strong></div>
+          <div class="info-row"><span>Status</span><strong><%= laporan.status || '-' %></strong></div>
+          <div class="info-row"><span>Ruangan</span><strong><%= laporan.nama_ruangan || '-' %> (<%= laporan.lokasi || '-' %>)</strong></div>
+          <div class="info-row"><span>Kode Ruangan</span><strong><%= laporan.kode_ruangan || '-' %></strong></div>
+          <div class="info-row"><span>Barang</span><strong><%= laporan.nama_barang || '-' %></strong></div>
+          <div class="info-row"><span>Kode Barang</span><strong><%= laporan.kode_barang || '-' %></strong></div>
+          <div class="info-row"><span>NUP</span><strong><%= laporan.nup || '-' %></strong></div>
+          <div class="info-row"><span>Merk</span><strong><%= laporan.merk || '-' %></strong></div>
+          <div class="info-row"><span>Kondisi </span><strong><%= laporan.kondisi || '-' %></strong></div>
+          <div class="info-row block"><span>Keterangan User</span><p><%= laporan.keterangan || '-' %></p></div>
+        </div>
+      </div>
+
+      <div style="display:grid;gap:20px">
+        <div class="form-card" style="max-width:100%">
+          <h2 style="margin-bottom:14px">Foto Bukti</h2>
+          <% if (laporan.bukti_foto) { %>
+            <img src="/uploads/<%= laporan.bukti_foto %>" alt="Bukti laporan" style="width:100%;border-radius:14px;border:1px solid #e5e7eb;object-fit:cover;max-height:320px">
+          <% } else { %>
+            <div class="empty-state" style="border:1px dashed #d0d5dd;border-radius:14px">Tidak ada foto bukti</div>
+          <% } %>
+        </div>
+
+        <div class="form-card" style="max-width:100%">
+          <h2 style="margin-bottom:14px">Keterangan Admin untuk User</h2>
+          <form action="/admin/laporan/keterangan/<%= laporan.id_laporan %>" method="POST">
+            <div class="form-group">
+              <label>Keterangan Admin</label>
+              <textarea name="keterangan_admin" placeholder="Contoh: Laporan sudah diterima dan sedang dicek teknisi."><%= laporan.keterangan_admin || '' %></textarea>
+            </div>
+            <div class="form-actions">
+              <button class="btn-primary" type="submit">Simpan Keterangan</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="form-card" style="max-width:100%">
+          <h2 style="margin-bottom:14px">Ubah Status</h2>
+          <form action="/admin/laporan/status/<%= laporan.id_laporan %>" method="POST" class="filter-row">
+            <select name="status" class="control">
+              <option value="diproses" <%= laporan.status === 'diproses' ? 'selected' : '' %>>Diproses</option>
+              <option value="ditolak" <%= laporan.status === 'ditolak' ? 'selected' : '' %>>Ditolak</option>
+              <option value="selesai" <%= laporan.status === 'selesai' ? 'selected' : '' %>>Selesai</option>
+            </select>
+            <button class="btn-success" type="submit">Update Status</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .info-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 14px;border:1px solid #edf1f6;background:#f8fafc;border-radius:12px}
+      .info-row span{color:#667085;font-weight:700}.info-row strong{color:#111827;text-align:right}.info-row.block{display:block}.info-row.block p{margin-top:10px;line-height:1.7;color:#111827}
+      @media(max-width:980px){.detail-grid{grid-template-columns:1fr!important}}
+    </style>
+  </section>
+<%- include('../partials/footer') %>

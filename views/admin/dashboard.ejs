@@ -1,0 +1,41 @@
+<%- include('partials/head', { title: 'Dashboard Admin' }) %>
+<main class="admin-page" id="adminPage">
+  <%- include('partials/sidebar', { active: 'dashboard' }) %>
+  <section class="main-content">
+    <%- include('partials/topbar', { pageTitle: 'Dashboard Admin', pageSubtitle: 'Ringkasan data dan grafik laporan per bulan.' }) %>
+    <section class="stats-grid">
+      <article class="stat-card"><div class="stat-title">Total Akun User</div><div class="stat-number"><%= totalUser || 0 %></div><div class="stat-desc">Akun yang terdaftar</div></article>
+      <article class="stat-card red"><div class="stat-title">Total Inventaris</div><div class="stat-number"><%= totalInventaris || 0 %></div><div class="stat-desc">Data barang inventaris</div></article>
+      <article class="stat-card purple"><div class="stat-title">Total Laporan</div><div class="stat-number"><%= totalLaporan || 0 %></div><div class="stat-desc">Laporan dari user</div></article>
+      <article class="stat-card green"><div class="stat-title">Total Rekomendasi</div><div class="stat-number"><%= totalRekomendasi || 0 %></div><div class="stat-desc">Rekomendasi tersimpan</div></article>
+    </section>
+
+    <section class="table-card" style="margin-top:24px;padding:24px">
+      <div class="table-top" style="margin:0 0 20px 0">
+        <div>
+          <h2>Grafik Laporan per Bulan</h2>
+        </div>
+      </div>
+
+      <% const maxTotal = Math.max(1, ...((grafikLaporanBulanan || []).map(item => Number(item.total) || 0))); %>
+      <% if (!grafikLaporanBulanan || grafikLaporanBulanan.length === 0) { %>
+        <div class="empty-state">Belum ada data laporan untuk ditampilkan pada grafik.</div>
+      <% } else { %>
+        <div class="monthly-chart">
+          <% grafikLaporanBulanan.forEach(item => { %>
+            <% const height = Math.max(12, (Number(item.total) / maxTotal) * 190); %>
+            <div class="bar-item">
+              <div class="bar-value"><%= item.total %></div>
+              <div class="bar-wrap"><div class="bar-fill" style="height:<%= height %>px"></div></div>
+              <div class="bar-label"><%= item.bulan %></div>
+            </div>
+          <% }) %>
+        </div>
+      <% } %>
+    </section>
+
+    <style>
+      .monthly-chart{height:285px;display:flex;align-items:flex-end;gap:18px;border:1px solid #edf1f6;background:linear-gradient(180deg,#ffffff,#f8fafc);border-radius:16px;padding:24px 20px 18px;overflow-x:auto}.bar-item{min-width:70px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:230px}.bar-value{font-weight:800;color:#154879;margin-bottom:8px}.bar-wrap{width:42px;height:190px;display:flex;align-items:flex-end;border-radius:999px;background:#eaf3fb;overflow:hidden}.bar-fill{width:100%;border-radius:999px 999px 0 0;background:linear-gradient(180deg,#2563eb,#154879)}.bar-label{margin-top:10px;color:#475467;font-weight:800}
+    </style>
+  </section>
+<%- include('partials/footer') %>

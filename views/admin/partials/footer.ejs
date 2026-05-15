@@ -1,0 +1,48 @@
+    <div class="logout-modal" id="logoutModal">
+      <div class="logout-box">
+        <h2>Logout</h2>
+        <p>Apakah Anda mau logout dari halaman admin?</p>
+        <div class="logout-actions">
+          <button type="button" class="btn-cancel" id="cancelLogout">Batal</button>
+          <button type="button" class="btn-logout" id="confirmLogout">Logout</button>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script>
+    const logoutForms = document.querySelectorAll('.logout-form');
+    const logoutModal = document.getElementById('logoutModal');
+    const cancelLogout = document.getElementById('cancelLogout');
+    const confirmLogout = document.getElementById('confirmLogout');
+    const topLogoutBtn = document.getElementById('topLogoutBtn');
+    const adminPage = document.getElementById('adminPage');
+    const sidebarToggle = document.getElementById('sidebarToggle');
+    let selectedLogoutForm = logoutForms[0];
+
+    if (localStorage.getItem('sidebarCollapsed') === 'true') adminPage?.classList.add('sidebar-collapsed');
+    sidebarToggle?.addEventListener('click', () => {
+      adminPage?.classList.toggle('sidebar-collapsed');
+      localStorage.setItem('sidebarCollapsed', adminPage?.classList.contains('sidebar-collapsed'));
+    });
+
+    logoutForms.forEach((form) => {
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        selectedLogoutForm = form;
+        logoutModal?.classList.add('show');
+      });
+    });
+
+    topLogoutBtn?.addEventListener('click', () => {
+      selectedLogoutForm = logoutForms[0];
+      logoutModal?.classList.add('show');
+    });
+
+    cancelLogout?.addEventListener('click', () => logoutModal?.classList.remove('show'));
+    logoutModal?.addEventListener('click', (event) => {
+      if (event.target === logoutModal) logoutModal.classList.remove('show');
+    });
+    confirmLogout?.addEventListener('click', () => selectedLogoutForm?.submit());
+  </script>
+</body>
+</html>
