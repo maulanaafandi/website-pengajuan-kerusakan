@@ -103,10 +103,10 @@
                     class="inline"
                     action="/admin/inventaris/delete/<%= item.id_inventaris %>"
                     method="POST"
+                    data-confirm-message="Inventaris <%= item.nama_barang || 'ini' %> akan dihapus permanen."
                   >
                     <button
                       type="submit"
-                      onclick="return confirm('Yakin hapus inventaris ini?')"
                       class="btn-danger"
                     >
                       Hapus
@@ -124,6 +124,8 @@
         </tbody>
 
       </table>
+
+      <%- include('../partials/pagination', { pagination }) %>
 
     </div>
 

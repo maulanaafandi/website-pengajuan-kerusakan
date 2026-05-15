@@ -10,6 +10,45 @@ function formatDate(value) {
   }
 }
 
+function paginateRows(rows = [], query = {}, perPage = 10) {
+  const totalItems = rows.length
+  const totalPages = Math.max(1, Math.ceil(totalItems / perPage))
+  const requestedPage = parseInt(query.page, 10)
+  const currentPage = Math.min(Math.max(Number.isNaN(requestedPage) ? 1 : requestedPage, 1), totalPages)
+  const startIndex = (currentPage - 1) * perPage
+  const params = new URLSearchParams()
+
+  Object.entries(query).forEach(([key, value]) => {
+    if (key !== 'page' && value) {
+      params.set(key, value)
+    }
+  })
+
+  const baseQuery = params.toString()
+  const makeUrl = page => `${baseQuery ? `?${baseQuery}&` : '?'}page=${page}`
+
+  return {
+    rows: rows.slice(startIndex, startIndex + perPage),
+    pagination: {
+      currentPage,
+      totalPages,
+      totalItems,
+      perPage,
+      startItem: totalItems ? startIndex + 1 : 0,
+      endItem: Math.min(startIndex + perPage, totalItems),
+      hasPrev: currentPage > 1,
+      hasNext: currentPage < totalPages,
+      prevUrl: makeUrl(currentPage - 1),
+      nextUrl: makeUrl(currentPage + 1),
+      baseQuery,
+      pageUrls: Array.from({ length: totalPages }, (_, index) => ({
+        page: index + 1,
+        url: makeUrl(index + 1)
+      }))
+    }
+  }
+}
+
 function safeJsonParse(text) {
   try {
     return JSON.parse(text)
@@ -184,8 +223,9 @@ class AdminController {
 
   static async users(req, res) {
     try {
-      const users = await Admin.getUsers(req.query.search || '')
-      return res.render('admin/users/index', { users, search: req.query.search || '' })
+      const allUsers = await Admin.getUsers(req.query.search || '')
+      const { rows: users, pagination } = paginateRows(allUsers, req.query)
+      return res.render('admin/users/index', { users, pagination, search: req.query.search || '' })
     } catch (err) {
       console.log(err)
       req.flash('error', 'Gagal memuat data user')
@@ -231,6 +271,12 @@ class AdminController {
         req.flash('error', 'User tidak ditemukan')
         return res.redirect('/admin/users')
       }
+
+      if (user.role === 'admin') {
+        req.flash('error', 'Akun admin tidak bisa diedit')
+        return res.redirect('/admin/users')
+      }
+
       return res.render('admin/users/edit', { user })
     } catch (err) {
       console.log(err)
@@ -241,6 +287,17 @@ class AdminController {
 
   static async updateUser(req, res) {
     try {
+      const user = await Admin.getUserById(req.params.id)
+      if (!user) {
+        req.flash('error', 'User tidak ditemukan')
+        return res.redirect('/admin/users')
+      }
+
+      if (user.role === 'admin') {
+        req.flash('error', 'Akun admin tidak bisa diedit')
+        return res.redirect('/admin/users')
+      }
+
       await Admin.updateUser(req.params.id, req.body)
       req.flash('success', 'User berhasil diupdate')
       return res.redirect('/admin/users')
@@ -253,6 +310,17 @@ class AdminController {
 
   static async deleteUser(req, res) {
     try {
+      const user = await Admin.getUserById(req.params.id)
+      if (!user) {
+        req.flash('error', 'User tidak ditemukan')
+        return res.redirect('/admin/users')
+      }
+
+      if (user.role === 'admin') {
+        req.flash('error', 'Akun admin tidak bisa dihapus')
+        return res.redirect('/admin/users')
+      }
+
       await Admin.deleteUser(req.params.id)
       req.flash('success', 'User berhasil dihapus')
       return res.redirect('/admin/users')
@@ -265,8 +333,9 @@ class AdminController {
 
   static async inventaris(req, res) {
     try {
-      const inventaris = await Admin.getInventaris(req.query.search || '')
-      return res.render('admin/inventaris/index', { inventaris, search: req.query.search || '', formatDate })
+      const allInventaris = await Admin.getInventaris(req.query.search || '')
+      const { rows: inventaris, pagination } = paginateRows(allInventaris, req.query)
+      return res.render('admin/inventaris/index', { inventaris, pagination, search: req.query.search || '', formatDate })
     } catch (err) {
       console.log(err)
       req.flash('error', 'Gagal memuat inventaris')
@@ -332,8 +401,9 @@ class AdminController {
 
   static async ruangan(req, res) {
     try {
-      const ruangan = await Admin.getRuangan(req.query.search || '')
-      return res.render('admin/ruangan/index', { ruangan, search: req.query.search || '' })
+      const allRuangan = await Admin.getRuangan(req.query.search || '')
+      const { rows: ruangan, pagination } = paginateRows(allRuangan, req.query)
+      return res.render('admin/ruangan/index', { ruangan, pagination, search: req.query.search || '' })
     } catch (err) {
       console.log(err)
       req.flash('error', 'Gagal memuat ruangan')
@@ -455,6 +525,11 @@ class AdminController {
         return res.redirect('/admin/laporan')
       }
 
+      if (item.status === 'selesai') {
+        req.flash('error', 'Laporan yang sudah selesai tidak bisa diupdate lagi')
+        return res.redirect('/admin/laporan')
+      }
+
       await Admin.updateStatusLaporan(req.params.id, status)
 
       const statusText = status === 'selesai' ? 'diselesaikan' : status === 'ditolak' ? 'ditolak' : 'dikembalikan ke proses'
@@ -469,9 +544,10 @@ class AdminController {
 
   static async rekomendasi(req, res) {
     try {
-      const rekomendasi = await Admin.getRekomendasi(req.query.search || '')
+      const allRekomendasi = await Admin.getRekomendasi(req.query.search || '')
+      const { rows: rekomendasi, pagination } = paginateRows(allRekomendasi, req.query)
       const aiResults = req.session.aiResults || []
-      return res.render('admin/rekomendasi/index', { rekomendasi, aiResults, search: req.query.search || '', formatDate })
+      return res.render('admin/rekomendasi/index', { rekomendasi, pagination, aiResults, search: req.query.search || '', formatDate })
     } catch (err) {
       console.log(err)
       req.flash('error', 'Gagal memuat rekomendasi')

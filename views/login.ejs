@@ -6,7 +6,6 @@
 
   <title>Login</title>
 
-  <!-- GOOGLE FONT -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
@@ -59,7 +58,8 @@
     }
 
     .popup-alert.email-error,
-    .popup-alert.password-error{
+    .popup-alert.password-error,
+    .popup-alert.invalid-error{
       background: linear-gradient(135deg, #ef4444, #b91c1c);
     }
 
@@ -234,18 +234,21 @@
   <%
     const errorMessage = Array.isArray(error) ? error[0] : error;
     const isEmailError = errorMessage === 'Email tidak ditemukan';
-    const isPasswordError = errorMessage === 'Kata sandi salah';
+    const isPasswordError = errorMessage === 'Kata sandi salah' || errorMessage === 'Password salah';
+    const isInvalidError = errorMessage === 'Akun tidak valid';
   %>
 
-  <% if (isEmailError || isPasswordError) { %>
-    <div class="popup-alert <%= isEmailError ? 'email-error' : 'password-error' %>">
+  <% if (isEmailError || isPasswordError || isInvalidError) { %>
+    <div class="popup-alert <%= isEmailError ? 'email-error' : isPasswordError ? 'password-error' : 'invalid-error' %>">
       <div class="popup-icon">!</div>
       <div class="popup-text">
         <strong><%= errorMessage %></strong>
         <span>
           <%= isEmailError
             ? 'Email belum terdaftar sebagai admin.'
-            : 'Periksa kembali kata sandi Anda.' %>
+            : isPasswordError
+              ? 'Periksa kembali kata sandi Anda.'
+              : 'Akun ini tidak memiliki akses admin atau kaleb.' %>
         </span>
       </div>
     </div>

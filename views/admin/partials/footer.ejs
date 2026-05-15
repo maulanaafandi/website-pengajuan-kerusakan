@@ -9,6 +9,7 @@
       </div>
     </div>
   </main>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script>
     const logoutForms = document.querySelectorAll('.logout-form');
     const logoutModal = document.getElementById('logoutModal');
@@ -43,6 +44,34 @@
       if (event.target === logoutModal) logoutModal.classList.remove('show');
     });
     confirmLogout?.addEventListener('click', () => selectedLogoutForm?.submit());
+
+    document.querySelectorAll('form[action*="/delete/"]').forEach((form) => {
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const message = form.dataset.confirmMessage || 'Data ini akan dihapus permanen.';
+
+        if (!window.Swal) {
+          if (window.confirm(message)) form.submit();
+          return;
+        }
+
+        Swal.fire({
+          title: 'Yakin hapus data?',
+          text: message,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonColor: '#dc2626',
+          cancelButtonColor: '#64748b',
+          confirmButtonText: 'Ya, hapus',
+          cancelButtonText: 'Batal'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            form.submit();
+          }
+        });
+      });
+    });
   </script>
 </body>
 </html>

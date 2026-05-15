@@ -6,7 +6,7 @@ const authAdmin = async (req, res, next) => {
             return res.redirect('/login')
         }
 
-        if (req.session.user.role === 'admin' || req.session.user.kaleb === '1') {
+        if (req.session.user.role === 'admin' || String(req.session.user.kaleb) === '1') {
             return next()
         } else {
             req.flash('error', 'Anda tidak memiliki akses ke halaman ini')

@@ -62,30 +62,19 @@
                 <td>
                   <span><%= formatDate(item.tanggal) || '-' %></span>
                 </td>
-                <td>
-                  <strong><%= item.nama_barang || '-' %></strong>
-                  <small><%= item.kode_barang || '-' %><% if (item.merk) { %> - <%= item.merk %><% } %></small>
-                </td>
-                <td><%= item.jumlah || item.kondisi || '-' %></td>
+              <td>
+                <strong><%= item.nama_barang || '-' %></strong>
+                <small><%= item.kode_barang || '-' %><% if (item.merk) { %> - <%= item.merk %><% } %></small>
+              </td>
+                <%
+                  const kondisiRaw = String(item.jumlah || item.kondisi || '-')
+                  const kondisiNumber = parseFloat(kondisiRaw.replace(',', '.'))
+                  const kondisiDisplay = Number.isNaN(kondisiNumber) ? kondisiRaw : `${Math.round(kondisiNumber)}%`
+                %>
+                <td><%= kondisiDisplay %></td>
                 <td><span class="badge <%= statusClass %>"><%= statusValue %></span></td>
                 <td>
                   <div class="actions" style="justify-content:center">
-                    <% if (statusValue === 'diproses') { %>
-                      <form class="inline" action="/admin/laporan/status/<%= item.id_laporan %>" method="POST">
-                        <input type="hidden" name="status" value="selesai">
-                        <button type="submit" class="btn-success" onclick="return confirm('Setujui dan tandai pengajuan ini selesai?')">Setujui</button>
-                      </form>
-                      <form class="inline" action="/admin/laporan/status/<%= item.id_laporan %>" method="POST">
-                        <input type="hidden" name="status" value="ditolak">
-                        <button type="submit" class="btn-danger" onclick="return confirm('Tolak pengajuan ini?')">Tolak</button>
-                      </form>
-                      <form class="inline" action="/admin/laporan/status/<%= item.id_laporan %>" method="POST">
-                        <input type="hidden" name="status" value="selesai">
-                        <button type="submit" class="btn-warning" onclick="return confirm('Tandai pengajuan ini selesai?')">Selesai</button>
-                      </form>
-                    <% } else { %>
-                      <span class="muted">-</span>
-                    <% } %>
                     <a href="/admin/laporan/detail/<%= item.id_laporan %>" class="btn-view" title="Detail laporan user">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:20px;height:20px"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
                     </a>

@@ -8,8 +8,9 @@
       <form method="GET" class="search-form"><input type="text" name="search" placeholder="Cari email, role, atau kaleb..." value="<%= search || '' %>"><button class="btn-primary" type="submit">Cari</button><a class="btn-secondary" href="/admin/users">Reset</a></form>
       <table><thead><tr><th>ID</th><th>Email</th><th>Role</th><th>Kaleb</th><th>Aksi</th></tr></thead><tbody>
       <% if (users.length === 0) { %><tr><td colspan="5" class="empty-state">Data user kosong</td></tr><% } %>
-      <% users.forEach(user => { %><tr><td><%= user.id_user %></td><td><%= user.email %></td><td><span class="badge badge-blue"><%= user.role %></span></td><td><span class="badge <%= user.kaleb === '1' ? 'badge-green' : 'badge-gray' %>"><%= user.kaleb %></span></td><td><div class="actions"><a href="/admin/users/edit/<%= user.id_user %>" class="btn-warning">Edit</a><form class="inline" action="/admin/users/delete/<%= user.id_user %>" method="POST"><button type="submit" onclick="return confirm('Yakin hapus user ini?')" class="btn-danger">Hapus</button></form></div></td></tr><% }) %>
+      <% users.forEach(user => { %><tr><td><%= user.id_user %></td><td><%= user.email %></td><td><span class="badge badge-blue"><%= user.role %></span></td><td><span class="badge <%= user.kaleb === '1' ? 'badge-green' : 'badge-gray' %>"><%= user.kaleb %></span></td><td><% if (user.role === 'admin') { %><span class="badge badge-gray">Terkunci</span><% } else { %><div class="actions"><a href="/admin/users/edit/<%= user.id_user %>" class="btn-warning">Edit</a><form class="inline" action="/admin/users/delete/<%= user.id_user %>" method="POST" data-confirm-message="User <%= user.email || 'ini' %> akan dihapus permanen."><button type="submit" class="btn-danger">Hapus</button></form></div><% } %></td></tr><% }) %>
       </tbody></table>
+      <%- include('../partials/pagination', { pagination }) %>
     </div>
   </section>
 <%- include('../partials/footer') %>

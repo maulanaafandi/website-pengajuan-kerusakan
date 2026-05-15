@@ -1,0 +1,43 @@
+<div class="table-footer">
+  <span>
+    Menampilkan <%= pagination.startItem %> sampai <%= pagination.endItem %> dari <%= pagination.totalItems %> data
+  </span>
+  <div class="pagination">
+    <% if (pagination.hasPrev) { %>
+      <a class="page-btn page-nav" href="<%= pagination.prevUrl %>">Back</a>
+    <% } else { %>
+      <span class="page-btn page-nav disabled">Back</span>
+    <% } %>
+    <input
+      class="page-input"
+      type="number"
+      min="1"
+      max="<%= pagination.totalPages %>"
+      value="<%= pagination.currentPage %>"
+      aria-label="Nomor halaman"
+      data-base-query="<%= pagination.baseQuery || '' %>"
+    >
+    <span class="page-text">dari <%= pagination.totalPages %></span>
+    <% if (pagination.hasNext) { %>
+      <a class="page-btn page-nav" href="<%= pagination.nextUrl %>">Next</a>
+    <% } else { %>
+      <span class="page-btn page-nav disabled">Next</span>
+    <% } %>
+  </div>
+</div>
+<script>
+  document.querySelectorAll('.page-input').forEach((input) => {
+    input.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter') return;
+
+      event.preventDefault();
+
+      const totalPages = Number(input.max) || 1;
+      const value = Number(input.value) || 1;
+      const page = Math.min(Math.max(value, 1), totalPages);
+      const baseQuery = input.dataset.baseQuery || '';
+
+      window.location.href = `${baseQuery ? `?${baseQuery}&` : '?'}page=${page}`;
+    });
+  });
+</script>

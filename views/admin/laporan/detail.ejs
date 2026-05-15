@@ -12,10 +12,10 @@
         </div>
 
         <div class="info-list" style="display:grid;gap:14px">
-          <div class="info-row"><span>ID Laporan</span><strong>#<%= laporan.id_laporan %></strong></div>
-          <div class="info-row"><span>Pelapor</span><strong><%= laporan.email || '-' %></strong></div>
+          <!-- <div class="info-row"><span>ID Laporan</span><strong>#<%= laporan.id_laporan %></strong></div> -->
+          <div class="info-row"><span>User</span><strong><%= laporan.email || '-' %></strong></div>
           <div class="info-row"><span>Role</span><strong><%= laporan.role || '-' %></strong></div>
-          <div class="info-row"><span>Tanggal</span><strong><%= laporan.tanggal || '-' %> <%= laporan.jam || '' %></strong></div>
+          <div class="info-row"><span>Tanggal</span><strong><%= laporan.tanggal || '-' %></strong></div>
           <div class="info-row"><span>Status</span><strong><%= laporan.status || '-' %></strong></div>
           <div class="info-row"><span>Ruangan</span><strong><%= laporan.nama_ruangan || '-' %> (<%= laporan.lokasi || '-' %>)</strong></div>
           <div class="info-row"><span>Kode Ruangan</span><strong><%= laporan.kode_ruangan || '-' %></strong></div>
@@ -23,7 +23,12 @@
           <div class="info-row"><span>Kode Barang</span><strong><%= laporan.kode_barang || '-' %></strong></div>
           <div class="info-row"><span>NUP</span><strong><%= laporan.nup || '-' %></strong></div>
           <div class="info-row"><span>Merk</span><strong><%= laporan.merk || '-' %></strong></div>
-          <div class="info-row"><span>Kondisi </span><strong><%= laporan.kondisi || '-' %></strong></div>
+          <%
+            const kondisiRaw = String(laporan.kondisi || '-')
+            const kondisiNumber = parseFloat(kondisiRaw.replace(',', '.'))
+            const kondisiDisplay = Number.isNaN(kondisiNumber) ? kondisiRaw : `${Math.round(kondisiNumber)}%`
+          %>
+          <div class="info-row"><span>Kondisi </span><strong><%= kondisiDisplay %></strong></div>
           <div class="info-row block"><span>Keterangan User</span><p><%= laporan.keterangan || '-' %></p></div>
         </div>
       </div>
@@ -53,14 +58,20 @@
 
         <div class="form-card" style="max-width:100%">
           <h2 style="margin-bottom:14px">Ubah Status</h2>
-          <form action="/admin/laporan/status/<%= laporan.id_laporan %>" method="POST" class="filter-row">
-            <select name="status" class="control">
-              <option value="diproses" <%= laporan.status === 'diproses' ? 'selected' : '' %>>Diproses</option>
-              <option value="ditolak" <%= laporan.status === 'ditolak' ? 'selected' : '' %>>Ditolak</option>
-              <option value="selesai" <%= laporan.status === 'selesai' ? 'selected' : '' %>>Selesai</option>
-            </select>
-            <button class="btn-success" type="submit">Update Status</button>
-          </form>
+          <% if (laporan.status === 'selesai') { %>
+            <div class="empty-state" style="border:1px dashed #d0d5dd;border-radius:14px">
+              Laporan sudah selesai dan tidak bisa diupdate lagi.
+            </div>
+          <% } else { %>
+            <form action="/admin/laporan/status/<%= laporan.id_laporan %>" method="POST" class="filter-row">
+              <select name="status" class="control">
+                <option value="diproses" <%= laporan.status === 'diproses' ? 'selected' : '' %>>Diproses</option>
+                <option value="ditolak" <%= laporan.status === 'ditolak' ? 'selected' : '' %>>Ditolak</option>
+                <option value="selesai" <%= laporan.status === 'selesai' ? 'selected' : '' %>>Selesai</option>
+              </select>
+              <button class="btn-success" type="submit">Update Status</button>
+            </form>
+          <% } %>
         </div>
       </div>
     </div>

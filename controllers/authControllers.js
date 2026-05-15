@@ -33,6 +33,11 @@ class AuthController {
         return res.redirect('/login')
       }
 
+      if (user.role !== 'admin' && String(user.kaleb) !== '1') {
+        req.flash('error', 'Akun tidak valid')
+        return res.redirect('/login')
+      }
+
       req.session.user = {
         id_user: user.id_user,
         email: user.email,
