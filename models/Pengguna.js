@@ -2,7 +2,6 @@ const connection = require('../config/db');
 
 class Pengguna {
 
-  // ================= PROFILE =================
   static async getProfile(idUser) {
     const [rows] = await connection.query(
       `SELECT id_user, email, role, kaleb
@@ -14,7 +13,6 @@ class Pengguna {
     return rows[0] || null;
   }
 
-  // ================= UPDATE STATUS KALEB =================
   static async getUpdateStatusKaleb() {
     const [rows] = await connection.query(
       `SELECT
@@ -50,7 +48,6 @@ class Pengguna {
     return rows;
   }
 
-  // ================= INVENTARIS =================
   static async getInventaris() {
     const [rows] = await connection.query(
       `SELECT id_inventaris, kode_barang, nup, nama_barang, merk, kategori
@@ -61,7 +58,6 @@ class Pengguna {
     return rows;
   }
 
-  // ================= RUANGAN =================
   static async getRuangan() {
     const [rows] = await connection.query(
       `SELECT id_ruangan, nama_ruangan, kode_ruangan, lokasi
@@ -72,7 +68,6 @@ class Pengguna {
     return rows;
   }
 
-  // ================= CREATE LAPORAN =================
   static async createLaporan(data) {
     const [result] = await connection.query(
       `INSERT INTO laporan
@@ -93,7 +88,6 @@ class Pengguna {
     return result.insertId;
   }
 
-  // ================= RIWAYAT LAPORAN =================
   static async getRiwayatLaporan(idUser) {
     const [rows] = await connection.query(
       `SELECT
@@ -129,7 +123,6 @@ class Pengguna {
     return rows;
   }
 
-  // ================= DETAIL LAPORAN =================
   static async getDetailLaporan(idLaporan, idUser) {
     const [rows] = await connection.query(
       `SELECT
@@ -166,7 +159,6 @@ class Pengguna {
     return rows[0] || null;
   }
 
-  // ================= FIND USER =================
   static async findUserById(idUser) {
     const [rows] = await connection.query(
       `SELECT id_user, email, password, role, kaleb
@@ -178,7 +170,6 @@ class Pengguna {
     return rows[0] || null;
   }
 
-  // ================= UPDATE STATUS DAN KETERANGAN KALEB =================
 static async updateStatusDanKeteranganKaleb(idLaporan, status, keteranganAdmin) {
   await connection.query(
     `UPDATE laporan
@@ -233,7 +224,6 @@ static async updateStatusDanKeteranganKaleb(idLaporan, status, keteranganAdmin) 
   );
 }
 
-  // ================= UPDATE PASSWORD =================
   static async updatePassword(idUser, hashedPassword) {
     await connection.query(
       `UPDATE user
