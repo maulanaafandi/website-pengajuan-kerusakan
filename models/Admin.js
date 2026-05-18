@@ -359,10 +359,11 @@ class Admin {
       await connection.query(
         `INSERT INTO rekomendasi_pengajuan_barang
          (id_ruangan, barang_rekomendasi_diajukan, tanggal, nama_barang, alasan)
-         VALUES (?, ?, CURDATE(), ?, ?)`,
+         VALUES (?, ?, ?, ?, ?)`,
         [
           item.id_ruangan || null,
           item.barang_rekomendasi_diajukan || item.nama_barang || '-',
+          item.tanggal || null,
           item.nama_barang || item.barang_rekomendasi_diajukan || '-',
           item.alasan || '-'
         ]
