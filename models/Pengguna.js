@@ -170,59 +170,30 @@ class Pengguna {
     return rows[0] || null;
   }
 
-static async updateStatusDanKeteranganKaleb(idLaporan, status, keteranganAdmin) {
-  await connection.query(
-    `UPDATE laporan
-     SET status = ?,
-         keterangan_admin = ?
-     WHERE id_laporan = ?`,
-    [status, keteranganAdmin, idLaporan]
-  );
-}
-static async getUpdateStatusKaleb() {
-  const [rows] = await connection.query(
-    `SELECT
-        l.id_laporan,
-        l.id_user,
-        u.email,
-        l.id_inventaris,
-        l.id_ruangan,
+  static async getLaporanKalebById(idLaporan) {
+    const [rows] = await connection.query(
+      `SELECT id_laporan, status
+       FROM laporan
+       WHERE id_laporan = ?
+       LIMIT 1`,
+      [idLaporan]
+    );
 
-        DATE_FORMAT(l.tanggal, '%Y-%m-%d') AS tanggal,
+    return rows[0] || null;
+  }
 
-        l.keterangan,
-        l.keterangan_admin,
-        l.status,
-        l.bukti_foto,
-        l.kondisi,
+  static async updateStatusDanKeteranganKaleb(idLaporan, status, keteranganAdmin) {
+    const [result] = await connection.query(
+      `UPDATE laporan
+       SET status = ?,
+           keterangan_admin = ?
+       WHERE id_laporan = ?
+         AND status != 'selesai'`,
+      [status, keteranganAdmin, idLaporan]
+    );
 
-        i.nama_barang,
-        i.kode_barang,
-        i.merk,
-        r.nama_ruangan,
-        r.kode_ruangan,
-        r.lokasi
-
-     FROM laporan l
-     LEFT JOIN user u ON l.id_user = u.id_user
-     LEFT JOIN inventaris i ON l.id_inventaris = i.id_inventaris
-     LEFT JOIN ruangan r ON l.id_ruangan = r.id_ruangan
-
-     ORDER BY l.id_laporan DESC`
-  );
-
-  return rows;
-}
-
-static async updateStatusDanKeteranganKaleb(idLaporan, status, keteranganAdmin) {
-  await connection.query(
-    `UPDATE laporan
-     SET status = ?,
-         keterangan_admin = ?
-     WHERE id_laporan = ?`,
-    [status, keteranganAdmin, idLaporan]
-  );
-}
+    return result.affectedRows;
+  }
 
   static async updatePassword(idUser, hashedPassword) {
     await connection.query(

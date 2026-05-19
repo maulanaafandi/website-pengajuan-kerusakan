@@ -124,11 +124,34 @@ try{
       });
     }
 
-    await Pengguna.updateStatusDanKeteranganKaleb(
+    const laporan = await Pengguna.getLaporanKalebById(id_laporan);
+
+    if (!laporan) {
+      return res.status(404).json({
+        success: false,
+        message: 'Laporan tidak ditemukan'
+      });
+    }
+
+    if (laporan.status === 'selesai') {
+      return res.status(400).json({
+        success: false,
+        message: 'Laporan yang sudah selesai tidak bisa diubah lagi'
+      });
+    }
+
+    const affectedRows = await Pengguna.updateStatusDanKeteranganKaleb(
       id_laporan,
       status,
       keterangan_admin || null
     );
+
+    if (!affectedRows) {
+      return res.status(400).json({
+        success: false,
+        message: 'Laporan gagal diperbarui'
+      });
+    }
 
     return res.status(200).json({
       success: true,
