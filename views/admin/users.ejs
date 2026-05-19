@@ -535,7 +535,8 @@
                     <td><span class="role-badge"><%= user.role %></span></td>
                     <td>
                       <% if (user.role !== 'admin') { %>
-                        <form action="/admin/daftar-akun/<%= user.id_user %>/delete" method="POST" class="delete-form">
+                        <form action="/admin/users/delete/<%= user.id_user %>" method="POST" class="delete-form">
+                          <input type="hidden" name="_method" value="DELETE">
                           <button type="submit" class="delete-button" data-email="<%= user.email %>">Hapus</button>
                         </form>
                       <% } %>

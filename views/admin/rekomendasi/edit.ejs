@@ -4,6 +4,7 @@
   <section class="main-content">
     <%- include('../partials/topbar', { pageTitle: 'Edit Rekomendasi', pageSubtitle: 'Ubah data rekomendasi pengajuan barang.' }) %>
     <form action="/admin/rekomendasi/edit/<%= item.id_rekomendasi %>" method="POST" class="form-card">
+      <input type="hidden" name="_method" value="PATCH">
       <div class="form-group">
         <label>Ruangan</label>
         <select name="id_ruangan" required>

@@ -90,6 +90,7 @@
                   <div class="actions">
                     <a href="/admin/rekomendasi/edit/<%= item.id_rekomendasi %>" class="btn-warning">Edit</a>
                     <form class="inline" action="/admin/rekomendasi/delete/<%= item.id_rekomendasi %>" method="POST" data-confirm-message="Rekomendasi <%= item.barang_rekomendasi_diajukan || item.nama_barang || 'ini' %> akan dihapus permanen.">
+                      <input type="hidden" name="_method" value="DELETE">
                       <button type="submit" class="btn-danger">Hapus</button>
                     </form>
                   </div>

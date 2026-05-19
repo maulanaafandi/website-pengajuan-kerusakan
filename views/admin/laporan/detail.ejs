@@ -46,6 +46,7 @@
         <div class="form-card" style="max-width:100%">
           <h2 style="margin-bottom:14px">Keterangan Admin untuk User</h2>
           <form action="/admin/laporan/keterangan/<%= laporan.id_laporan %>" method="POST">
+            <input type="hidden" name="_method" value="PATCH">
             <div class="form-group">
               <label>Keterangan Admin</label>
               <textarea name="keterangan_admin" placeholder="Contoh: Laporan sudah diterima dan sedang dicek teknisi."><%= laporan.keterangan_admin || '' %></textarea>
@@ -64,6 +65,7 @@
             </div>
           <% } else { %>
             <form action="/admin/laporan/status/<%= laporan.id_laporan %>" method="POST" class="filter-row">
+              <input type="hidden" name="_method" value="PATCH">
               <select name="status" class="control">
                 <option value="diproses" <%= laporan.status === 'diproses' ? 'selected' : '' %>>Diproses</option>
                 <option value="ditolak" <%= laporan.status === 'ditolak' ? 'selected' : '' %>>Ditolak</option>

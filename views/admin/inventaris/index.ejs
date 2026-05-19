@@ -105,6 +105,7 @@
                     method="POST"
                     data-confirm-message="Inventaris <%= item.nama_barang || 'ini' %> akan dihapus permanen."
                   >
+                    <input type="hidden" name="_method" value="DELETE">
                     <button
                       type="submit"
                       class="btn-danger"
