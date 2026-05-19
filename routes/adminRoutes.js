@@ -11,13 +11,9 @@ router.post('/admin/buat-akun', authAdmin, AdminController.storeBuatAkun)
 router.get('/admin/daftar-akun', authAdmin, AdminController.daftarAkun)
 
 router.get('/admin/inventaris', authAdmin, AdminController.inventaris)
-
 router.get('/admin/inventaris/export/pdf', authAdmin, AdminController.exportInventarisPDF)
-
 router.get('/admin/inventaris/export/excel', authAdmin, AdminController.exportInventarisExcel)
-
 router.get('/admin/inventaris/export/word', authAdmin, AdminController.exportInventarisWord)
-
 router.get('/admin/inventaris/create', authAdmin, AdminController.createInventarisPage)
 
 router.get('/admin/users', authAdmin, AdminController.users)
