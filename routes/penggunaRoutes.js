@@ -65,13 +65,13 @@ router.get(
   authUser,
   PenggunaController.updateStatusKaleb
 );
-router.patch(
+router.put(
   '/api/pengguna/kaleb/update-laporan',
   authUser,
   PenggunaController.updateLaporanKaleb
 );
 
-router.patch(
+router.put(
   '/api/pengguna/change-password',
   authUser,
   PenggunaController.changePassword
