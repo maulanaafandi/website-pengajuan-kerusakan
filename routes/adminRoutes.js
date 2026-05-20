@@ -6,9 +6,7 @@ const authAdmin = require('../middleware/auth')
 router.get('/dashboard', authAdmin, AdminController.dashboard)
 
 router.get('/admin/buat-akun', authAdmin, AdminController.formBuatAkun)
-router.get('/admin/pengaturan', authAdmin, AdminController.pengaturan)
 router.post('/admin/buat-akun', authAdmin, AdminController.storeBuatAkun)
-router.get('/admin/daftar-akun', authAdmin, AdminController.daftarAkun)
 
 router.get('/admin/inventaris', authAdmin, AdminController.inventaris)
 router.get('/admin/inventaris/export/pdf', authAdmin, AdminController.exportInventarisPDF)
@@ -17,8 +15,6 @@ router.get('/admin/inventaris/export/word', authAdmin, AdminController.exportInv
 router.get('/admin/inventaris/create', authAdmin, AdminController.createInventarisPage)
 
 router.get('/admin/users', authAdmin, AdminController.users)
-router.get('/admin/users/create', authAdmin, AdminController.createUserPage)
-router.post('/admin/users/create', authAdmin, AdminController.storeUser)
 router.get('/admin/users/edit/:id', authAdmin, AdminController.editUserPage)
 router.patch('/admin/users/edit/:id', authAdmin, AdminController.updateUser)
 router.delete('/admin/users/delete/:id', authAdmin, AdminController.deleteUser)

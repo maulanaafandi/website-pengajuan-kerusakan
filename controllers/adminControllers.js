@@ -1091,8 +1091,6 @@ static async exportInventarisWord(req, res) {
 
   }
 }
-  
-
 
   static pengaturan(req, res) {
     return res.render('admin/pengaturan', {
