@@ -16,6 +16,10 @@ function checkRole(req) {
   return req.user && allowedRoles.includes(req.user.role);
 }
 
+function checkAdminRole(req) {
+  return req.user && (req.user.role === 'admin' || String(req.user.kaleb) === '1');
+}
+
 router.get('/api/pengguna/profile', authUser, async (req, res) => {
   try {
     if (!checkRole(req)) {
@@ -111,6 +115,133 @@ router.get('/api/pengguna/inventaris', authUser, async (req, res) => {
     });
   } catch (error) {
     console.log('Error getAllInventarisPengguna:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error'
+    });
+  }
+});
+
+router.get('/api/admin/laporan', authUser, async (req, res) => {
+  try {
+    if (!checkAdminRole(req)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Akses hanya untuk admin atau kaleb'
+      });
+    }
+
+    const laporan = await Laporan.getAllRiwayatLaporanAdmin();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Data laporan berhasil diambil',
+      data: laporan
+    });
+  } catch (error) {
+    console.log('Error getAllLaporanAdmin:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error'
+    });
+  }
+});
+
+router.get('/api/admin/laporan/:id', authUser, async (req, res) => {
+  try {
+    if (!checkAdminRole(req)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Akses hanya untuk admin atau kaleb'
+      });
+    }
+
+    const laporan = await Laporan.getLaporanById(req.params.id);
+
+    if (!laporan) {
+      return res.status(404).json({
+        success: false,
+        message: 'Detail laporan tidak ditemukan'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Detail laporan berhasil diambil',
+      data: laporan
+    });
+  } catch (error) {
+    console.log('Error detailLaporanAdmin:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error'
+    });
+  }
+});
+
+router.patch('/api/admin/laporan/validasi/:id', authUser, async (req, res) => {
+  try {
+    if (!checkAdminRole(req)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Akses hanya untuk admin atau kaleb'
+      });
+    }
+
+    const { status, keterangan_admin } = req.body;
+    const allowedStatus = ['diproses', 'ditolak', 'selesai'];
+
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        message: 'Status wajib diisi'
+      });
+    }
+
+    if (!allowedStatus.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Status tidak valid'
+      });
+    }
+
+    const laporan = await Laporan.getLaporanKalebById(req.params.id);
+
+    if (!laporan) {
+      return res.status(404).json({
+        success: false,
+        message: 'Laporan tidak ditemukan'
+      });
+    }
+
+    if (laporan.status === 'selesai') {
+      return res.status(400).json({
+        success: false,
+        message: 'Laporan yang sudah selesai tidak bisa diubah lagi'
+      });
+    }
+
+    const affectedRows = await Laporan.updateStatusDanKeteranganKaleb(
+      req.params.id,
+      status,
+      keterangan_admin || null
+    );
+
+    if (!affectedRows) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validasi laporan gagal diperbarui'
+      });
+    }
+
+    const updatedLaporan = await Laporan.getLaporanById(req.params.id);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Validasi laporan berhasil diperbarui',
+    });
+  } catch (error) {
+    console.log('Error validasiLaporanAdmin:', error);
     return res.status(500).json({
       success: false,
       message: 'Internal Server Error'

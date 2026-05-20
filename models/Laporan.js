@@ -83,7 +83,27 @@ class Laporan {
     }
   }
 
-static async getDetailLaporan(idLaporan, idUser) {
+  static async getAllRiwayatLaporanAdmin() {
+    try {
+      const [rows] = await connection.query(
+        `SELECT
+            l.id_laporan,
+            DATE_FORMAT(l.tanggal, '%Y-%m-%d') AS tanggal,
+            l.status,
+            i.nama_barang
+         FROM laporan l
+         LEFT JOIN inventaris i ON l.id_inventaris = i.id_inventaris
+         ORDER BY l.id_laporan DESC`
+      )
+
+      return rows
+    } catch (error) {
+      console.log('Error getAllRiwayatLaporanAdmin:', error)
+      throw error
+    }
+  }
+
+  static async getDetailLaporan(idLaporan, idUser) {
   try {
     const [rows] = await connection.query(
       `SELECT
