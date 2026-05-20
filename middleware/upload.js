@@ -46,4 +46,18 @@ const upload = multer({
   }
 });
 
+function deleteUploadFile(fileName) {
+  if (!fileName) return;
+
+  const filePath = path.join(uploadPath, fileName);
+
+  fs.unlink(filePath, (err) => {
+    if (err && err.code !== 'ENOENT') {
+      console.log('DELETE UPLOAD ERROR:', err);
+    }
+  });
+}
+
+upload.deleteUploadFile = deleteUploadFile;
+
 module.exports = upload;

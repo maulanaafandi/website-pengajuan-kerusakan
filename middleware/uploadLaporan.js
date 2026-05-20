@@ -10,6 +10,13 @@ function uploadLaporan(req, res, next) {
       })
     }
 
+    if (!req.file) {
+      return res.status(400).json({
+        success: false,
+        message: 'Foto laporan wajib diupload'
+      })
+    }
+
     return next()
   })
 }

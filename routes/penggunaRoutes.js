@@ -3,6 +3,7 @@ const router = express.Router();
 
 const authUser = require('../middleware/jwt');
 const uploadLaporan = require('../middleware/uploadLaporan');
+const upload = require('../middleware/upload');
 const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Inventaris = require('../models/Inventaris');
@@ -15,9 +16,10 @@ function checkRole(req) {
   return req.user && allowedRoles.includes(req.user.role);
 }
 
-router.get('/api/pengguna/profile', authUser, async function(req, res, next) {
+router.get('/api/pengguna/profile', authUser, async (req, res) => {
   try {
     if (!checkRole(req)) {
+      upload.deleteUploadFile(req.file && req.file.filename);
       return res.status(403).json({
         success: false,
         message: 'Anda tidak memiliki akses'
@@ -40,7 +42,7 @@ router.get('/api/pengguna/profile', authUser, async function(req, res, next) {
   }
 });
 
-router.get('/api/pengguna/master-data', authUser, async function(req, res, next) {
+router.get('/api/pengguna/master-data', authUser, async (req, res) => {
   try {
     if (!checkRole(req)) {
       return res.status(403).json({
@@ -66,11 +68,58 @@ router.get('/api/pengguna/master-data', authUser, async function(req, res, next)
   }
 });
 
-router.post('/api/pengguna/laporan', authUser, uploadLaporan, async function(req, res, next) {
+router.get('/api/pengguna/ruangan', authUser, async (req, res) => {
   try {
-    console.log('BODY LAPORAN:', req.body);
-    console.log('FILE LAPORAN:', req.file);
+    if (!checkRole(req)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Anda tidak memiliki akses'
+      });
+    }
 
+    const ruangan = await Ruangan.getAllRuanganPengguna();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Data ruangan berhasil diambil',
+      data: ruangan
+    });
+  } catch (error) {
+    console.log('Error getAllRuanganPengguna:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error'
+    });
+  }
+});
+
+router.get('/api/pengguna/inventaris', authUser, async (req, res) => {
+  try {
+    if (!checkRole(req)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Anda tidak memiliki akses'
+      });
+    }
+
+    const inventaris = await Inventaris.getAllInventarisPengguna();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Data inventaris berhasil diambil',
+      data: inventaris
+    });
+  } catch (error) {
+    console.log('Error getAllInventarisPengguna:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error'
+    });
+  }
+});
+
+router.post('/api/pengguna/laporan', authUser, uploadLaporan, async (req, res) => {
+  try {
     if (!checkRole(req)) {
       return res.status(403).json({
         success: false,
@@ -81,6 +130,7 @@ router.post('/api/pengguna/laporan', authUser, uploadLaporan, async function(req
     const { id_inventaris, id_ruangan, tanggal, keterangan, kondisi } = req.body;
 
     if (!id_inventaris || !id_ruangan || !tanggal || !keterangan || !kondisi) {
+      upload.deleteUploadFile(req.file && req.file.filename);
       return res.status(400).json({
         success: false,
         message: 'Semua field wajib diisi'
@@ -110,6 +160,7 @@ router.post('/api/pengguna/laporan', authUser, uploadLaporan, async function(req
     });
   } catch (error) {
     console.log('ERROR createLaporan:', error);
+    upload.deleteUploadFile(req.file && req.file.filename);
     return res.status(500).json({
       success: false,
       message: error.message
@@ -117,7 +168,7 @@ router.post('/api/pengguna/laporan', authUser, uploadLaporan, async function(req
   }
 });
 
-router.get('/api/pengguna/riwayat-laporan', authUser, async function(req, res, next) {
+router.get('/api/pengguna/riwayat-laporan', authUser, async (req, res) => {
   try {
     if (!checkRole(req)) {
       return res.status(403).json({
@@ -142,7 +193,7 @@ router.get('/api/pengguna/riwayat-laporan', authUser, async function(req, res, n
   }
 });
 
-router.get('/api/pengguna/riwayat-laporan/:id', authUser, async function(req, res, next) {
+router.get('/api/pengguna/riwayat-laporan/:id', authUser, async (req, res) => {
   try {
     if (!checkRole(req)) {
       return res.status(403).json({
@@ -174,7 +225,7 @@ router.get('/api/pengguna/riwayat-laporan/:id', authUser, async function(req, re
   }
 });
 
-router.get('/api/pengguna/update-status', authUser, async function(req, res, next) {
+router.get('/api/pengguna/update-status', authUser, async (req, res) => {
   try {
     if (req.user.kaleb != '1') {
       return res.status(403).json({
@@ -199,7 +250,7 @@ router.get('/api/pengguna/update-status', authUser, async function(req, res, nex
   }
 });
 
-router.get('/api/pengguna/update-status-kaleb', authUser, async function(req, res, next) {
+router.get('/api/pengguna/update-status-kaleb', authUser, async (req, res) => {
   try {
     if (req.user.kaleb != '1') {
       return res.status(403).json({
@@ -224,7 +275,7 @@ router.get('/api/pengguna/update-status-kaleb', authUser, async function(req, re
   }
 });
 
-router.get('/api/pengguna/update-laporan-kaleb', authUser, async function(req, res, next) {
+router.get('/api/pengguna/update-laporan-kaleb', authUser, async (req, res) => {
   try {
     if (req.user.kaleb != '1') {
       return res.status(403).json({
@@ -249,7 +300,7 @@ router.get('/api/pengguna/update-laporan-kaleb', authUser, async function(req, r
   }
 });
 
-router.get('/api/kaleb/update-status', authUser, async function(req, res, next) {
+router.get('/api/kaleb/update-status', authUser, async (req, res) => {
   try {
     if (req.user.kaleb != '1') {
       return res.status(403).json({
@@ -274,7 +325,7 @@ router.get('/api/kaleb/update-status', authUser, async function(req, res, next) 
   }
 });
 
-router.get('/api/pengguna/kaleb/update-status', authUser, async function(req, res, next) {
+router.get('/api/pengguna/kaleb/update-status', authUser, async (req, res) => {
   try {
     if (req.user.kaleb != '1') {
       return res.status(403).json({
@@ -299,7 +350,7 @@ router.get('/api/pengguna/kaleb/update-status', authUser, async function(req, re
   }
 });
 
-router.patch('/api/pengguna/kaleb/update-laporan', authUser, async function(req, res, next) {
+router.patch('/api/pengguna/kaleb/update-laporan', authUser, async (req, res) => {
   try {
     if (req.user.kaleb != '1') {
       return res.status(403).json({
@@ -368,7 +419,7 @@ router.patch('/api/pengguna/kaleb/update-laporan', authUser, async function(req,
   }
 });
 
-router.patch('/api/pengguna/change-password', authUser, async function(req, res, next) {
+router.patch('/api/pengguna/change-password', authUser, async (req, res) => {
   try {
     if (!checkRole(req)) {
       return res.status(403).json({

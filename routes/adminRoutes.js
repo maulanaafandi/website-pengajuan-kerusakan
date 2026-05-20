@@ -247,7 +247,7 @@ async function generateRekomendasiDenganOpenAI(data) {
   }))
 }
 
-router.get('/dashboard', authAdmin, async function(req, res, next) {
+router.get('/dashboard', authAdmin, async (req, res) => {
     try {
       const [
         totalUser,
@@ -285,11 +285,11 @@ router.get('/dashboard', authAdmin, async function(req, res, next) {
     }
   })
 
-router.get('/admin/buat-akun', authAdmin, function(req, res, next) {
+router.get('/admin/buat-akun', authAdmin, (req, res) => {
     return res.render('admin/buat-akun')
   })
 
-router.post('/admin/buat-akun', authAdmin, async function(req, res, next) {
+router.post('/admin/buat-akun', authAdmin, async (req, res) => {
     try {
       const { email, role } = req.body
       if (!email || !role) {
@@ -323,7 +323,7 @@ router.post('/admin/buat-akun', authAdmin, async function(req, res, next) {
     }
   })
 
-router.get('/admin/inventaris', authAdmin, async function(req, res, next) {
+router.get('/admin/inventaris', authAdmin, async (req, res) => {
     try {
       const allInventaris = await Inventaris.getInventaris(req.query.search || '')
       const { rows: inventaris, pagination } = paginateRows(allInventaris, req.query)
@@ -334,7 +334,7 @@ router.get('/admin/inventaris', authAdmin, async function(req, res, next) {
       return res.redirect('/dashboard')
     }
   })
-router.get('/admin/inventaris/export/pdf', authAdmin, async function(req, res, next) {
+router.get('/admin/inventaris/export/pdf', authAdmin, async (req, res) => {
   try {
     const inventaris = await Inventaris.getInventaris('')
 
@@ -525,7 +525,7 @@ router.get('/admin/inventaris/export/pdf', authAdmin, async function(req, res, n
   }
 })
 
-router.get('/admin/inventaris/export/excel', authAdmin, async function(req, res, next) {
+router.get('/admin/inventaris/export/excel', authAdmin, async (req, res) => {
   try {
 
     const inventaris = await Inventaris.getInventaris('')
@@ -568,7 +568,7 @@ router.get('/admin/inventaris/export/excel', authAdmin, async function(req, res,
   }
 })
 
-router.get('/admin/inventaris/export/word', authAdmin, async function(req, res, next) {
+router.get('/admin/inventaris/export/word', authAdmin, async (req, res) => {
   try {
 
     const inventaris = await Inventaris.getInventaris('')
@@ -684,11 +684,11 @@ router.get('/admin/inventaris/export/word', authAdmin, async function(req, res, 
   }
 })
 
-router.get('/admin/inventaris/create', authAdmin, function(req, res, next) {
+router.get('/admin/inventaris/create', authAdmin, (req, res) => {
     return res.render('admin/inventaris/create')
   })
 
-router.get('/admin/users', authAdmin, async function(req, res, next) {
+router.get('/admin/users', authAdmin, async (req, res) => {
     try {
       const allUsers = await User.getUsers(req.query.search || '')
       const { rows: users, pagination } = paginateRows(allUsers, req.query)
@@ -700,7 +700,7 @@ router.get('/admin/users', authAdmin, async function(req, res, next) {
     }
   })
 
-router.get('/admin/users/edit/:id', authAdmin, async function(req, res, next) {
+router.get('/admin/users/edit/:id', authAdmin, async (req, res) => {
     try {
       const user = await User.getUserById(req.params.id)
       if (!user) {
@@ -721,7 +721,7 @@ router.get('/admin/users/edit/:id', authAdmin, async function(req, res, next) {
     }
   })
 
-router.patch('/admin/users/edit/:id', authAdmin, async function(req, res, next) {
+router.patch('/admin/users/edit/:id', authAdmin, async (req, res) => {
     try {
       const user = await User.getUserById(req.params.id)
       if (!user) {
@@ -744,7 +744,7 @@ router.patch('/admin/users/edit/:id', authAdmin, async function(req, res, next) 
     }
   })
 
-router.delete('/admin/users/delete/:id', authAdmin, async function(req, res, next) {
+router.delete('/admin/users/delete/:id', authAdmin, async (req, res) => {
     try {
       const user = await User.getUserById(req.params.id)
       if (!user) {
@@ -767,7 +767,7 @@ router.delete('/admin/users/delete/:id', authAdmin, async function(req, res, nex
     }
   })
 
-router.get('/admin/inventaris', authAdmin, async function(req, res, next) {
+router.get('/admin/inventaris', authAdmin, async (req, res) => {
     try {
       const allInventaris = await Inventaris.getInventaris(req.query.search || '')
       const { rows: inventaris, pagination } = paginateRows(allInventaris, req.query)
@@ -779,11 +779,11 @@ router.get('/admin/inventaris', authAdmin, async function(req, res, next) {
     }
   })
 
-router.get('/admin/inventaris/create', authAdmin, function(req, res, next) {
+router.get('/admin/inventaris/create', authAdmin, (req, res) => {
     return res.render('admin/inventaris/create')
   })
 
-router.post('/admin/inventaris/create', authAdmin, async function(req, res, next) {
+router.post('/admin/inventaris/create', authAdmin, async (req, res) => {
     try {
       await Inventaris.createInventaris(req.body)
       req.flash('success', 'Inventaris berhasil ditambahkan')
@@ -796,7 +796,7 @@ router.post('/admin/inventaris/create', authAdmin, async function(req, res, next
     }
   })
 
-router.get('/admin/inventaris/edit/:id', authAdmin, async function(req, res, next) {
+router.get('/admin/inventaris/edit/:id', authAdmin, async (req, res) => {
     try {
       const item = await Inventaris.getInventarisById(req.params.id)
       if (!item) {
@@ -811,7 +811,7 @@ router.get('/admin/inventaris/edit/:id', authAdmin, async function(req, res, nex
     }
   })
 
-router.patch('/admin/inventaris/edit/:id', authAdmin, async function(req, res, next) {
+router.patch('/admin/inventaris/edit/:id', authAdmin, async (req, res) => {
     try {
       await Inventaris.updateInventaris(req.params.id, req.body)
       req.flash('success', 'Inventaris berhasil diupdate')
@@ -823,7 +823,7 @@ router.patch('/admin/inventaris/edit/:id', authAdmin, async function(req, res, n
     }
   })
 
-router.delete('/admin/inventaris/delete/:id', authAdmin, async function(req, res, next) {
+router.delete('/admin/inventaris/delete/:id', authAdmin, async (req, res) => {
     try {
       await Inventaris.deleteInventaris(req.params.id)
       req.flash('success', 'Inventaris berhasil dihapus')
@@ -835,7 +835,7 @@ router.delete('/admin/inventaris/delete/:id', authAdmin, async function(req, res
     }
   })
 
-router.get('/admin/ruangan', authAdmin, async function(req, res, next) {
+router.get('/admin/ruangan', authAdmin, async (req, res) => {
     try {
       const allRuangan = await Ruangan.getRuangan(req.query.search || '')
       const { rows: ruangan, pagination } = paginateRows(allRuangan, req.query)
@@ -847,11 +847,11 @@ router.get('/admin/ruangan', authAdmin, async function(req, res, next) {
     }
   })
 
-router.get('/admin/ruangan/create', authAdmin, function(req, res, next) {
+router.get('/admin/ruangan/create', authAdmin, (req, res) => {
     return res.render('admin/ruangan/create')
   })
 
-router.post('/admin/ruangan/create', authAdmin, async function(req, res, next) {
+router.post('/admin/ruangan/create', authAdmin, async (req, res) => {
     try {
       await Ruangan.createRuangan(req.body)
       req.flash('success', 'Ruangan berhasil ditambahkan')
@@ -864,7 +864,7 @@ router.post('/admin/ruangan/create', authAdmin, async function(req, res, next) {
     }
   })
 
-router.get('/admin/ruangan/edit/:id', authAdmin, async function(req, res, next) {
+router.get('/admin/ruangan/edit/:id', authAdmin, async (req, res) => {
     try {
       const item = await Ruangan.getRuanganById(req.params.id)
       if (!item) {
@@ -879,7 +879,7 @@ router.get('/admin/ruangan/edit/:id', authAdmin, async function(req, res, next) 
     }
   })
 
-router.patch('/admin/ruangan/edit/:id', authAdmin, async function(req, res, next) {
+router.patch('/admin/ruangan/edit/:id', authAdmin, async (req, res) => {
     try {
       await Ruangan.updateRuangan(req.params.id, req.body)
       req.flash('success', 'Ruangan berhasil diupdate')
@@ -891,7 +891,7 @@ router.patch('/admin/ruangan/edit/:id', authAdmin, async function(req, res, next
     }
   })
 
-router.delete('/admin/ruangan/delete/:id', authAdmin, async function(req, res, next) {
+router.delete('/admin/ruangan/delete/:id', authAdmin, async (req, res) => {
     try {
       await Ruangan.deleteRuangan(req.params.id)
       req.flash('success', 'Ruangan berhasil dihapus')
@@ -903,7 +903,7 @@ router.delete('/admin/ruangan/delete/:id', authAdmin, async function(req, res, n
     }
   })
 
-router.get('/admin/laporan', authAdmin, async function(req, res, next) {
+router.get('/admin/laporan', authAdmin, async (req, res) => {
     try {
       const laporan = await Laporan.getLaporan(req.query.search || '', req.query.status || '', req.query.tanggal || '')
       return res.render('admin/laporan/index', { laporan, search: req.query.search || '', status: req.query.status || '', tanggal: req.query.tanggal || '', formatDate })
@@ -914,7 +914,7 @@ router.get('/admin/laporan', authAdmin, async function(req, res, next) {
     }
   })
 
-router.get('/admin/laporan/detail/:id', authAdmin, async function(req, res, next) {
+router.get('/admin/laporan/detail/:id', authAdmin, async (req, res) => {
     try {
       const laporan = await Laporan.getLaporanById(req.params.id)
 
@@ -931,7 +931,7 @@ router.get('/admin/laporan/detail/:id', authAdmin, async function(req, res, next
     }
   })
 
-router.patch('/admin/laporan/keterangan/:id', authAdmin, async function(req, res, next) {
+router.patch('/admin/laporan/keterangan/:id', authAdmin, async (req, res) => {
     try {
       const laporan = await Laporan.getLaporanById(req.params.id)
 
@@ -950,7 +950,7 @@ router.patch('/admin/laporan/keterangan/:id', authAdmin, async function(req, res
     }
   })
 
-router.patch('/admin/laporan/status/:id', authAdmin, async function(req, res, next) {
+router.patch('/admin/laporan/status/:id', authAdmin, async (req, res) => {
     try {
       const { status } = req.body
       const item = await Laporan.getLaporanById(req.params.id)
@@ -977,7 +977,7 @@ router.patch('/admin/laporan/status/:id', authAdmin, async function(req, res, ne
     }
   })
 
-router.get('/admin/rekomendasi', authAdmin, async function(req, res, next) {
+router.get('/admin/rekomendasi', authAdmin, async (req, res) => {
     try {
       const allRekomendasi = await Rekomendasi.getRekomendasi(req.query.search || '')
       const { rows: rekomendasi, pagination } = paginateRows(allRekomendasi, req.query)
@@ -990,7 +990,7 @@ router.get('/admin/rekomendasi', authAdmin, async function(req, res, next) {
     }
   })
 
-router.post('/admin/rekomendasi/generate-ai', authAdmin, async function(req, res, next) {
+router.post('/admin/rekomendasi/generate-ai', authAdmin, async (req, res) => {
     try {
       const [laporan, ruangan] = await Promise.all([
         Laporan.getLaporanUntukAI(),
@@ -1017,7 +1017,7 @@ router.post('/admin/rekomendasi/generate-ai', authAdmin, async function(req, res
     }
   })
 
-router.post('/admin/rekomendasi/save-ai', authAdmin, async function(req, res, next) {
+router.post('/admin/rekomendasi/save-ai', authAdmin, async (req, res) => {
     try {
       const aiResults = req.session.aiResults || []
 
@@ -1037,12 +1037,12 @@ router.post('/admin/rekomendasi/save-ai', authAdmin, async function(req, res, ne
     }
   })
   
-router.post('/admin/rekomendasi/clear-ai', authAdmin, async function(req, res, next) {
+router.post('/admin/rekomendasi/clear-ai', authAdmin, async (req, res) => {
     req.session.aiResults = null
     req.flash('success', 'Hasil sementara AI dibuang')
     return res.redirect('/admin/rekomendasi')
   })
-router.get('/admin/rekomendasi/create', authAdmin, async function(req, res, next) {
+router.get('/admin/rekomendasi/create', authAdmin, async (req, res) => {
     try {
       const ruangan = await Ruangan.getRuangan()
       return res.render('admin/rekomendasi/create', { ruangan })
@@ -1052,7 +1052,7 @@ router.get('/admin/rekomendasi/create', authAdmin, async function(req, res, next
       return res.redirect('/admin/rekomendasi')
     }
   })
-router.post('/admin/rekomendasi/create', authAdmin, async function(req, res, next) {
+router.post('/admin/rekomendasi/create', authAdmin, async (req, res) => {
     try {
       await Rekomendasi.createRekomendasi(req.body)
       req.flash('success', 'Rekomendasi berhasil ditambahkan')
@@ -1063,7 +1063,7 @@ router.post('/admin/rekomendasi/create', authAdmin, async function(req, res, nex
       return res.redirect('/admin/rekomendasi/create')
     }
   })
-router.get('/admin/rekomendasi/edit/:id', authAdmin, async function(req, res, next) {
+router.get('/admin/rekomendasi/edit/:id', authAdmin, async (req, res) => {
     try {
       const item = await Rekomendasi.getRekomendasiById(req.params.id)
       const ruangan = await Ruangan.getRuangan()
@@ -1078,7 +1078,7 @@ router.get('/admin/rekomendasi/edit/:id', authAdmin, async function(req, res, ne
       return res.redirect('/admin/rekomendasi')
     }
   })
-router.patch('/admin/rekomendasi/edit/:id', authAdmin, async function(req, res, next) {
+router.patch('/admin/rekomendasi/edit/:id', authAdmin, async (req, res) => {
     try {
       await Rekomendasi.updateRekomendasi(req.params.id, req.body)
       req.flash('success', 'Rekomendasi berhasil diupdate')
@@ -1089,7 +1089,7 @@ router.patch('/admin/rekomendasi/edit/:id', authAdmin, async function(req, res, 
       return res.redirect('/admin/rekomendasi')
     }
   })
-router.delete('/admin/rekomendasi/delete/:id', authAdmin, async function(req, res, next) {
+router.delete('/admin/rekomendasi/delete/:id', authAdmin, async (req, res) => {
     try {
       await Rekomendasi.deleteRekomendasi(req.params.id)
       req.flash('success', 'Rekomendasi berhasil dihapus')
@@ -1101,9 +1101,9 @@ router.delete('/admin/rekomendasi/delete/:id', authAdmin, async function(req, re
     }
   })
 
-router.post('/logout', function(req, res, next) {
+router.post('/logout', (req, res) => {
     req.session.destroy(() => {
-      return res.redirect('/login')
+      return res.redirect('/')
     })
   })
 

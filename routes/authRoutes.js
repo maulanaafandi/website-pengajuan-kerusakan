@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const Auth = require('../models/Auth')
 
-router.get('/login', function(req, res, next) {
+router.get('/', (req, res) => {
   if (req.session && req.session.user) {
     return res.redirect('/dashboard')
   }
@@ -12,7 +12,7 @@ router.get('/login', function(req, res, next) {
   return res.render('login')
 })
 
-router.post('/login', async function(req, res, next) {
+router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body
     const user = await Auth.findUserByEmail(email)
@@ -49,7 +49,7 @@ router.post('/login', async function(req, res, next) {
   }
 })
 
-router.post('/api/auth/login', async function(req, res, next) {
+router.post('/api/login/mobile', async (req, res) => {
   try {
     const { email, password } = req.body
 
@@ -99,15 +99,8 @@ router.post('/api/auth/login', async function(req, res, next) {
     )
 
     return res.status(200).json({
-      success: true,
-      message: 'Login berhasil',
+      // success: true,
       token,
-      user: {
-        id_user: user.id_user,
-        email: user.email,
-        role: user.role,
-        kaleb: user.kaleb
-      }
     })
   } catch (error) {
     console.log(error)
