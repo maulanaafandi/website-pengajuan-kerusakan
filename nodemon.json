@@ -1,5 +1,5 @@
 {
-  "watch": ["app.js", "bin", "routes", "controllers", "models", "views", "config"],
+  "watch": ["app.js", "bin", "routes", "models", "views", "config"],
   "ignore": ["node_modules", "public/uploads", ".git"],
   "ext": "js,json,ejs"
 }
