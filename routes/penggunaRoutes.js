@@ -20,6 +20,14 @@ function checkAdminRole(req) {
   return req.user && (req.user.role === 'admin' || String(req.user.kaleb) === '1');
 }
 
+function checkLaporanReaderRole(req) {
+  return req.user && (req.user.role === 'admin' || req.user.role === 'dosen' || String(req.user.kaleb) === '1');
+}
+
+function isAdmin(req) {
+  return req.user && req.user.role === 'admin';
+}
+
 router.get('/api/pengguna/profile', authUser, async (req, res) => {
   try {
     if (!checkRole(req)) {
@@ -124,14 +132,16 @@ router.get('/api/pengguna/inventaris', authUser, async (req, res) => {
 
 router.get('/api/admin/laporan', authUser, async (req, res) => {
   try {
-    if (!checkAdminRole(req)) {
+    if (!checkLaporanReaderRole(req)) {
       return res.status(403).json({
         success: false,
-        message: 'Akses hanya untuk admin atau kaleb'
+        message: 'Akses hanya untuk admin, dosen, atau kaleb'
       });
     }
 
-    const laporan = await Laporan.getAllRiwayatLaporanAdmin();
+    const laporan = isAdmin(req)
+      ? await Laporan.getAllRiwayatLaporanAdmin()
+      : await Laporan.getAllRiwayatLaporanAdminByPemilikRuangan(req.user.id_user);
 
     return res.status(200).json({
       success: true,
@@ -149,14 +159,16 @@ router.get('/api/admin/laporan', authUser, async (req, res) => {
 
 router.get('/api/admin/laporan/:id', authUser, async (req, res) => {
   try {
-    if (!checkAdminRole(req)) {
+    if (!checkLaporanReaderRole(req)) {
       return res.status(403).json({
         success: false,
-        message: 'Akses hanya untuk admin atau kaleb'
+        message: 'Akses hanya untuk admin, dosen, atau kaleb'
       });
     }
 
-    const laporan = await Laporan.getLaporanById(req.params.id);
+    const laporan = isAdmin(req)
+      ? await Laporan.getLaporanById(req.params.id)
+      : await Laporan.getLaporanByIdForPemilikRuangan(req.params.id, req.user.id_user);
 
     if (!laporan) {
       return res.status(404).json({
