@@ -38,6 +38,22 @@ class User {
     }
   }
 
+  static async getDosenKalebUsers() {
+    try {
+      const [rows] = await connection.query(
+        `SELECT id_user, email, role, kaleb
+         FROM user
+         WHERE role = ? OR kaleb = ?
+         ORDER BY email ASC`,
+        ['dosen', '1']
+      )
+      return rows
+    } catch (error) {
+      console.log('Error getDosenKalebUsers:', error)
+      throw error
+    }
+  }
+
   static async getUserById(idUser) {
     try {
       const [rows] = await connection.query(`SELECT id_user, email, role, kaleb FROM user WHERE id_user = ?`, [idUser])

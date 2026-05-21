@@ -847,8 +847,15 @@ router.get('/admin/ruangan', authAdmin, async (req, res) => {
     }
   })
 
-router.get('/admin/ruangan/create', authAdmin, (req, res) => {
-    return res.render('admin/ruangan/create')
+router.get('/admin/ruangan/create', authAdmin, async (req, res) => {
+    try {
+      const dosenKalebUsers = await User.getDosenKalebUsers()
+      return res.render('admin/ruangan/create', { dosenKalebUsers })
+    } catch (err) {
+      console.log(err)
+      req.flash('error', 'Gagal memuat data dosen/kaleb')
+      return res.redirect('/admin/ruangan')
+    }
   })
 
 router.post('/admin/ruangan/create', authAdmin, async (req, res) => {
@@ -871,7 +878,8 @@ router.get('/admin/ruangan/edit/:id', authAdmin, async (req, res) => {
         req.flash('error', 'Ruangan tidak ditemukan')
         return res.redirect('/admin/ruangan')
       }
-      return res.render('admin/ruangan/edit', { item })
+      const dosenKalebUsers = await User.getDosenKalebUsers()
+      return res.render('admin/ruangan/edit', { item, dosenKalebUsers })
     } catch (err) {
       console.log(err)
       req.flash('error', 'Gagal memuat edit ruangan')
@@ -1108,6 +1116,5 @@ router.post('/logout', (req, res) => {
   })
 
 module.exports = router
-
 
 

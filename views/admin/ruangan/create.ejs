@@ -7,6 +7,15 @@
       <div class="form-group"><label>Nama Ruangan</label><input type="text" name="nama_ruangan" value="<%= oldInput.nama_ruangan || '' %>" required></div>
       <div class="form-group"><label>Kode Ruangan</label><input type="text" name="kode_ruangan" value="<%= oldInput.kode_ruangan || '' %>" required></div>
       <div class="form-group"><label>Lokasi</label><select name="lokasi" required><option value="pamolokan" <%= oldInput.lokasi === 'pamolokan' ? 'selected' : '' %>>pamolokan</option><option value="batuan" <%= oldInput.lokasi === 'batuan' ? 'selected' : '' %>>batuan</option></select></div>
+      <div class="form-group">
+        <label>Dosen/Kaleb</label>
+        <select name="id_user">
+          <option value="">Pilih dosen/kaleb</option>
+          <% dosenKalebUsers.forEach(user => { %>
+            <option value="<%= user.id_user %>" <%= String(oldInput.id_user || '') === String(user.id_user) ? 'selected' : '' %>><%= user.id_user %> - <%= user.email %> - <%= user.role %><%= String(user.kaleb) === '1' ? ' - Kaleb' : '' %></option>
+          <% }) %>
+        </select>
+      </div>
       <div class="form-actions"><button type="submit" class="btn-primary">Simpan</button><a href="/admin/ruangan" class="btn-secondary">Kembali</a></div>
     </form>
   </section>
