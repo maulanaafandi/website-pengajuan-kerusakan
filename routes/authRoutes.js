@@ -12,26 +12,26 @@ router.get('/', (req, res) => {
   return res.render('login')
 })
 
-router.post('/login', async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { email, password } = req.body
     const user = await Auth.findUserByEmail(email)
 
     if (!user) {
       req.flash('error', 'Email tidak ditemukan')
-      return res.redirect('/login')
+      return res.redirect('/')
     }
 
     const match = await bcrypt.compare(password, user.password)
 
     if (!match) {
       req.flash('error', 'Password salah')
-      return res.redirect('/login')
+      return res.redirect('/')
     }
 
     if (user.role !== 'admin' && String(user.kaleb) !== '1') {
       req.flash('error', 'Akun tidak valid')
-      return res.redirect('/login')
+      return res.redirect('/')
     }
 
     req.session.user = {
@@ -45,7 +45,7 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     console.log(error)
     req.flash('error', 'Terjadi kesalahan saat login')
-    return res.redirect('/login')
+    return res.redirect('/')
   }
 })
 

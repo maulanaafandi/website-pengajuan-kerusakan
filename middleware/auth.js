@@ -3,7 +3,7 @@ const authAdmin = async (req, res, next) => {
 
         if (!req.session.user) {
             req.flash('error', 'Silahkan login terlebih dahulu')
-            return res.redirect('/login')
+            return res.redirect('/')
         }
 
         if (req.session.user.role === 'admin' || String(req.session.user.kaleb) === '1') {
@@ -16,7 +16,7 @@ const authAdmin = async (req, res, next) => {
     } catch (err) {
         console.log(err)
         req.flash('error', 'Internal Server Error')
-        return res.redirect('/login')
+        return res.redirect('/')
     }
 }
 

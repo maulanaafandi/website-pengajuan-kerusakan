@@ -77,6 +77,20 @@ class Inventaris {
     }
   }
 
+  static async getInventarisByNamaBarang(namaBarang) {
+    try {
+      const [rows] = await connection.query(
+        `SELECT * FROM inventaris WHERE LOWER(nama_barang) = LOWER(?) LIMIT 1`,
+        [namaBarang]
+      )
+
+      return rows[0] || null
+    } catch (error) {
+      console.log('Error getInventarisByNamaBarang:', error)
+      throw error
+    }
+  }
+
   static async createInventaris(data) {
     try {
       await connection.query(
@@ -96,6 +110,20 @@ class Inventaris {
       )
     } catch (error) {
       console.log('Error createInventaris:', error)
+      throw error
+    }
+  }
+
+  static async createInventarisNamaBarang(namaBarang) {
+    try {
+      const [result] = await connection.query(
+        `INSERT INTO inventaris (nama_barang) VALUES (?)`,
+        [namaBarang]
+      )
+
+      return result.insertId
+    } catch (error) {
+      console.log('Error createInventarisNamaBarang:', error)
       throw error
     }
   }

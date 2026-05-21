@@ -281,7 +281,7 @@ router.get('/dashboard', authAdmin, async (req, res) => {
     } catch (err) {
       console.log(err)
       req.flash('error', 'Gagal memuat dashboard')
-      return res.redirect('/login')
+      return res.redirect('/')
     }
   })
 
@@ -1116,5 +1116,4 @@ router.post('/logout', (req, res) => {
   })
 
 module.exports = router
-
 

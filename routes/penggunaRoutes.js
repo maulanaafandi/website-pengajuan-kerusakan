@@ -20,6 +20,10 @@ function checkAdminRole(req) {
   return req.user && (req.user.role === 'admin' || String(req.user.kaleb) === '1');
 }
 
+function checkDosenKalebRole(req) {
+  return req.user && (req.user.role === 'dosen' || String(req.user.kaleb) === '1');
+}
+
 function checkLaporanReaderRole(req) {
   return req.user && (req.user.role === 'admin' || req.user.role === 'dosen' || String(req.user.kaleb) === '1');
 }
@@ -193,10 +197,10 @@ router.get('/api/admin/laporan/:id', authUser, async (req, res) => {
 
 router.patch('/api/admin/laporan/validasi/:id', authUser, async (req, res) => {
   try {
-    if (!checkAdminRole(req)) {
+    if (!checkDosenKalebRole(req)) {
       return res.status(403).json({
         success: false,
-        message: 'Akses hanya untuk admin atau kaleb'
+        message: 'Akses hanya untuk dosen atau kaleb'
       });
     }
 
@@ -217,12 +221,12 @@ router.patch('/api/admin/laporan/validasi/:id', authUser, async (req, res) => {
       });
     }
 
-    const laporan = await Laporan.getLaporanKalebById(req.params.id);
+    const laporan = await Laporan.getLaporanByIdForPemilikRuangan(req.params.id, req.user.id_user);
 
     if (!laporan) {
       return res.status(404).json({
         success: false,
-        message: 'Laporan tidak ditemukan'
+        message: 'Laporan tidak ditemukan atau bukan dari ruangan Anda'
       });
     }
 
@@ -233,8 +237,9 @@ router.patch('/api/admin/laporan/validasi/:id', authUser, async (req, res) => {
       });
     }
 
-    const affectedRows = await Laporan.updateStatusDanKeteranganKaleb(
+    const affectedRows = await Laporan.updateStatusDanKeteranganByPemilikRuangan(
       req.params.id,
+      req.user.id_user,
       status,
       keterangan_admin || null
     );
@@ -304,6 +309,56 @@ router.post('/api/pengguna/laporan', authUser, uploadLaporan, async (req, res) =
   } catch (error) {
     console.log('ERROR createLaporan:', error);
     upload.deleteUploadFile(req.file && req.file.filename);
+    return res.status(500).json({
+      success: false,
+      message: error.message
+    });
+  }
+});
+
+router.post('/api/pengguna/laporan-barang-baru', authUser, async (req, res) => {
+  try {
+    if (!checkRole(req)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Anda tidak memiliki akses'
+      });
+    }
+
+    const nama_barang = String(req.body.nama_barang || '').trim();
+
+    if (!nama_barang) {
+      return res.status(400).json({
+        success: false,
+        message: 'Nama barang wajib diisi'
+      });
+    }
+
+    const existingInventaris = await Inventaris.getInventarisByNamaBarang(nama_barang);
+
+    if (existingInventaris) {
+      return res.status(409).json({
+        success: false,
+        message: 'Barang sudah ada',
+        data: {
+          id_inventaris: existingInventaris.id_inventaris,
+          nama_barang: existingInventaris.nama_barang
+        }
+      });
+    }
+
+    const idInventaris = await Inventaris.createInventarisNamaBarang(nama_barang);
+
+    return res.status(201).json({
+      success: true,
+      message: 'Laporan barang baru berhasil dibuat',
+      data: {
+        id_inventaris: idInventaris,
+        nama_barang
+      }
+    });
+  } catch (error) {
+    console.log('ERROR createLaporanBarangBaru:', error);
     return res.status(500).json({
       success: false,
       message: error.message

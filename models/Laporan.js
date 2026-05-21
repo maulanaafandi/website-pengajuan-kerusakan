@@ -203,6 +203,26 @@ class Laporan {
     }
   }
 
+  static async updateStatusDanKeteranganByPemilikRuangan(idLaporan, idUser, status, keteranganAdmin) {
+    try {
+      const [result] = await connection.query(
+        `UPDATE laporan l
+         INNER JOIN ruangan r ON l.id_ruangan = r.id_ruangan
+         SET l.status = ?,
+             l.keterangan_admin = ?
+         WHERE l.id_laporan = ?
+           AND r.id_user = ?
+           AND l.status != 'selesai'`,
+        [status, keteranganAdmin, idLaporan, idUser]
+      )
+
+      return result.affectedRows
+    } catch (error) {
+      console.log('Error updateStatusDanKeteranganByPemilikRuangan:', error)
+      throw error
+    }
+  }
+
   static async getLaporan(search = '', status = '', tanggal = '') {
     try {
       const params = []
