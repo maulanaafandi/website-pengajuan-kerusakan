@@ -134,7 +134,7 @@ router.get('/api/pengguna/inventaris', authUser, async (req, res) => {
   }
 });
 
-router.get('/api/admin/laporan', authUser, async (req, res) => {
+router.get('/api/dosen/laporan', authUser, async (req, res) => {
   try {
     if (!checkLaporanReaderRole(req)) {
       return res.status(403).json({
@@ -161,7 +161,7 @@ router.get('/api/admin/laporan', authUser, async (req, res) => {
   }
 });
 
-router.get('/api/admin/laporan/:id', authUser, async (req, res) => {
+router.get('/api/dosen/laporan/:id', authUser, async (req, res) => {
   try {
     if (!checkLaporanReaderRole(req)) {
       return res.status(403).json({
@@ -195,7 +195,7 @@ router.get('/api/admin/laporan/:id', authUser, async (req, res) => {
   }
 });
 
-router.patch('/api/admin/laporan/validasi/:id', authUser, async (req, res) => {
+router.patch('/api/dosen/laporan/validasi/:id', authUser, async (req, res) => {
   try {
     if (!checkDosenKalebRole(req)) {
       return res.status(403).json({

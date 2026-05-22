@@ -63,7 +63,7 @@ class Ruangan {
   static async getAllRuanganPengguna() {
     try {
       const [rows] = await connection.query(
-        `SELECT r.id_ruangan AS id, r.nama_ruangan, r.kode_ruangan, r.lokasi, r.id_user, u.email AS dosen_kaleb_email
+        `SELECT r.id_ruangan AS id, r.nama_ruangan, r.kode_ruangan, r.lokasi, u.email AS dosen_kaleb_email
          FROM ruangan r
          LEFT JOIN user u ON r.id_user = u.id_user
          ORDER BY r.id_ruangan DESC`
