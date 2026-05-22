@@ -177,8 +177,14 @@ class Inventaris {
           r.kode_ruangan,
           r.lokasi
         FROM inventaris i
-        LEFT JOIN ruangan r ON i.id_ruangan = r.id_ruangan
-        GROUP BY i.kode_barang, i.nama_barang, i.merk, i.tipe, i.kategori, r.id_ruangan, r.nama_ruangan, r.kode_ruangan, r.lokasi
+        LEFT JOIN (
+          SELECT id_inventaris, MAX(id_laporan) AS id_laporan
+          FROM laporan
+          WHERE id_inventaris IS NOT NULL
+          GROUP BY id_inventaris
+        ) latest_laporan ON i.id_inventaris = latest_laporan.id_inventaris
+        LEFT JOIN laporan l ON latest_laporan.id_laporan = l.id_laporan
+        LEFT JOIN ruangan r ON l.id_ruangan = r.id_ruangan
         ORDER BY i.nama_barang ASC
         LIMIT 200
       `)
@@ -197,7 +203,6 @@ class Inventaris {
           id_inventaris, kode_barang, nup, nama_barang, merk, tipe, kategori,
           NULL AS id_ruangan, NULL AS nama_ruangan, NULL AS kode_ruangan, NULL AS lokasi
         FROM inventaris
-        GROUP BY kode_barang, nama_barang, merk, tipe, kategori
         ORDER BY nama_barang ASC
         LIMIT 200
       `)
