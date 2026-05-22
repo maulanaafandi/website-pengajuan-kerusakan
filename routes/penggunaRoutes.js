@@ -676,4 +676,11 @@ router.patch('/api/pengguna/change-password', authUser, async (req, res) => {
   }
 });
 
+router.post('/api/logout/mobile', (req, res) => {
+  return res.status(200).json({
+    success: true,
+    message: 'Logout berhasil'
+  })
+})
+
 module.exports = router;
