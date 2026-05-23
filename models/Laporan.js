@@ -223,6 +223,24 @@ class Laporan {
     }
   }
 
+static async updatePrioritasByPemilikRuangan(idLaporan, idUser, prioritas) {
+    try {
+      const [result] = await connection.query(
+        `UPDATE laporan l
+         INNER JOIN ruangan r ON l.id_ruangan = r.id_ruangan
+         SET l.prioritas = ?
+         WHERE l.id_laporan = ?
+           AND r.id_user = ?`,
+        [prioritas, idLaporan, idUser]
+      )
+
+      return result.affectedRows
+    } catch (error) {
+      console.log('Error updatePrioritasByPemilikRuangan:', error)
+      throw error
+    }
+  }
+
   static async getLaporan(search = '', status = '', tanggal = '') {
     try {
       const params = []

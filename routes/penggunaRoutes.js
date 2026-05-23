@@ -134,6 +134,201 @@ router.get('/api/pengguna/inventaris', authUser, async (req, res) => {
   }
 });
 
+router.get('/api/kalep/laporan', authUser, async (req, res) => {
+  try {
+    if (!checkLaporanReaderRole(req)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Akses hanya untuk kaleb'
+      });
+    }
+
+    const laporan = isAdmin(req)
+      ? await Laporan.getAllRiwayatLaporanAdmin()
+      : await Laporan.getAllRiwayatLaporanAdminByPemilikRuangan(req.user.id_user);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Data laporan berhasil diambil',
+      data: laporan
+    });
+  } catch (error) {
+    console.log('Error getAllLaporanAdmin:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error'
+    });
+  }
+});
+
+router.get('/api/kalep/laporan/:id', authUser, async (req, res) => {
+  try {
+    if (!checkLaporanReaderRole(req)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Akses hanya untuk kaleb'
+      });
+    }
+
+    const laporan = isAdmin(req)
+      ? await Laporan.getLaporanById(req.params.id)
+      : await Laporan.getLaporanByIdForPemilikRuangan(req.params.id, req.user.id_user);
+
+    if (!laporan) {
+      return res.status(404).json({
+        success: false,
+        message: 'Detail laporan tidak ditemukan'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Detail laporan berhasil diambil',
+      data: laporan
+    });
+  } catch (error) {
+    console.log('Error detailLaporanAdmin:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error'
+    });
+  }
+});
+
+router.patch('/api/kalep/laporan/validasi/:id', authUser, async (req, res) => {
+  try {
+    if (!checkDosenKalebRole(req)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Akses hanya untuk kaleb'
+      });
+    }
+
+    const { status, keterangan_admin } = req.body;
+    const allowedStatus = ['diproses_internal', 'diproses_eksternal', 'pending', 'ditolak', 'selesai'];
+
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        message: 'Status wajib diisi'
+      });
+    }
+
+    if (!allowedStatus.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Status tidak valid'
+      });
+    }
+
+    const laporan = await Laporan.getLaporanByIdForPemilikRuangan(req.params.id, req.user.id_user);
+
+    if (!laporan) {
+      return res.status(404).json({
+        success: false,
+        message: 'Laporan tidak ditemukan atau bukan dari ruangan Anda'
+      });
+    }
+
+    if (laporan.status === 'selesai') {
+      return res.status(400).json({
+        success: false,
+        message: 'Laporan yang sudah selesai tidak bisa diubah lagi'
+      });
+    }
+
+    const affectedRows = await Laporan.updateStatusDanKeteranganByPemilikRuangan(
+      req.params.id,
+      req.user.id_user,
+      status,
+      keterangan_admin || null
+    );
+
+    if (!affectedRows) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validasi laporan gagal diperbarui'
+      });
+    }
+
+    const updatedLaporan = await Laporan.getLaporanById(req.params.id);
+
+    return res.status(200).json({
+      success: true,
+      message: 'Validasi laporan berhasil diperbarui',
+    });
+  } catch (error) {
+    console.log('Error validasiLaporanAdmin:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error'
+    });
+  }
+});
+
+router.patch('/api/kaleb/lapora/prioritas/:id', authUser, async (req, res) => {
+  try {
+    if (!checkDosenKalebRole(req)) {
+      return res.status(403).json({
+        success: false,
+        message: 'Akses hanya untuk kaleb'
+      });
+    }
+
+    const { prioritas } = req.body;
+    const allowedPrioritas = ['Penting dan Mendesak', 'Penting tapi Tidak Mendesak', 'Tidak Penting tapi Mendesak', 'Tidak Penting dan Tidak Mendesak'];
+
+    if (!prioritas) {
+      return res.status(400).json({
+        success: false,
+        message: 'prioritas wajib diisi'
+      });
+    }
+
+    if (!allowedPrioritas.includes(prioritas)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Prioritas tidak valid'
+      });
+    }
+
+    const laporan = await Laporan.getLaporanByIdForPemilikRuangan(req.params.id, req.user.id_user);
+
+    if (!laporan) {
+      return res.status(404).json({
+        success: false,
+        message: 'Laporan tidak ditemukan atau bukan dari ruangan Anda'
+      });
+    }
+
+    const affectedRows = await Laporan.updatePrioritasByPemilikRuangan(
+      req.params.id,
+      req.user.id_user,
+      prioritas
+    );
+    console.log(affectedRows)
+
+    if (!affectedRows) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validasi laporan gagal diperbarui'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Validasi laporan berhasil diperbarui',
+    });
+
+  } catch (error) {
+    console.log('Error validasiLaporanAdmin:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error'
+    });
+  }
+})
+
 router.get('/api/dosen/laporan', authUser, async (req, res) => {
   try {
     if (!checkLaporanReaderRole(req)) {
