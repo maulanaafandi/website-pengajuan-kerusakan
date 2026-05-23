@@ -255,6 +255,8 @@ router.get('/dashboard', authAdmin, async (req, res) => {
         totalRuangan,
         totalRekomendasi,
         totalLaporan,
+        totalDiprosesInternal,
+        totalDiprosesEksternal,
         totalLaporanSelesai,
         grafikLaporanBulanan
       ] = await Promise.all([
@@ -263,6 +265,8 @@ router.get('/dashboard', authAdmin, async (req, res) => {
         Dashboard.countRuangan(),
         Dashboard.countRekomendasi(),
         Dashboard.countLaporan(),
+        Dashboard.countDiprosesInternal(),
+        Dashboard.countDiprosesEksternal(),
         Dashboard.countLaporanSelesai(),
         Dashboard.getGrafikLaporanBulanan()
       ])
@@ -273,6 +277,8 @@ router.get('/dashboard', authAdmin, async (req, res) => {
         totalRuangan,
         totalRekomendasi,
         totalLaporan,
+        totalDiprosesInternal,
+        totalDiprosesEksternal,
         totalLaporanSelesai,
         grafikLaporanBulanan
       }
@@ -1116,4 +1122,3 @@ router.post('/logout', (req, res) => {
   })
 
 module.exports = router
-

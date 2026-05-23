@@ -48,7 +48,7 @@ class Laporan {
           data.id_ruangan,
           data.tanggal || null,
           data.keterangan,
-          data.status || 'diproses',
+          data.status || 'pending',
           data.bukti_foto || null,
           data.kondisi
         ]
@@ -367,7 +367,7 @@ class Laporan {
 
   static async updateStatusLaporan(idLaporan, status) {
     try {
-      const allowedStatus = ['diproses', 'ditolak', 'selesai']
+      const allowedStatus = ['diproses_internal', 'diproses_eksternal', 'ditolak', 'selesai']
 
       if (!allowedStatus.includes(status)) {
         throw new Error('Status laporan tidak valid')

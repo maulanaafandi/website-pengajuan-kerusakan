@@ -292,7 +292,7 @@ router.post('/api/pengguna/laporan', authUser, uploadLaporan, async (req, res) =
       id_ruangan,
       tanggal,
       keterangan,
-      status: 'diproses',
+      status: 'pending',
       bukti_foto,
       kondisi
     };

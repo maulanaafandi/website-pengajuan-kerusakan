@@ -67,7 +67,9 @@
             <form action="/admin/laporan/status/<%= laporan.id_laporan %>" method="POST" class="filter-row">
               <input type="hidden" name="_method" value="PATCH">
               <select name="status" class="control">
-                <option value="diproses" <%= laporan.status === 'diproses' ? 'selected' : '' %>>Diproses</option>
+                                <option value="diproses_internal" <%= laporan.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                <option value="diproses_internal" <%= laporan.status === 'diproses_internal' ? 'selected' : '' %>>Diproses Internal</option>
+                <option value="diproses_eksternal" <%= laporan.status === 'diproses_eksternal' ? 'selected' : '' %>>Diproses Eksternal</option>
                 <option value="ditolak" <%= laporan.status === 'ditolak' ? 'selected' : '' %>>Ditolak</option>
                 <option value="selesai" <%= laporan.status === 'selesai' ? 'selected' : '' %>>Selesai</option>
               </select>

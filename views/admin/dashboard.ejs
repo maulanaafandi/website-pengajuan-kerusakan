@@ -5,9 +5,11 @@
     <%- include('partials/topbar', { pageTitle: 'Dashboard Admin', pageSubtitle: 'Ringkasan data dan grafik laporan per bulan.' }) %>
     <section class="stats-grid">
       <article class="stat-card"><div class="stat-title">Total Akun User</div><div class="stat-number"><%= totalUser || 0 %></div><div class="stat-desc">Akun yang terdaftar</div></article>
-      <article class="stat-card red"><div class="stat-title">Total Inventaris</div><div class="stat-number"><%= totalInventaris || 0 %></div><div class="stat-desc">Data barang inventaris</div></article>
-      <article class="stat-card purple"><div class="stat-title">Total Laporan</div><div class="stat-number"><%= totalLaporan || 0 %></div><div class="stat-desc">Laporan dari user</div></article>
-      <article class="stat-card green"><div class="stat-title">Total Rekomendasi</div><div class="stat-number"><%= totalRekomendasi || 0 %></div><div class="stat-desc">Rekomendasi tersimpan</div></article>
+      <article class="stat-card"><div class="stat-title">Total Inventaris</div><div class="stat-number"><%= totalInventaris || 0 %></div><div class="stat-desc">Data barang inventaris</div></article>
+      <article class="stat-card"><div class="stat-title">Total Laporan</div><div class="stat-number"><%= totalLaporan || 0 %></div><div class="stat-desc">Laporan dari user</div></article>
+      <article class="stat-card"><div class="stat-title">Diproses Internal</div><div class="stat-number"><%= totalDiprosesInternal || 0 %></div><div class="stat-desc">Laporan diproses internal</div></article>
+      <article class="stat-card"><div class="stat-title">Diproses Eksternal</div><div class="stat-number"><%= totalDiprosesEksternal || 0 %></div><div class="stat-desc">Laporan diproses eksternal</div></article>
+      <article class="stat-card"><div class="stat-title">Total Rekomendasi</div><div class="stat-number"><%= totalRekomendasi || 0 %></div><div class="stat-desc">Rekomendasi tersimpan</div></article>
     </section>
 
     <section class="table-card" style="margin-top:24px;padding:24px">

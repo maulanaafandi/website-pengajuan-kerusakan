@@ -51,6 +51,36 @@ class Dashboard {
     }
   }
 
+static async countDiprosesInternal() {
+  try {
+    const [[row]] = await connection.query(`
+      SELECT COUNT(*) AS total
+      FROM laporan
+      WHERE status = 'diproses_internal'
+    `)
+
+    return row.total || 0
+  } catch (error) {
+    console.log('Error countDiprosesInternal:', error)
+    throw error
+  }
+}
+
+static async countDiprosesEksternal() {
+  try {
+    const [[row]] = await connection.query(`
+      SELECT COUNT(*) AS total
+      FROM laporan
+      WHERE status = 'diproses_eksternal'
+    `)
+
+    return row.total || 0
+  } catch (error) {
+    console.log('Error countDiprosesEksternal:', error)
+    throw error
+  }
+}
+
   static async countLaporanSelesai() {
     try {
       const [[row]] = await connection.query(`SELECT COUNT(*) AS total FROM laporan WHERE status = ?`, ['selesai'])
