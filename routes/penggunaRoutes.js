@@ -329,6 +329,95 @@ router.patch('/api/kaleb/lapora/prioritas/:id', authUser, async (req, res) => {
   }
 })
 
+
+router.get('/api/plp/laporan', authUser, async (req, res) => {
+  try {
+    const laporan = await Laporan.getAllRiwayatLaporanPlp();
+
+    return res.status(200).json({
+      success: true,
+      message: 'Data laporan berhasil diambil',
+      data: laporan
+    });
+  } catch (error) {
+    console.log('Error getAllLaporanPlp:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error'
+    });
+  }
+});
+
+router.get('/api/plp/laporan/:id', authUser, async (req, res) => {
+  try {
+    const laporan = await Laporan.getLaporanById(req.params.id);
+
+    if (!laporan) {
+      return res.status(404).json({
+        success: false,
+        message: 'Detail laporan tidak ditemukan'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Detail laporan berhasil diambil',
+      data: laporan
+    });
+  } catch (error) {
+    console.log('Error detailLaporanPlp:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error'
+    });
+  }
+});
+
+router.patch('/api/plp/laporan/validasi/:id', authUser, async (req, res) => {
+  try {
+    const { status, keterangan_admin } = req.body;
+    const allowedStatus = ['diproses_internal', 'diproses_eksternal', 'pending', 'ditolak', 'selesai'];
+
+    if (!status) {
+      return res.status(400).json({
+        success: false,
+        message: 'Status wajib diisi'
+      });
+    }
+
+    if (!allowedStatus.includes(status)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Status tidak valid'
+      });
+    }
+
+    const affectedRows = await Laporan.updateStatusDanKeteranganByPlp(
+      req.params.id,
+      status,
+      keterangan_admin || null
+    );
+
+    if (!affectedRows) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validasi laporan gagal diperbarui'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: 'Validasi laporan berhasil diperbarui',
+    });
+  } catch (error) {
+    console.log('Error validasiLaporanPlp:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'Internal Server Error'
+    });
+  }
+});
+
 router.get('/api/dosen/laporan', authUser, async (req, res) => {
   try {
     if (!checkLaporanReaderRole(req)) {

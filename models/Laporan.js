@@ -223,6 +223,90 @@ class Laporan {
     }
   }
 
+
+  static async getAllRiwayatLaporanPlp() {
+    try {
+      const [rows] = await connection.query(
+        `SELECT
+            l.id_laporan,
+            DATE_FORMAT(l.tanggal, '%Y-%m-%d') AS tanggal,
+            l.status,
+            i.nama_barang,
+            r.id_ruangan,
+            r.nama_ruangan,
+            r.kode_ruangan,
+            r.lokasi
+         FROM laporan l
+         LEFT JOIN inventaris i ON l.id_inventaris = i.id_inventaris
+         LEFT JOIN ruangan r ON l.id_ruangan = r.id_ruangan
+         ORDER BY l.id_laporan DESC`
+      )
+
+      return rows
+    } catch (error) {
+      console.log('Error getAllRiwayatLaporanPlp:', error)
+      throw error
+    }
+  }
+
+  static async updateStatusDanKeteranganByPlp(idLaporan, status, keteranganAdmin) {
+    try {
+      const [result] = await connection.query(
+        `UPDATE laporan
+         SET status = ?,
+             keterangan_admin = ?
+         WHERE id_laporan = ?
+           AND status != 'selesai'`,
+        [status, keteranganAdmin, idLaporan]
+      )
+
+      return result.affectedRows
+    } catch (error) {
+      console.log('Error updateStatusDanKeteranganByPlp:', error)
+      throw error
+    }
+  }
+
+  static async getLaporanByIdPlp(idLaporan) {
+    try {
+      const [rows] = await connection.query(
+        `SELECT
+            l.id_laporan,
+            l.id_user,
+            l.id_inventaris,
+            l.id_ruangan,
+            DATE_FORMAT(l.tanggal, '%Y-%m-%d') AS tanggal,
+            DATE_FORMAT(l.tanggal, '%H:%i') AS jam,
+            l.keterangan,
+            l.keterangan_admin,
+            l.status,
+            l.bukti_foto,
+            l.kondisi,
+            u.email,
+            u.role,
+            i.nama_barang,
+            i.kode_barang,
+            i.nup,
+            i.merk,
+            r.nama_ruangan,
+            r.kode_ruangan,
+            r.lokasi
+         FROM laporan l
+         LEFT JOIN user u ON l.id_user = u.id_user
+         LEFT JOIN inventaris i ON l.id_inventaris = i.id_inventaris
+         LEFT JOIN ruangan r ON l.id_ruangan = r.id_ruangan
+         WHERE l.id_laporan = ?
+         LIMIT 1`,
+        [idLaporan]
+      )
+
+      return rows[0] || null
+    } catch (error) {
+      console.log('Error getLaporanByIdPlp:', error)
+      throw error
+    }
+  }
+  
 static async updatePrioritasByPemilikRuangan(idLaporan, idUser, prioritas) {
     try {
       const [result] = await connection.query(
