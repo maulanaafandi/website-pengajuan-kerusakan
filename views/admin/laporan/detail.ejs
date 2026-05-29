@@ -32,7 +32,10 @@
           <%
             const kondisiRaw = String(laporan.kondisi || '-')
             const kondisiNumber = parseFloat(kondisiRaw.replace(',', '.'))
-            const kondisiDisplay = Number.isNaN(kondisiNumber) ? kondisiRaw : `${Math.round(kondisiNumber)}%`
+            const kondisiText = Number.isNaN(kondisiNumber)
+              ? kondisiRaw
+              : kondisiNumber.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1')
+            const kondisiDisplay = Number.isNaN(kondisiNumber) ? kondisiRaw : `${kondisiText}%`
           %>
           <div class="info-row"><span>Kondisi</span><strong><%= kondisiDisplay %></strong></div>
           <div class="info-row block"><span>Deskripsi Pelapor</span><p><%= laporan.deskripsi || laporan.keterangan || '-' %></p></div>

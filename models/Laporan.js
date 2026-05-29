@@ -53,6 +53,24 @@ class Laporan {
     `
   }
 
+  static normalizeKondisi(value) {
+    if (value === undefined || value === null || value === '') {
+      return null
+    }
+
+    const kondisi = Number(String(value).replace(',', '.'))
+
+    if (Number.isNaN(kondisi)) {
+      throw new Error('Kondisi harus berupa angka')
+    }
+
+    if (kondisi < 0 || kondisi > 100) {
+      throw new Error('Kondisi harus di antara 0 sampai 100')
+    }
+
+    return kondisi.toFixed(2)
+  }
+
   static async getUpdateStatusKaleb() {
     return Laporan.getLaporan()
   }
@@ -70,7 +88,7 @@ class Laporan {
           data.deskripsi || data.keterangan,
           data.status || 'pending',
           data.bukti_foto || null,
-          data.kondisi || null
+          Laporan.normalizeKondisi(data.kondisi)
         ]
       )
 
