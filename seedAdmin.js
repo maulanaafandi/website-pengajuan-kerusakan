@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs')
 async function seedAdmin() {
     try {
         const [rows] = await connection.query(
-            `SELECT id_user FROM user  WHERE email = ? AND role = ?`,
+            `SELECT id FROM users WHERE email = ? AND role = ?`,
             [
                 process.env.ADMIN_EMAIL,
                 'admin'
@@ -23,9 +23,9 @@ async function seedAdmin() {
             )
 
             await connection.query(
-                `INSERT INTO user (email, password, role, kaleb) VALUES (?, ?, ?, ?)`,
+                `INSERT INTO users (nama, email, kata_sandi, role, kaleb, status) VALUES (?, ?, ?, ?, ?, ?)`,
                 [
-                    process.env.ADMIN_EMAIL,hashedPassword,'admin','0'
+                    'Administrator',process.env.ADMIN_EMAIL,hashedPassword,'admin','0','aktif'
                 ]
             )
 
