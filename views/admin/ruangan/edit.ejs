@@ -7,17 +7,18 @@
       <input type="hidden" name="_method" value="PATCH">
       <div class="form-group"><label>Nama Ruangan</label><input type="text" name="nama_ruangan" value="<%= item.nama_ruangan || '' %>" required></div>
       <div class="form-group"><label>Kode Ruangan</label><input type="text" name="kode_ruangan" value="<%= item.kode_ruangan || '' %>" required></div>
-      <div class="form-group"><label>Lokasi</label><select name="lokasi" required><option value="pamolokan" <%= item.lokasi === 'pamolokan' ? 'selected' : '' %>>pamolokan</option><option value="batuan" <%= item.lokasi === 'batuan' ? 'selected' : '' %>>batuan</option></select></div>
+      <div class="form-group"><label>Lokasi</label><select name="id_lokasi"><option value="">Pilih lokasi</option><% lokasi.forEach(row => { %><option value="<%= row.id %>" <%= String(item.id_lokasi || '') === String(row.id) ? 'selected' : '' %>><%= row.nama %></option><% }) %></select></div>
+      <div class="form-group"><label>Lantai</label><select name="id_lantai"><option value="">Pilih lantai</option><% lantai.forEach(row => { %><option value="<%= row.id %>" <%= String(item.id_lantai || '') === String(row.id) ? 'selected' : '' %>><%= row.nama %></option><% }) %></select></div>
       <div class="form-group">
         <label>Dosen/Kaleb</label>
-        <select name="id_user">
+        <select name="id_kaleb">
           <option value="">Pilih dosen/kaleb</option>
           <% dosenKalebUsers.forEach(user => { %>
             <option 
               value="<%= user.id_user %>"
-              <%= String(item.id_user || '') === String(user.id_user) ? 'selected' : '' %>>
+              <%= String(item.id_kaleb || item.id_user || '') === String(user.id_user) ? 'selected' : '' %>>
               
-              <%= user.email %> - <%= user.role %>
+              <%= user.nama || user.email %> - <%= user.role %>
               <%= user.role !== 'dosen' && String(user.kaleb) === '1' ? ' (Kaleb)' : '' %>
 
             </option>

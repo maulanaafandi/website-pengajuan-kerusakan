@@ -34,7 +34,10 @@ router.get('/admin/laporan', authAdmin, async (req, res) => {
 router.get('/admin/laporan/detail/:id', authAdmin, async (req, res) => {
   try {
 
-    const laporan = await Laporan.getLaporanById(req.params.id)
+    const [laporan, auditLaporan] = await Promise.all([
+      Laporan.getLaporanById(req.params.id),
+      Laporan.getAuditLaporan(req.params.id)
+    ])
     if (!laporan) {
       req.flash('error', 'Laporan tidak ditemukan')
       return res.redirect('/admin/laporan')
@@ -42,6 +45,7 @@ router.get('/admin/laporan/detail/:id', authAdmin, async (req, res) => {
 
     return res.render('admin/laporan/detail', {
       laporan,
+      auditLaporan,
       formatDate
     })
 

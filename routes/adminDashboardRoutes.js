@@ -8,35 +8,47 @@ router.get('/dashboard', authAdmin, async (req, res) => {
   try {
 
     const [
-      totalUser,
+      totalMahasiswa,
+      totalDosen,
+      totalSatpam,
+      totalTendik,
+      totalPlp,
       totalInventaris,
       totalRuangan,
-      totalRekomendasi,
       totalLaporan,
       totalDiprosesInternal,
       totalDiprosesEksternal,
+      totalLaporanPending,
       totalLaporanSelesai,
       grafikLaporanBulanan
     ] = await Promise.all([
-      Dashboard.countUsers(),
+      Dashboard.countUsersByRole('mahasiswa'),
+      Dashboard.countUsersByRole('dosen'),
+      Dashboard.countUsersByRole('satpam'),
+      Dashboard.countUsersByRole('tendik'),
+      Dashboard.countUsersByRole('plp'),
       Dashboard.countInventaris(),
       Dashboard.countRuangan(),
-      Dashboard.countRekomendasi(),
       Dashboard.countLaporan(),
       Dashboard.countDiprosesInternal(),
       Dashboard.countDiprosesEksternal(),
+      Dashboard.countLaporanPending(),
       Dashboard.countLaporanSelesai(),
       Dashboard.getGrafikLaporanBulanan()
     ])
 
     const stats = {
-      totalUser,
+      totalMahasiswa,
+      totalDosen,
+      totalSatpam,
+      totalTendik,
+      totalPlp,
       totalInventaris,
       totalRuangan,
-      totalRekomendasi,
       totalLaporan,
       totalDiprosesInternal,
       totalDiprosesEksternal,
+      totalLaporanPending,
       totalLaporanSelesai,
       grafikLaporanBulanan
     }

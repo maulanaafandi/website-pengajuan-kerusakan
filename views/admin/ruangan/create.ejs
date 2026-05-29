@@ -6,13 +6,14 @@
     <form action="/admin/ruangan/create" method="POST" class="form-card">
       <div class="form-group"><label>Nama Ruangan</label><input type="text" name="nama_ruangan" value="<%= oldInput.nama_ruangan || '' %>" required></div>
       <div class="form-group"><label>Kode Ruangan</label><input type="text" name="kode_ruangan" value="<%= oldInput.kode_ruangan || '' %>" required></div>
-      <div class="form-group"><label>Lokasi</label><select name="lokasi" required><option value="pamolokan" <%= oldInput.lokasi === 'pamolokan' ? 'selected' : '' %>>pamolokan</option><option value="batuan" <%= oldInput.lokasi === 'batuan' ? 'selected' : '' %>>batuan</option></select></div>
+      <div class="form-group"><label>Lokasi</label><select name="id_lokasi"><option value="">Pilih lokasi</option><% lokasi.forEach(item => { %><option value="<%= item.id %>" <%= String(oldInput.id_lokasi || '') === String(item.id) ? 'selected' : '' %>><%= item.nama %></option><% }) %></select></div>
+      <div class="form-group"><label>Lantai</label><select name="id_lantai"><option value="">Pilih lantai</option><% lantai.forEach(item => { %><option value="<%= item.id %>" <%= String(oldInput.id_lantai || '') === String(item.id) ? 'selected' : '' %>><%= item.nama %></option><% }) %></select></div>
       <div class="form-group">
         <label>Dosen/Kaleb</label>
-        <select name="id_user">
+        <select name="id_kaleb">
           <option value="">Pilih dosen/kaleb</option>
           <% dosenKalebUsers.forEach(user => { %>
-            <option value="<%= user.id_user %>" <%= String(oldInput.id_user || '') === String(user.id_user) ? 'selected' : '' %>><%= user.id_user %> - <%= user.email %> - <%= user.role %><%= String(user.kaleb) === '1' ? ' - Kaleb' : '' %></option>
+            <option value="<%= user.id_user %>" <%= String(oldInput.id_kaleb || '') === String(user.id_user) ? 'selected' : '' %>><%= user.nama || user.email %> - <%= user.role %><%= String(user.kaleb) === '1' ? ' - Kaleb' : '' %></option>
           <% }) %>
         </select>
       </div>

@@ -19,9 +19,7 @@
 
         <div style="display:flex; gap:10px; flex-wrap:wrap;">
 
-          <a href="/admin/inventaris/export/pdf" class="btn-danger">PDF</a>
           <a href="/admin/inventaris/export/excel" class="btn-success">Excel</a>
-          <a href="/admin/inventaris/export/word" class="btn-secondary">Word</a>
           <a href="/admin/inventaris/create" class="btn-primary">+ Tambah Inventaris</a>
 
         </div>
@@ -38,16 +36,22 @@
         >
 
         <button class="btn-primary" type="submit">Cari</button>
-
-        <a class="btn-secondary" href="/admin/inventaris">Reset</a>
-
       </form>
+
+      <!-- <form
+        action="/admin/inventaris/import/excel"
+        method="POST"
+        enctype="multipart/form-data"
+        class="search-form"
+      >
+        <input type="file" name="file_excel" accept=".xlsx" required>
+        <button class="btn-success" type="submit">Import Excel</button>
+      </form> -->
 
       <table>
 
         <thead>
           <tr>
-            <th>ID</th>
             <th>Kode Barang</th>
             <th>NUP</th>
             <th>Nama Barang</th>
@@ -64,7 +68,7 @@
 
           <% if (!inventaris || inventaris.length === 0) { %>
             <tr>
-              <td colspan="10" class="empty-state">
+              <td colspan="9" class="empty-state">
                 Data inventaris kosong
               </td>
             </tr>
@@ -74,7 +78,6 @@
 
             <tr>
 
-              <td><%= item.id_inventaris || '-' %></td>
               <td><%= item.kode_barang || '-' %></td>
               <td><%= item.nup || '-' %></td>
               <td><%= item.nama_barang || '-' %></td>

@@ -5,10 +5,10 @@
     <%- include('../partials/topbar', { pageTitle: 'Kelola Ruangan', pageSubtitle: 'Tambah, edit, hapus, dan cari data ruangan.' }) %>
     <div class="table-card">
       <div class="table-top"><h2>Data Ruangan</h2><a href="/admin/ruangan/create" class="btn-primary">+ Tambah Ruangan</a></div>
-      <form method="GET" class="search-form"><input type="text" name="search" placeholder="Cari nama, kode, lokasi, atau dosen/kaleb..." value="<%= search || '' %>"><button class="btn-primary" type="submit">Cari</button><a class="btn-secondary" href="/admin/ruangan">Reset</a></form>
-      <table><thead><tr><th>ID</th><th>Nama Ruangan</th><th>Kode Ruangan</th><th>Lokasi</th><th>Dosen/Kaleb</th><th>Aksi</th></tr></thead><tbody>
-      <% if (ruangan.length === 0) { %><tr><td colspan="6" class="empty-state">Data ruangan kosong</td></tr><% } %>
-      <% ruangan.forEach(item => { %><tr><td><%= item.id_ruangan %></td><td><%= item.nama_ruangan %></td><td><%= item.kode_ruangan %></td><td><span class="badge badge-blue"><%= item.lokasi %></span></td><td>
+      <form method="GET" class="search-form"><input type="text" name="search" placeholder="Cari nama, kode, lokasi, lantai, atau kaleb..." value="<%= search || '' %>"><button class="btn-primary" type="submit">Cari</button><a class="btn-secondary" href="/admin/ruangan">Reset</a></form>
+      <table><thead><tr><th>ID</th><th>Nama Ruangan</th><th>Kode Ruangan</th><th>Lokasi</th><th>Lantai</th><th>Kaleb</th><th>Aksi</th></tr></thead><tbody>
+      <% if (ruangan.length === 0) { %><tr><td colspan="7" class="empty-state">Data ruangan kosong</td></tr><% } %>
+      <% ruangan.forEach(item => { %><tr><td><%= item.id_ruangan %></td><td><%= item.nama_ruangan %></td><td><%= item.kode_ruangan %></td><td><span class="badge badge-blue"><%= item.lokasi || '-' %></span></td><td><span class="badge badge-gray"><%= item.lantai || '-' %></span></td><td>
   <%= item.dosen_kaleb_email || '-' %>
   <% if (item.dosen_kaleb_email) { %>
     <small>

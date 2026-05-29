@@ -1,0 +1,18 @@
+<%- include('../partials/head', { title: (item ? 'Edit ' : 'Tambah ') + label }) %>
+<main class="admin-page" id="adminPage">
+  <%- include('../partials/sidebar', { active: type }) %>
+  <section class="main-content">
+    <%- include('../partials/topbar', { pageTitle: (item ? 'Edit ' : 'Tambah ') + label, pageSubtitle: 'Form master data ' + label.toLowerCase() + '.' }) %>
+    <form action="<%= item ? '/admin/master/' + type + '/edit/' + item.id : '/admin/master/' + type + '/create' %>" method="POST" class="form-card">
+      <% if (item) { %><input type="hidden" name="_method" value="PATCH"><% } %>
+      <div class="form-group">
+        <label>Nama <%= label %></label>
+        <input type="text" name="nama" value="<%= item ? item.nama : (oldInput.nama || '') %>" required>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn-primary"><%= item ? 'Update' : 'Simpan' %></button>
+        <a href="/admin/master/<%= type %>" class="btn-secondary">Kembali</a>
+      </div>
+    </form>
+  </section>
+<%- include('../partials/footer') %>

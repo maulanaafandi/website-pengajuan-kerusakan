@@ -2,20 +2,26 @@
 <main class="admin-page" id="adminPage">
   <%- include('partials/sidebar', { active: 'dashboard' }) %>
   <section class="main-content">
-    <%- include('partials/topbar', { pageTitle: 'Dashboard Admin', pageSubtitle: 'Ringkasan data dan grafik laporan per bulan.' }) %>
+    <%- include('partials/topbar', { pageTitle: 'Dashboard Admin', pageSubtitle: 'Ringkasan data dan grafik laporan selesai per bulan.' }) %>
     <section class="stats-grid">
-      <article class="stat-card"><div class="stat-title">Total Akun User</div><div class="stat-number"><%= totalUser || 0 %></div><div class="stat-desc">Akun yang terdaftar</div></article>
+      <article class="stat-card"><div class="stat-title">Total Mahasiswa</div><div class="stat-number"><%= totalMahasiswa || 0 %></div><div class="stat-desc">Akun mahasiswa</div></article>
+      <article class="stat-card"><div class="stat-title">Total Dosen</div><div class="stat-number"><%= totalDosen || 0 %></div><div class="stat-desc">Akun dosen</div></article>
+      <article class="stat-card"><div class="stat-title">Total Satpam</div><div class="stat-number"><%= totalSatpam || 0 %></div><div class="stat-desc">Akun satpam</div></article>
+      <article class="stat-card"><div class="stat-title">Total Tendik</div><div class="stat-number"><%= totalTendik || 0 %></div><div class="stat-desc">Akun tendik</div></article>
+      <article class="stat-card"><div class="stat-title">Total PLP</div><div class="stat-number"><%= totalPlp || 0 %></div><div class="stat-desc">Akun plp</div></article>
+      <article class="stat-card"><div class="stat-title">Total Ruangan</div><div class="stat-number"><%= totalRuangan || 0 %></div><div class="stat-desc">Data ruangan</div></article>
       <article class="stat-card"><div class="stat-title">Total Inventaris</div><div class="stat-number"><%= totalInventaris || 0 %></div><div class="stat-desc">Data barang inventaris</div></article>
       <article class="stat-card"><div class="stat-title">Total Laporan</div><div class="stat-number"><%= totalLaporan || 0 %></div><div class="stat-desc">Laporan dari user</div></article>
       <article class="stat-card"><div class="stat-title">Diproses Internal</div><div class="stat-number"><%= totalDiprosesInternal || 0 %></div><div class="stat-desc">Laporan diproses internal</div></article>
       <article class="stat-card"><div class="stat-title">Diproses Eksternal</div><div class="stat-number"><%= totalDiprosesEksternal || 0 %></div><div class="stat-desc">Laporan diproses eksternal</div></article>
-      <article class="stat-card"><div class="stat-title">Total Rekomendasi</div><div class="stat-number"><%= totalRekomendasi || 0 %></div><div class="stat-desc">Rekomendasi tersimpan</div></article>
+      <article class="stat-card"><div class="stat-title">Pending</div><div class="stat-number"><%= totalLaporanPending || 0 %></div><div class="stat-desc">Laporan menunggu</div></article>
+      <article class="stat-card"><div class="stat-title">Selesai</div><div class="stat-number"><%= totalLaporanSelesai || 0 %></div><div class="stat-desc">Laporan selesai</div></article>
     </section>
 
     <section class="table-card" style="margin-top:24px;padding:24px">
       <div class="table-top" style="margin:0 0 20px 0">
         <div>
-          <h2>Grafik Laporan per Bulan</h2>
+          <h2>Grafik Laporan Selesai per Bulan</h2>
         </div>
       </div>
 

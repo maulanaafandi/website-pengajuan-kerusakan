@@ -2,6 +2,10 @@ const connection = require('../config/db')
 const bcrypt = require('bcryptjs')
 
 class User {
+  static get selectFields() {
+    return `id AS id_user, nama, email, role, kaleb, status`
+  }
+
   static async getUsers(search = '') {
     try {
       return search ? await User.searchUsers(search) : await User.getAllUsers()
@@ -15,10 +19,11 @@ class User {
     try {
       const keyword = `%${search}%`
       const [rows] = await connection.query(
-        `SELECT id_user, email, role, kaleb FROM user
-         WHERE email LIKE ? OR role LIKE ? OR kaleb LIKE ?
-         ORDER BY id_user DESC`,
-        [keyword, keyword, keyword]
+        `SELECT ${User.selectFields}
+         FROM users
+         WHERE nama LIKE ? OR email LIKE ? OR role LIKE ? OR kaleb LIKE ? OR status LIKE ?
+         ORDER BY id DESC`,
+        [keyword, keyword, keyword, keyword, keyword]
       )
 
       return rows
@@ -30,7 +35,7 @@ class User {
 
   static async getAllUsers() {
     try {
-      const [rows] = await connection.query(`SELECT id_user, email, role, kaleb FROM user ORDER BY id_user DESC`)
+      const [rows] = await connection.query(`SELECT ${User.selectFields} FROM users ORDER BY id DESC`)
       return rows
     } catch (error) {
       console.log('Error getAllUsers:', error)
@@ -41,11 +46,11 @@ class User {
   static async getDosenKalebUsers() {
     try {
       const [rows] = await connection.query(
-        `SELECT id_user, email, role, kaleb
-         FROM user
-         WHERE role = ? OR kaleb = ?
-         ORDER BY email ASC`,
-        ['dosen', '1']
+        `SELECT ${User.selectFields}
+         FROM users
+         WHERE kaleb = ?
+         ORDER BY nama ASC, email ASC`,
+        ['1']
       )
       return rows
     } catch (error) {
@@ -56,7 +61,10 @@ class User {
 
   static async getUserById(idUser) {
     try {
-      const [rows] = await connection.query(`SELECT id_user, email, role, kaleb FROM user WHERE id_user = ?`, [idUser])
+      const [rows] = await connection.query(
+        `SELECT ${User.selectFields} FROM users WHERE id = ?`,
+        [idUser]
+      )
       return rows[0]
     } catch (error) {
       console.log('Error getUserById:', error)
@@ -67,9 +75,9 @@ class User {
   static async getProfile(idUser) {
     try {
       const [rows] = await connection.query(
-        `SELECT id_user, email, role, kaleb
-         FROM user
-         WHERE id_user = ?`,
+        `SELECT ${User.selectFields}
+         FROM users
+         WHERE id = ?`,
         [idUser]
       )
 
@@ -83,9 +91,9 @@ class User {
   static async findUserById(idUser) {
     try {
       const [rows] = await connection.query(
-        `SELECT id_user, email, password, role, kaleb
-         FROM user
-         WHERE id_user = ?`,
+        `SELECT id AS id_user, nama, email, kata_sandi AS password, role, kaleb, status
+         FROM users
+         WHERE id = ?`,
         [idUser]
       )
 
@@ -98,7 +106,7 @@ class User {
 
   static async findUserByEmail(email) {
     try {
-      const [rows] = await connection.query(`SELECT id_user FROM user WHERE email = ?`, [email])
+      const [rows] = await connection.query(`SELECT id AS id_user FROM users WHERE email = ?`, [email])
       return rows[0]
     } catch (error) {
       console.log('Error findUserByEmail:', error)
@@ -108,11 +116,16 @@ class User {
 
   static async createUser(data) {
     try {
-      const hashedPassword = await bcrypt.hash(data.password || 'user123', 10)
-      await connection.query(
-        `INSERT INTO user (email, password, role, kaleb) VALUES (?, ?, ?, ?)`,
-        [data.email, hashedPassword, data.role, data.kaleb || '0']
+      const hashedPassword = await bcrypt.hash(data.password || data.kata_sandi || 'user123', 10)
+      const nama = data.nama || String(data.email || '').split('@')[0] || 'User'
+
+      const [result] = await connection.query(
+        `INSERT INTO users (nama, email, kata_sandi, role, kaleb, status)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [nama, data.email, hashedPassword, data.role, data.kaleb || '0', data.status || 'proses']
       )
+
+      return result.insertId
     } catch (error) {
       console.log('Error createUser:', error)
       throw error
@@ -122,8 +135,17 @@ class User {
   static async updateUser(idUser, data) {
     try {
       await connection.query(
-        `UPDATE user SET email = ?, role = ?, kaleb = ? WHERE id_user = ?`,
-        [data.email, data.role, data.kaleb || '0', idUser]
+        `UPDATE users
+         SET nama = ?, email = ?, role = ?, kaleb = ?, status = ?
+         WHERE id = ?`,
+        [
+          data.nama,
+          data.email,
+          data.role,
+          data.kaleb || '0',
+          data.status || 'proses',
+          idUser
+        ]
       )
     } catch (error) {
       console.log('Error updateUser:', error)
@@ -131,9 +153,23 @@ class User {
     }
   }
 
+  static async updateStatus(idUser, status) {
+    try {
+      const allowedStatus = ['proses', 'aktif', 'nonaktif']
+      if (!allowedStatus.includes(status)) {
+        throw new Error('Status akun tidak valid')
+      }
+
+      await connection.query(`UPDATE users SET status = ? WHERE id = ? AND role != ?`, [status, idUser, 'admin'])
+    } catch (error) {
+      console.log('Error updateStatus:', error)
+      throw error
+    }
+  }
+
   static async deleteUser(idUser) {
     try {
-      await connection.query(`DELETE FROM user WHERE id_user = ? AND role != ?`, [idUser, 'admin'])
+      await connection.query(`DELETE FROM users WHERE id = ? AND role != ?`, [idUser, 'admin'])
     } catch (error) {
       console.log('Error deleteUser:', error)
       throw error
@@ -143,9 +179,9 @@ class User {
   static async updatePassword(idUser, hashedPassword) {
     try {
       await connection.query(
-        `UPDATE user
-         SET password = ?
-         WHERE id_user = ?`,
+        `UPDATE users
+         SET kata_sandi = ?
+         WHERE id = ?`,
         [hashedPassword, idUser]
       )
     } catch (error) {

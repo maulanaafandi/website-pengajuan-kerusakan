@@ -1,15 +1,17 @@
-<%- include('../partials/head', { title: 'Validasi Pengajuan' }) %>
+<%- include('../partials/head', { title: 'Laporan' }) %>
 <main class="admin-page" id="adminPage">
   <%- include('../partials/sidebar', { active: status === 'selesai' ? 'laporan-selesai' : 'laporan' }) %>
   <section class="main-content">
-    <%- include('../partials/topbar', { pageTitle: 'Validasi Pengajuan', pageSubtitle: 'Kelola dan validasi pengajuan barang' }) %>
+    <%- include('../partials/topbar', { pageTitle: 'Laporan', pageSubtitle: 'Pantau laporan kerusakan dan kehilangan inventaris.' }) %>
 
     <div class="table-card">
       <form method="GET" action="/admin/laporan" class="toolbar">
         <div class="filter-left">
           <select name="status" class="control">
             <option value="">Semua Status</option>
-            <option value="diproses" <%= status === 'diproses' ? 'selected' : '' %>>Diproses</option>
+            <option value="pending" <%= status === 'pending' ? 'selected' : '' %>>Pending</option>
+            <option value="diproses_internal" <%= status === 'diproses_internal' ? 'selected' : '' %>>Diproses Internal</option>
+            <option value="diproses_eksternal" <%= status === 'diproses_eksternal' ? 'selected' : '' %>>Diproses Eksternal</option>
             <option value="ditolak" <%= status === 'ditolak' ? 'selected' : '' %>>Ditolak</option>
             <option value="selesai" <%= status === 'selesai' ? 'selected' : '' %>>Selesai</option>
           </select>
@@ -49,7 +51,7 @@
             <% } %>
 
             <% laporan.forEach((item, index) => { %>
-              <% const statusValue = item.status || 'diproses'; %>
+              <% const statusValue = item.status || 'pending'; %>
               <% const statusClass = statusValue === 'selesai' ? 'badge-green' : statusValue === 'ditolak' ? 'badge-red' : 'badge-yellow'; %>
               <% const nomor = 'PGJ-' + ((item.tanggal || '').slice(0,4) || new Date().getFullYear()) + '-' + String(item.id_laporan).padStart(4, '0'); %>
               <tr>

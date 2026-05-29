@@ -1,0 +1,44 @@
+<%- include('../partials/head', { title: 'Master ' + label }) %>
+<main class="admin-page" id="adminPage">
+  <%- include('../partials/sidebar', { active: type }) %>
+  <section class="main-content">
+    <%- include('../partials/topbar', { pageTitle: 'Master ' + label, pageSubtitle: 'Kelola data ' + label.toLowerCase() + '.' }) %>
+    <div class="table-card">
+      <div class="table-top">
+        <h2>Data <%= label %></h2>
+        <a href="/admin/master/<%= type %>/create" class="btn-primary">+ Tambah <%= label %></a>
+      </div>
+      <form method="GET" class="search-form">
+        <input type="text" name="search" placeholder="Cari nama..." value="<%= search || '' %>">
+        <button class="btn-primary" type="submit">Cari</button>
+        <a class="btn-secondary" href="/admin/master/<%= type %>">Reset</a>
+      </form>
+      <table>
+        <thead>
+          <tr><th>ID</th><th>Nama</th><th>Aksi</th></tr>
+        </thead>
+        <tbody>
+          <% if (!rows || rows.length === 0) { %>
+            <tr><td colspan="3" class="empty-state">Data <%= label.toLowerCase() %> kosong</td></tr>
+          <% } %>
+          <% rows.forEach(item => { %>
+            <tr>
+              <td><%= item.id %></td>
+              <td><%= item.nama %></td>
+              <td>
+                <div class="actions">
+                  <a href="/admin/master/<%= type %>/edit/<%= item.id %>" class="btn-warning">Edit</a>
+                  <form class="inline" action="/admin/master/<%= type %>/delete/<%= item.id %>" method="POST" data-confirm-message="<%= label %> <%= item.nama || 'ini' %> akan dihapus permanen.">
+                    <input type="hidden" name="_method" value="DELETE">
+                    <button type="submit" class="btn-danger">Hapus</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+      <%- include('../partials/pagination', { pagination }) %>
+    </div>
+  </section>
+<%- include('../partials/footer') %>

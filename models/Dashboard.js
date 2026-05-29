@@ -1,9 +1,19 @@
 const connection = require('../config/db')
 
 class Dashboard {
+  static async countUsersByRole(role) {
+    try {
+      const [[row]] = await connection.query(`SELECT COUNT(*) AS total FROM users WHERE role = ?`, [role])
+      return row.total || 0
+    } catch (error) {
+      console.log('Error countUsersByRole:', error)
+      throw error
+    }
+  }
+
   static async countUsers() {
     try {
-      const [[row]] = await connection.query(`SELECT COUNT(*) AS total FROM user WHERE role != ?`, ['admin'])
+      const [[row]] = await connection.query(`SELECT COUNT(*) AS total FROM users WHERE role != ?`, ['admin'])
       return row.total || 0
     } catch (error) {
       console.log('Error countUsers:', error)
@@ -31,19 +41,11 @@ class Dashboard {
     }
   }
 
-  static async countRekomendasi() {
+  static async countLaporan(status = '') {
     try {
-      const [[row]] = await connection.query(`SELECT COUNT(*) AS total FROM rekomendasi_pengajuan_barang`)
-      return row.total || 0
-    } catch (error) {
-      console.log('Error countRekomendasi:', error)
-      throw error
-    }
-  }
-
-  static async countLaporan() {
-    try {
-      const [[row]] = await connection.query(`SELECT COUNT(*) AS total FROM laporan`)
+      const [[row]] = status
+        ? await connection.query(`SELECT COUNT(*) AS total FROM laporan WHERE status = ?`, [status])
+        : await connection.query(`SELECT COUNT(*) AS total FROM laporan`)
       return row.total || 0
     } catch (error) {
       console.log('Error countLaporan:', error)
@@ -51,60 +53,36 @@ class Dashboard {
     }
   }
 
-static async countDiprosesInternal() {
-  try {
-    const [[row]] = await connection.query(`
-      SELECT COUNT(*) AS total
-      FROM laporan
-      WHERE status = 'diproses_internal'
-    `)
-
-    return row.total || 0
-  } catch (error) {
-    console.log('Error countDiprosesInternal:', error)
-    throw error
+  static async countDiprosesInternal() {
+    return Dashboard.countLaporan('diproses_internal')
   }
-}
 
-static async countDiprosesEksternal() {
-  try {
-    const [[row]] = await connection.query(`
-      SELECT COUNT(*) AS total
-      FROM laporan
-      WHERE status = 'diproses_eksternal'
-    `)
-
-    return row.total || 0
-  } catch (error) {
-    console.log('Error countDiprosesEksternal:', error)
-    throw error
+  static async countDiprosesEksternal() {
+    return Dashboard.countLaporan('diproses_eksternal')
   }
-}
+
+  static async countLaporanPending() {
+    return Dashboard.countLaporan('pending')
+  }
 
   static async countLaporanSelesai() {
-    try {
-      const [[row]] = await connection.query(`SELECT COUNT(*) AS total FROM laporan WHERE status = ?`, ['selesai'])
-      return row.total || 0
-    } catch (error) {
-      console.log('Error countLaporanSelesai:', error)
-      throw error
-    }
+    return Dashboard.countLaporan('selesai')
   }
 
   static async getGrafikLaporanBulanan() {
     try {
       const [rows] = await connection.query(`
         SELECT
-          DATE_FORMAT(tanggal, '%Y-%m') AS bulan_key,
-          CASE MONTH(tanggal)
+          DATE_FORMAT(selesai_pada, '%Y-%m') AS bulan_key,
+          CASE MONTH(selesai_pada)
             WHEN 1 THEN 'Jan' WHEN 2 THEN 'Feb' WHEN 3 THEN 'Mar' WHEN 4 THEN 'Apr'
             WHEN 5 THEN 'Mei' WHEN 6 THEN 'Jun' WHEN 7 THEN 'Jul' WHEN 8 THEN 'Agu'
             WHEN 9 THEN 'Sep' WHEN 10 THEN 'Okt' WHEN 11 THEN 'Nov' WHEN 12 THEN 'Des'
           END AS bulan,
           COUNT(*) AS total
         FROM laporan
-        WHERE tanggal IS NOT NULL
-        GROUP BY DATE_FORMAT(tanggal, '%Y-%m'), MONTH(tanggal)
+        WHERE status = 'selesai' AND selesai_pada IS NOT NULL
+        GROUP BY DATE_FORMAT(selesai_pada, '%Y-%m'), MONTH(selesai_pada)
         ORDER BY bulan_key ASC
       `)
 

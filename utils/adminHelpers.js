@@ -1,3 +1,21 @@
+const multer = require('multer')
+
+const uploadExcel = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 2 * 1024 * 1024 }
+})
+
+function handleExcelUpload(req, res, next) {
+  uploadExcel.single('file_excel')(req, res, err => {
+    if (err) {
+      req.flash('error', err.code === 'LIMIT_FILE_SIZE' ? 'Ukuran file maksimal 2MB' : err.message)
+      return res.redirect('/admin/inventaris')
+    }
+
+    return next()
+  })
+}
+
 function formatDate(value) {
   if (!value) return ''
 
@@ -57,171 +75,100 @@ function paginateRows(rows = [], query = {}, perPage = 10) {
   }
 }
 
-function safeJsonParse(text) {
-  try {
-    return JSON.parse(text)
-  } catch (err) {
-    const match = String(text || '').match(/\[[\s\S]*\]/)
-    if (match) {
-      return JSON.parse(match[0])
+function normalizeHeader(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '_')
+}
+
+function normalizeText(value) {
+  return String(value || '').trim().toLowerCase()
+}
+
+function normalizeExcelDate(value) {
+  if (!value) return null
+  if (value instanceof Date) return formatDate(value) || null
+  return formatDate(String(value).trim()) || null
+}
+
+function getCellText(rowData, keys) {
+  for (const key of keys) {
+    if (rowData[key] !== undefined && rowData[key] !== null && String(rowData[key]).trim() !== '') {
+      return String(rowData[key]).trim()
     }
-    throw err
-  }
-}
-
-function normalizePromptKey(value) {
-  return String(value || '-').trim().toLowerCase()
-}
-
-function getLaporanTime(item) {
-  const tanggal = String(item.tanggal || '')
-  const match = tanggal.match(/^(\d{4})-(\d{2})-(\d{2})$/)
-  const time = match
-    ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3])).getTime()
-    : new Date(item.tanggal || 0).getTime()
-  return Number.isNaN(time) ? 0 : time
-}
-
-function pilihLaporanTerbaru(laporan = []) {
-  const latestByKey = new Map()
-
-  laporan.forEach(item => {
-    const key = [
-      item.id_ruangan || normalizePromptKey(item.nama_ruangan),
-      normalizePromptKey(item.nama_barang || item.kode_barang),
-      normalizePromptKey(item.kondisi)
-    ].join('|')
-
-    const current = latestByKey.get(key)
-    const itemTime = getLaporanTime(item)
-    const currentTime = current ? getLaporanTime(current) : 0
-    const itemId = Number(item.id_laporan || 0)
-    const currentId = current ? Number(current.id_laporan || 0) : 0
-
-    if (!current || itemTime > currentTime || (itemTime === currentTime && itemId > currentId)) {
-      latestByKey.set(key, item)
-    }
-  })
-
-  return Array.from(latestByKey.values()).sort((a, b) => {
-    const dateDiff = getLaporanTime(b) - getLaporanTime(a)
-    if (dateDiff !== 0) return dateDiff
-    return Number(b.id_laporan || 0) - Number(a.id_laporan || 0)
-  })
-}
-
-function cariTanggalLaporanTerbaru(rekomendasi, laporan = []) {
-  const idRuangan = rekomendasi.id_ruangan ? String(rekomendasi.id_ruangan) : ''
-  const barang = normalizePromptKey(rekomendasi.nama_barang || rekomendasi.barang_rekomendasi_diajukan)
-
-  const cocok = laporan.find(item => {
-    const sameRoom = idRuangan && String(item.id_ruangan || '') === idRuangan
-    const itemBarang = normalizePromptKey(item.nama_barang || item.kode_barang)
-    const sameBarang = barang && barang !== '-' && itemBarang !== '-' && (
-      barang.includes(itemBarang) || itemBarang.includes(barang)
-    )
-
-    return sameRoom && sameBarang
-  })
-
-  if (cocok) return cocok.tanggal || null
-
-  const sameRoom = laporan.find(item => idRuangan && String(item.id_ruangan || '') === idRuangan)
-  return sameRoom ? sameRoom.tanggal || null : (laporan[0] ? laporan[0].tanggal || null : null)
-}
-
-function buatPromptRekomendasiAI(data) {
-  const laporanTerbaru = pilihLaporanTerbaru(data.laporan || [])
-
-  const laporanText = laporanTerbaru.map((item, index) => {
-    return `${index + 1}. Tanggal: ${item.tanggal || '-'} | Ruangan: ${item.nama_ruangan || '-'} (${item.lokasi || '-'}) | Barang laporan: ${item.nama_barang || '-'} | Kondisi: ${item.kondisi || '-'} | Status: ${item.status || '-'} | Keterangan user: ${item.keterangan || '-'}`
-  }).join('\n')
-
-  const inventarisText = (data.inventaris || []).map((item, index) => {
-    return `${index + 1}. ${item.nama_barang || '-'} | Merk/Tipe: ${item.merk || item.tipe || '-'} | Kategori: ${item.kategori || '-'} | Ruangan: ${item.nama_ruangan || '-'} | Lokasi: ${item.lokasi || '-'}`
-  }).join('\n')
-
-  const ruanganText = (data.ruangan || []).map((item, index) => {
-    return `${index + 1}. id_ruangan=${item.id_ruangan}, ${item.nama_ruangan || '-'}, ${item.kode_ruangan || '-'}, lokasi ${item.lokasi || '-'}`
-  }).join('\n')
-
-  return `
-Anda adalah asisten admin sistem pengajuan barang inventaris kampus.
-Tugas Anda hanya membuat rekomendasi pengajuan barang berdasarkan laporan user terbaru dan data inventaris.
-Jangan membuat penjelasan panjang. Kembalikan JSON array valid saja.
-
-DAFTAR RUANGAN:
-${ruanganText || '-'}
-
-DATA LAPORAN USER:
-${laporanText || '-'}
-
-DATA INVENTARIS:
-${inventarisText || '-'}
-`
-}
-
-async function generateRekomendasiDenganOpenAI(data) {
-  const apiKey = process.env.OPENAI_API_KEY
-  const model = process.env.OPENAI_MODEL || 'gpt-4o-mini'
-  const laporanTerbaru = pilihLaporanTerbaru(data.laporan || [])
-
-  if (!apiKey) {
-    throw new Error('OPENAI_API_KEY belum diisi di file .env')
   }
 
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`
-    },
-    body: JSON.stringify({
-      model,
-      temperature: 0.2,
-      messages: [
-        { role: 'system', content: 'Jawab hanya dengan JSON array valid tanpa markdown.' },
-        { role: 'user', content: buatPromptRekomendasiAI(data) }
-      ]
+  return ''
+}
+
+function getRoomId(rowData, ruanganList) {
+  const idRuangan = getCellText(rowData, ['id_ruangan', 'id_ruang', 'id'])
+  if (idRuangan) return idRuangan
+
+  const kodeRuangan = normalizeText(getCellText(rowData, ['kode_ruangan', 'kode_ruang']))
+  const namaRuangan = normalizeText(getCellText(rowData, ['nama_ruangan', 'ruangan']))
+
+  const room = ruanganList.find(item => {
+    return (kodeRuangan && normalizeText(item.kode_ruangan) === kodeRuangan) ||
+      (namaRuangan && normalizeText(item.nama_ruangan) === namaRuangan)
+  })
+
+  return room ? room.id_ruangan : null
+}
+
+function buildImportRows(worksheet, ruanganList) {
+  const headers = []
+  const rows = []
+  const errors = []
+
+  worksheet.getRow(1).eachCell((cell, colNumber) => {
+    headers[colNumber] = normalizeHeader(cell.value)
+  })
+
+  worksheet.eachRow((row, rowNumber) => {
+    if (rowNumber === 1) return
+
+    const rowData = {}
+    row.eachCell((cell, colNumber) => {
+      const header = headers[colNumber]
+      if (header) rowData[header] = cell.value
+    })
+
+    const kodeBarang = getCellText(rowData, ['kode_barang', 'kode'])
+    const namaBarang = getCellText(rowData, ['nama_barang', 'barang'])
+
+    if (!kodeBarang && !namaBarang) return
+
+    if (!kodeBarang || !namaBarang) {
+      errors.push(`Baris ${rowNumber}: Kode Barang dan Nama Barang wajib diisi`)
+      return
+    }
+
+    rows.push({
+      id_ruangan: getRoomId(rowData, ruanganList),
+      kode_barang: kodeBarang,
+      nup: getCellText(rowData, ['nup', 'NUP']),
+      nama_barang: namaBarang,
+      merk: getCellText(rowData, ['merk', 'merek']),
+      tipe: getCellText(rowData, ['tipe', 'type']),
+      kategori: getCellText(rowData, ['kategori']) || 'Alat',
+      tanggal_buku_pertama: normalizeExcelDate(rowData.tanggal_buku_pertama || rowData.tgl_buku || rowData.tanggal_buku),
+      tanggal_perolehan: normalizeExcelDate(rowData.tanggal_perolehan || rowData.tgl_perolehan)
     })
   })
 
-  const result = await response.json()
-
-  if (!response.ok) {
-    const message = result && result.error && result.error.message ? result.error.message : 'Gagal memanggil OpenAI'
-    throw new Error(message)
-  }
-
-  const content = result.choices && result.choices[0] && result.choices[0].message
-    ? result.choices[0].message.content
-    : '[]'
-
-  const parsed = safeJsonParse(content)
-
-  if (!Array.isArray(parsed)) {
-    throw new Error('Format hasil AI tidak sesuai. AI harus mengembalikan JSON array.')
-  }
-
-  return parsed.map(item => ({
-    id_ruangan: item.id_ruangan || null,
-    nama_ruangan: item.nama_ruangan || '-',
-    lokasi: item.lokasi || '-',
-    tanggal: item.tanggal || cariTanggalLaporanTerbaru(item, laporanTerbaru),
-    barang_rekomendasi_diajukan: item.barang_rekomendasi_diajukan || item.nama_barang || '-',
-    nama_barang: item.nama_barang || item.barang_rekomendasi_diajukan || '-',
-    alasan: item.alasan || '-'
-  }))
+  return { rows, errors }
 }
 
 module.exports = {
+  buildImportRows,
   formatDate,
-  paginateRows,
-  safeJsonParse,
-  normalizePromptKey,
-  getLaporanTime,
-  pilihLaporanTerbaru,
-  cariTanggalLaporanTerbaru,
-  buatPromptRekomendasiAI,
-  generateRekomendasiDenganOpenAI
+  getCellText,
+  getRoomId,
+  handleExcelUpload,
+  normalizeExcelDate,
+  normalizeHeader,
+  normalizeText,
+  paginateRows
 }

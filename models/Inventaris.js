@@ -1,9 +1,32 @@
 const connection = require('../config/db')
 
 class Inventaris {
+  static selectFields() {
+    return `
+      i.id AS id_inventaris,
+      i.id AS id,
+      i.id_ruangan,
+      i.kode_barang,
+      i.NUP AS nup,
+      i.NUP,
+      i.nama_barang,
+      i.merk,
+      i.tipe,
+      i.kategori,
+      i.tanggal_buku_pertama,
+      i.tanggal_perolehan,
+      r.nama AS nama_ruangan,
+      r.kode_ruangan,
+      lok.nama AS lokasi,
+      lan.nama AS lantai
+    `
+  }
+
   static async getInventaris(search = '') {
     try {
-      return search ? await Inventaris.searchInventaris(search) : await Inventaris.getAllInventaris()
+      return search
+        ? await Inventaris.searchInventaris(search)
+        : await Inventaris.getAllInventaris()
     } catch (error) {
       console.log('Error getInventaris:', error)
       throw error
@@ -13,11 +36,33 @@ class Inventaris {
   static async searchInventaris(search) {
     try {
       const keyword = `%${search}%`
+
       const [rows] = await connection.query(
-        `SELECT * FROM inventaris
-         WHERE kode_barang LIKE ? OR nup LIKE ? OR nama_barang LIKE ? OR merk LIKE ? OR tipe LIKE ? OR kategori LIKE ?
-         ORDER BY id_inventaris DESC`,
-        [keyword, keyword, keyword, keyword, keyword, keyword]
+        `SELECT ${Inventaris.selectFields()}
+         FROM inventaris i
+         LEFT JOIN ruangan r ON i.id_ruangan = r.id
+         LEFT JOIN lokasi lok ON r.id_lokasi = lok.id
+         LEFT JOIN lantai lan ON r.id_lantai = lan.id
+         WHERE 
+           i.kode_barang LIKE ? OR
+           i.NUP LIKE ? OR
+           i.nama_barang LIKE ? OR
+           i.merk LIKE ? OR
+           i.tipe LIKE ? OR
+           i.kategori LIKE ? OR
+           r.nama LIKE ? OR
+           lok.nama LIKE ?
+         ORDER BY i.id DESC`,
+        [
+          keyword,
+          keyword,
+          keyword,
+          keyword,
+          keyword,
+          keyword,
+          keyword,
+          keyword
+        ]
       )
 
       return rows
@@ -29,7 +74,15 @@ class Inventaris {
 
   static async getAllInventaris() {
     try {
-      const [rows] = await connection.query(`SELECT * FROM inventaris ORDER BY id_inventaris DESC`)
+      const [rows] = await connection.query(
+        `SELECT ${Inventaris.selectFields()}
+         FROM inventaris i
+         LEFT JOIN ruangan r ON i.id_ruangan = r.id
+         LEFT JOIN lokasi lok ON r.id_lokasi = lok.id
+         LEFT JOIN lantai lan ON r.id_lantai = lan.id
+         ORDER BY i.id DESC`
+      )
+
       return rows
     } catch (error) {
       console.log('Error getAllInventaris:', error)
@@ -40,9 +93,15 @@ class Inventaris {
   static async getInventarisPengguna() {
     try {
       const [rows] = await connection.query(
-        `SELECT id_inventaris, kode_barang, nup, nama_barang, merk, kategori
+        `SELECT 
+          id AS id_inventaris,
+          kode_barang,
+          NUP AS nup,
+          nama_barang,
+          merk,
+          kategori
          FROM inventaris
-         ORDER BY id_inventaris DESC`
+         ORDER BY id DESC`
       )
 
       return rows
@@ -55,9 +114,13 @@ class Inventaris {
   static async getAllInventarisPengguna() {
     try {
       const [rows] = await connection.query(
-        `SELECT id_inventaris AS id, nama_barang, merk, tipe
+        `SELECT 
+          id,
+          nama_barang,
+          merk,
+          tipe
          FROM inventaris
-         ORDER BY id_inventaris DESC`
+         ORDER BY id DESC`
       )
 
       return rows
@@ -69,7 +132,16 @@ class Inventaris {
 
   static async getInventarisById(idInventaris) {
     try {
-      const [rows] = await connection.query(`SELECT * FROM inventaris WHERE id_inventaris = ?`, [idInventaris])
+      const [rows] = await connection.query(
+        `SELECT ${Inventaris.selectFields()}
+         FROM inventaris i
+         LEFT JOIN ruangan r ON i.id_ruangan = r.id
+         LEFT JOIN lokasi lok ON r.id_lokasi = lok.id
+         LEFT JOIN lantai lan ON r.id_lantai = lan.id
+         WHERE i.id = ?`,
+        [idInventaris]
+      )
+
       return rows[0]
     } catch (error) {
       console.log('Error getInventarisById:', error)
@@ -80,7 +152,12 @@ class Inventaris {
   static async getInventarisByNamaBarang(namaBarang) {
     try {
       const [rows] = await connection.query(
-        `SELECT * FROM inventaris WHERE LOWER(nama_barang) = LOWER(?) LIMIT 1`,
+        `SELECT 
+          id AS id_inventaris,
+          nama_barang
+         FROM inventaris
+         WHERE LOWER(nama_barang) = LOWER(?)
+         LIMIT 1`,
         [namaBarang]
       )
 
@@ -95,15 +172,26 @@ class Inventaris {
     try {
       await connection.query(
         `INSERT INTO inventaris
-         (kode_barang, nup, nama_barang, merk, tipe, kategori, tanggal_buku_pertama, tanggal_perolehan)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+        (
+          id_ruangan,
+          kode_barang,
+          NUP,
+          nama_barang,
+          merk,
+          tipe,
+          kategori,
+          tanggal_buku_pertama,
+          tanggal_perolehan
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
+          data.id_ruangan || null,
           data.kode_barang,
-          data.nup || null,
+          data.nup || data.NUP || null,
           data.nama_barang,
           data.merk || null,
           data.tipe || null,
-          data.kategori,
+          data.kategori || 'Alat',
           data.tanggal_buku_pertama || null,
           data.tanggal_perolehan || null
         ]
@@ -114,11 +202,64 @@ class Inventaris {
     }
   }
 
+  static async createManyInventaris(rows = []) {
+    const conn = await connection.getConnection()
+
+    try {
+      await conn.beginTransaction()
+
+      for (const data of rows) {
+        await conn.query(
+          `INSERT INTO inventaris
+          (
+            id_ruangan,
+            kode_barang,
+            NUP,
+            nama_barang,
+            merk,
+            tipe,
+            kategori,
+            tanggal_buku_pertama,
+            tanggal_perolehan
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          [
+            data.id_ruangan || null,
+            data.kode_barang,
+            data.nup || data.NUP || null,
+            data.nama_barang,
+            data.merk || null,
+            data.tipe || null,
+            data.kategori || 'Alat',
+            data.tanggal_buku_pertama || null,
+            data.tanggal_perolehan || null
+          ]
+        )
+      }
+
+      await conn.commit()
+    } catch (error) {
+      await conn.rollback()
+      console.log('Error createManyInventaris:', error)
+      throw error
+    } finally {
+      conn.release()
+    }
+  }
+
   static async createInventarisNamaBarang(namaBarang) {
     try {
+      const kodeBarang = `BRG-${Date.now()}`
+
       const [result] = await connection.query(
-        `INSERT INTO inventaris (nama_barang) VALUES (?)`,
-        [namaBarang]
+        `INSERT INTO inventaris
+        (
+          kode_barang,
+          nama_barang,
+          kategori
+        )
+        VALUES (?, ?, ?)`,
+        [kodeBarang, namaBarang, 'Alat']
       )
 
       return result.insertId
@@ -130,22 +271,33 @@ class Inventaris {
 
   static async updateInventaris(idInventaris, data) {
     try {
-      await connection.query(
+      const [result] = await connection.query(
         `UPDATE inventaris SET
-         kode_barang = ?, nup = ?, nama_barang = ?, merk = ?, tipe = ?, kategori = ?, tanggal_buku_pertama = ?, tanggal_perolehan = ?
-         WHERE id_inventaris = ?`,
+          id_ruangan = ?,
+          kode_barang = ?,
+          NUP = ?,
+          nama_barang = ?,
+          merk = ?,
+          tipe = ?,
+          kategori = ?,
+          tanggal_buku_pertama = ?,
+          tanggal_perolehan = ?
+         WHERE id = ?`,
         [
+          data.id_ruangan || null,
           data.kode_barang,
-          data.nup || null,
+          data.nup || data.NUP || null,
           data.nama_barang,
           data.merk || null,
           data.tipe || null,
-          data.kategori,
+          data.kategori || 'Alat',
           data.tanggal_buku_pertama || null,
           data.tanggal_perolehan || null,
           idInventaris
         ]
       )
+
+      return result
     } catch (error) {
       console.log('Error updateInventaris:', error)
       throw error
@@ -154,62 +306,12 @@ class Inventaris {
 
   static async deleteInventaris(idInventaris) {
     try {
-      await connection.query(`DELETE FROM inventaris WHERE id_inventaris = ?`, [idInventaris])
+      await connection.query(
+        `DELETE FROM inventaris WHERE id = ?`,
+        [idInventaris]
+      )
     } catch (error) {
       console.log('Error deleteInventaris:', error)
-      throw error
-    }
-  }
-
-  static async getInventarisUntukAI() {
-    try {
-      const [rows] = await connection.query(`
-        SELECT
-          i.id_inventaris,
-          i.kode_barang,
-          i.nup,
-          i.nama_barang,
-          i.merk,
-          i.tipe,
-          i.kategori,
-          r.id_ruangan,
-          r.nama_ruangan,
-          r.kode_ruangan,
-          r.lokasi
-        FROM inventaris i
-        LEFT JOIN (
-          SELECT id_inventaris, MAX(id_laporan) AS id_laporan
-          FROM laporan
-          WHERE id_inventaris IS NOT NULL
-          GROUP BY id_inventaris
-        ) latest_laporan ON i.id_inventaris = latest_laporan.id_inventaris
-        LEFT JOIN laporan l ON latest_laporan.id_laporan = l.id_laporan
-        LEFT JOIN ruangan r ON l.id_ruangan = r.id_ruangan
-        ORDER BY i.nama_barang ASC
-        LIMIT 200
-      `)
-
-      return rows
-    } catch (error) {
-      console.log('Error getInventarisUntukAI:', error)
-      throw error
-    }
-  }
-
-  static async getInventarisUntukAIFallback() {
-    try {
-      const [rows] = await connection.query(`
-        SELECT
-          id_inventaris, kode_barang, nup, nama_barang, merk, tipe, kategori,
-          NULL AS id_ruangan, NULL AS nama_ruangan, NULL AS kode_ruangan, NULL AS lokasi
-        FROM inventaris
-        ORDER BY nama_barang ASC
-        LIMIT 200
-      `)
-
-      return rows
-    } catch (error) {
-      console.log('Error getInventarisUntukAIFallback:', error)
       throw error
     }
   }

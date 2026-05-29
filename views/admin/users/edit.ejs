@@ -5,9 +5,11 @@
     <%- include('../partials/topbar', { pageTitle: 'Edit User', pageSubtitle: 'Ubah data akun pengguna.' }) %>
     <form action="/admin/users/edit/<%= user.id_user %>" method="POST" class="form-card">
       <input type="hidden" name="_method" value="PATCH">
+      <div class="form-group"><label>Nama</label><input type="text" name="nama" value="<%= user.nama || '' %>" required></div>
       <div class="form-group"><label>Email</label><input type="email" name="email" value="<%= user.email %>" required></div>
       <div class="form-group"><label>Role</label><select name="role" required><% ['mahasiswa','dosen','satpam','tendik','plp','admin'].forEach(role => { %><option value="<%= role %>" <%= user.role === role ? 'selected' : '' %>><%= role %></option><% }) %></select></div>
-      <div class="form-group"><label>Kaleb</label><select name="kaleb"><option value="0" <%= user.kaleb === '0' ? 'selected' : '' %>>0</option><option value="1" <%= user.kaleb === '1' ? 'selected' : '' %>>1</option></select></div>
+      <div class="form-group"><label>Kaleb</label><select name="kaleb"><option value="0" <%= String(user.kaleb) === '0' ? 'selected' : '' %>>0</option><option value="1" <%= String(user.kaleb) === '1' ? 'selected' : '' %>>1</option></select></div>
+      <div class="form-group"><label>Status</label><select name="status"><option value="proses" <%= user.status === 'proses' ? 'selected' : '' %>>proses</option><option value="aktif" <%= user.status === 'aktif' ? 'selected' : '' %>>aktif</option><option value="nonaktif" <%= user.status === 'nonaktif' ? 'selected' : '' %>>nonaktif</option></select></div>
       <div class="form-actions"><button type="submit" class="btn-primary">Update</button><a href="/admin/users" class="btn-secondary">Kembali</a></div>
     </form>
   </section>

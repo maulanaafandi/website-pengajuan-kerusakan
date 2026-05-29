@@ -14,6 +14,16 @@
     <form action="/admin/inventaris/create" method="POST" class="form-card">
 
       <div class="form-group">
+        <label>Ruangan</label>
+        <select name="id_ruangan">
+          <option value="">Pilih ruangan</option>
+          <% ruangan.forEach(item => { %>
+            <option value="<%= item.id_ruangan %>" <%= String(oldInput?.id_ruangan || '') === String(item.id_ruangan) ? 'selected' : '' %>><%= item.nama_ruangan %> - <%= item.kode_ruangan %> - <%= item.lokasi || '-' %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div class="form-group">
         <label>Kode Barang</label>
         <input type="text" name="kode_barang" value="<%= oldInput?.kode_barang || '' %>" required>
       </div>
@@ -41,8 +51,8 @@
       <div class="form-group">
         <label>Kategori</label>
         <select name="kategori" required>
-          <option value="alat" <%= oldInput?.kategori === 'alat' ? 'selected' : '' %>>alat</option>
-          <option value="habis_pakai" <%= oldInput?.kategori === 'habis_pakai' ? 'selected' : '' %>>habis_pakai</option>
+          <option value="Alat" <%= oldInput?.kategori === 'Alat' ? 'selected' : '' %>>Alat</option>
+          <option value="Habis Pakai" <%= oldInput?.kategori === 'Habis Pakai' ? 'selected' : '' %>>Habis Pakai</option>
         </select>
       </div>
 

@@ -4,7 +4,17 @@ class Auth {
   static async findUserByEmail(email) {
     try {
       const [rows] = await connection.query(
-        `SELECT * FROM user WHERE email = ? LIMIT 1`,
+        `SELECT
+            id AS id_user,
+            nama,
+            email,
+            kata_sandi AS password,
+            role,
+            kaleb,
+            status
+         FROM users
+         WHERE email = ?
+         LIMIT 1`,
         [email]
       )
 

@@ -16,7 +16,15 @@
       method="POST"
       class="form-card"
     >
-      <input type="hidden" name="_method" value="PATCH">
+      <div class="form-group">
+        <label>Ruangan</label>
+        <select name="id_ruangan">
+          <option value="">Pilih ruangan</option>
+          <% ruangan.forEach(row => { %>
+            <option value="<%= row.id_ruangan %>" <%= String(item.id_ruangan || '') === String(row.id_ruangan) ? 'selected' : '' %>><%= row.nama_ruangan %> - <%= row.kode_ruangan %> - <%= row.lokasi || '-' %></option>
+          <% }) %>
+        </select>
+      </div>
 
       <div class="form-group">
         <label>Kode Barang</label>
@@ -46,8 +54,8 @@
       <div class="form-group">
         <label>Kategori</label>
         <select name="kategori" required>
-          <option value="alat" <%= item.kategori === 'alat' ? 'selected' : '' %>>alat</option>
-          <option value="habis_pakai" <%= item.kategori === 'habis_pakai' ? 'selected' : '' %>>habis_pakai</option>
+          <option value="Alat" <%= item.kategori === 'Alat' ? 'selected' : '' %>>Alat</option>
+          <option value="Habis Pakai" <%= item.kategori === 'Habis Pakai' ? 'selected' : '' %>>Habis Pakai</option>
         </select>
       </div>
 
@@ -56,7 +64,7 @@
         <input
           type="date"
           name="tanggal_buku_pertama"
-          value="<%= item.tanggal_buku_pertama ? item.tanggal_buku_pertama.toISOString().split('T')[0] : '' %>"
+          value="<%= formatDate(item.tanggal_buku_pertama) || '' %>"
         >
       </div>
 
@@ -65,7 +73,7 @@
         <input
           type="date"
           name="tanggal_perolehan"
-          value="<%= item.tanggal_perolehan ? item.tanggal_perolehan.toISOString().split('T')[0] : '' %>"
+          value="<%= formatDate(item.tanggal_perolehan) || '' %>"
         >
       </div>
 
