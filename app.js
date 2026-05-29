@@ -11,11 +11,16 @@ const session = require('express-session');
 const flash = require('connect-flash');
 
 require('dotenv').config({ quiet: true });
-require('./config/db');
 
 const authRoutes = require('./routes/authRoutes');
-const adminRoutes = require('./routes/adminRoutes');
-const penggunaRoutes = require('./routes/penggunaRoutes');
+// const adminRoutes = require('./routes/adminRoutes');
+const adminDashboardRoutes = require('./routes/adminDashboardRoutes');
+const adminUserRoutes = require('./routes/adminUserRoutes');
+const adminInventarisRoutes = require('./routes/adminInventarisRoutes');
+const adminRuanganRoutes = require('./routes/adminRuanganRoutes');
+const adminLaporanRoutes = require('./routes/adminLaporanRoutes');
+const adminRekomendasiRoutes = require('./routes/adminRekomendasiRoutes');
+// const penggunaRoutes = require('./routes/penggunaRoutes');
 
 var app = express();
 
@@ -55,8 +60,14 @@ app.use((req, res, next) => {
 });
 
 app.use(authRoutes);
-app.use(adminRoutes);
-app.use(penggunaRoutes);
+// app.use(adminRoutes);
+app.use(adminDashboardRoutes);
+app.use(adminUserRoutes);
+app.use(adminInventarisRoutes);
+app.use(adminRuanganRoutes);
+app.use(adminLaporanRoutes);
+app.use(adminRekomendasiRoutes);
+// app.use(penggunaRoutes);
 
 app.use(function(req, res, next) {
   next(createError(404));
