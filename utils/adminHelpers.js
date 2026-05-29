@@ -1,4 +1,18 @@
 const multer = require('multer')
+const connection = require('../config/db')
+
+const masterDataConfig = {
+  lantai: {
+    type: 'lantai',
+    label: 'Lantai',
+    table: 'lantai'
+  },
+  lokasi: {
+    type: 'lokasi',
+    label: 'Lokasi',
+    table: 'lokasi'
+  }
+}
 
 const uploadExcel = multer({
   storage: multer.memoryStorage(),
@@ -73,6 +87,51 @@ function paginateRows(rows = [], query = {}, perPage = 10) {
       }))
     }
   }
+}
+
+function validateMasterName(config, data) {
+  const nama = String(data.nama || '').trim()
+
+  if (!nama) {
+    throw new Error(`Nama ${config.label.toLowerCase()} wajib diisi`)
+  }
+
+  return nama
+}
+
+async function isMasterNameExists(config, nama, excludeId = null) {
+  const params = [nama]
+  let excludeWhere = ''
+
+  if (excludeId) {
+    excludeWhere = 'AND id != ?'
+    params.push(excludeId)
+  }
+
+  const [rows] = await connection.query(
+    `SELECT id FROM ${config.table} WHERE LOWER(TRIM(nama)) = LOWER(TRIM(?)) ${excludeWhere} LIMIT 1`,
+    params
+  )
+
+  return rows.length > 0
+}
+
+async function validateMasterData(config, data, excludeId = null) {
+  const nama = validateMasterName(config, data)
+
+  if (await isMasterNameExists(config, nama, excludeId)) {
+    throw new Error(`${config.label} sudah ada`)
+  }
+
+  return { nama }
+}
+
+function validateLantai(data, excludeId = null) {
+  return validateMasterData(masterDataConfig.lantai, data, excludeId)
+}
+
+function validateLokasi(data, excludeId = null) {
+  return validateMasterData(masterDataConfig.lokasi, data, excludeId)
 }
 
 function normalizeHeader(value) {
@@ -167,8 +226,13 @@ module.exports = {
   getCellText,
   getRoomId,
   handleExcelUpload,
+  masterDataConfig,
   normalizeExcelDate,
   normalizeHeader,
   normalizeText,
-  paginateRows
+  paginateRows,
+  validateLantai,
+  validateLokasi,
+  validateMasterData,
+  validateMasterName
 }

@@ -19,7 +19,8 @@ const adminUserRoutes = require('./routes/adminUserRoutes');
 const adminInventarisRoutes = require('./routes/adminInventarisRoutes');
 const adminRuanganRoutes = require('./routes/adminRuanganRoutes');
 const adminLaporanRoutes = require('./routes/adminLaporanRoutes');
-const adminMasterDataRoutes = require('./routes/adminMasterDataRoutes');
+const adminLantaiRoutes = require('./routes/adminLantaiRoutes');
+const adminLokasiRoutes = require('./routes/adminLokasiRoutes');
 // const penggunaRoutes = require('./routes/penggunaRoutes');
 
 var app = express();
@@ -66,7 +67,8 @@ app.use(adminUserRoutes);
 app.use(adminInventarisRoutes);
 app.use(adminRuanganRoutes);
 app.use(adminLaporanRoutes);
-app.use(adminMasterDataRoutes);
+app.use(adminLantaiRoutes);
+app.use(adminLokasiRoutes);
 // app.use(penggunaRoutes);
 
 app.use(function(req, res, next) {
