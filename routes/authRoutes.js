@@ -3,7 +3,8 @@ const router = express.Router()
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const Auth = require('../models/Auth')
-const User = require('../models/User')
+const validateEmail = require('../middleware/validateEmail')
+const validatePassword = require('../middleware/validatePassword')
 
 router.get('/', (req, res) => {
   if (req.session && req.session.user) {
@@ -61,126 +62,103 @@ router.post('/', async (req, res) => {
   }
 })
 
-router.post('/api/login/mobile', async (req, res) => {
+router.post('/API/login-mobile', async (req, res) => {
   try {
-    const { email, password } = req.body
+    const { email, kata_sandi } = req.body
+    const data = { email, kata_sandi }
 
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: 'Email dan password wajib diisi'
-      })
+    if (!data.email) {
+      return res.status(400).json({ message: 'Email diperlukan.' })
     }
 
-    const user = await Auth.findUserByEmail(email)
+    if (!data.kata_sandi) {
+      return res.status(400).json({ message: 'Kata sandi diperlukan.' })
+    }
+
+    const user = await Auth.loginMobile(data)
 
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'Email tidak ditemukan'
-      })
-    }
-
-    const match = await bcrypt.compare(password, user.password)
-
-    if (!match) {
-      return res.status(400).json({
-        success: false,
-        message: 'Password salah'
-      })
+      return res.status(401).json({ message: 'Email yang anda masukkan salah.' })
     }
 
     const allowedRoles = ['mahasiswa', 'dosen', 'satpam', 'tendik', 'plp']
 
     if (!allowedRoles.includes(user.role)) {
-      return res.status(403).json({
-        success: false,
-        message: 'Role ini tidak diizinkan login sebagai pengguna'
-      })
+      return res.status(403).json({ message: 'Role ini tidak diizinkan login sebagai pengguna' })
     }
 
     if (user.status !== 'aktif') {
-      return res.status(403).json({
-        success: false,
-        message: 'Akun belum aktif'
-      })
+      return res.status(401).json({ message: 'Silahkan hubungi Admin untuk aktifasi akun anda.' })
     }
 
-    const token = jwt.sign(
-      {
-        id_user: user.id_user,
-        email: user.email,
-        role: user.role,
-        kaleb: user.kaleb
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    )
+    if (!(await bcrypt.compare(data.kata_sandi, user.kata_sandi))) {
+      return res.status(401).json({ message: 'Password yang anda masukkan salah.' })
+    }
 
-    return res.status(200).json({
-      // success: true,
-      token,
-    })
+    const payload = {
+      id: user.id,
+      role: user.role,
+      kaleb: user.kaleb
+    }
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7d' })
+
+    return res.status(200).json({ token })
   } catch (error) {
-    console.log(error)
-    return res.status(500).json({
-      success: false,
-      message: 'Internal Server Error'
-    })
+    console.error(error)
+    return res.status(500).json({ message: 'Internal Server Error' })
   }
 })
 
-router.post('/api/user/register', async (req, res) => {
+router.post('/API/register-mobile', validateEmail, validatePassword, async (req, res) => {
   try {
-    const { nama, email, password, role } = req.body
+    const { nama, email, kata_sandi, konfirmasi_kata_sandi, role } = req.body
 
-    if (!nama || !email || !password || !role) {
-      return res.status(400).json({
-        success: false,
-        message: 'Nama, email, password, dan role wajib diisi'
-      })
+    if (!nama) {
+      return res.status(400).json({ message: 'Nama diperlukan.' })
+    }
+
+    if (!kata_sandi) {
+      return res.status(400).json({ message: 'Kata sandi diperlukan.' })
+    }
+
+    if (!role) {
+      return res.status(400).json({ message: 'Role diperlukan.' })
     }
 
     const allowedRoles = ['mahasiswa', 'dosen', 'satpam', 'tendik', 'plp']
     if (!allowedRoles.includes(role)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Role tidak valid'
-      })
+      return res.status(400).json({ message: 'Role tidak valid.' })
     }
 
-    const existing = await User.findUserByEmail(email)
-    if (existing) {
-      return res.status(409).json({
-        success: false,
-        message: 'Email sudah terdaftar'
-      })
+    if (await Auth.checkEmail(email)) {
+      return res.status(400).json({ message: 'Email sudah terdaftar.' })
     }
 
-    const idUser = await User.createUser({
-      nama,
-      email,
-      password,
-      role,
-      kaleb: '0',
-      status: 'proses'
-    })
+    if (kata_sandi != konfirmasi_kata_sandi) {
+      return res.status(400).json({ message: 'Kata sandi dan konfirmasi kata sandi tidak cocok.' })
+    }
 
-    return res.status(201).json({
-      success: true,
-      message: 'Registrasi berhasil. Akun menunggu aktivasi admin.',
-      data: {
-        id_user: idUser,
-        status: 'proses'
-      }
-    })
+    await Auth.register({ nama, email, kata_sandi, role })
+
+    res.status(201).json({ message: 'Registrasi berhasil. Tunggu akun aktif dari admin.' })
   } catch (error) {
     console.log(error)
-    return res.status(500).json({
-      success: false,
-      message: 'Internal Server Error'
-    })
+    return res.status(500).json({ message: 'Internal Server Error' })
   }
+})
+
+router.post('/API/logout-mobile', (req, res) => {
+  const token = req.headers.authorization?.split(' ')[1]
+  if (!token) {
+      return res.status(401).json({ message: 'Tidak ada token yang diberikan.' })
+  }
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+      return res.status(401).json({ message: 'Token tidak valid atau sudah kedaluwarsa.' })
+      }
+      res.status(200).json({ message: 'Logout berhasil.' })
+  })
 })
 
 module.exports = router
