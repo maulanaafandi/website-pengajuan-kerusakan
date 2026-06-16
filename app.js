@@ -22,6 +22,11 @@ const adminLaporanRoutes = require('./routes/adminLaporanRoutes');
 const adminLantaiRoutes = require('./routes/adminLantaiRoutes');
 const adminLokasiRoutes = require('./routes/adminLokasiRoutes');
 // const penggunaRoutes = require('./routes/penggunaRoutes');
+const buatLaporanRoutes = require('./routes/mobile/allUser/buatLaporan');
+const profileRoutes = require('./routes/mobile/allUser/profile');
+const riwayatLaporanRoutes = require('./routes/mobile/allUser/riwayetLaporan');
+const laporanPlpRoutes = require('./routes/mobile/PLP/laporan');
+const laporanKalebRoutes = require('./routes/mobile/dosenKalep/laporan');
 
 var app = express();
 
@@ -70,6 +75,11 @@ app.use(adminLaporanRoutes);
 app.use(adminLantaiRoutes);
 app.use(adminLokasiRoutes);
 // app.use(penggunaRoutes);
+app.use(buatLaporanRoutes);
+app.use(profileRoutes);
+app.use(riwayatLaporanRoutes);
+app.use(laporanPlpRoutes);
+app.use(laporanKalebRoutes);
 
 app.use(function(req, res, next) {
   next(createError(404));
