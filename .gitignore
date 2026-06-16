@@ -12,9 +12,6 @@ yarn-debug.log
 dist/
 build/
 
-# uploads (kalau pakai multer)
-uploads/
-
 # OS files
 .DS_Store
 Thumbs.db
