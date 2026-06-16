@@ -36,7 +36,7 @@
               <th style="width:58px">No</th>
               <th>Kode Laporan</th>
               <th>User</th>
-              <th>Tanggal</th>
+              <th>Kategori</th>
               <th>Barang</th>
               <th>Kondisi</th>
               <th>Status</th>
@@ -61,7 +61,7 @@
                   <small><%= item.role ? (item.role.charAt(0).toUpperCase() + item.role.slice(1)) : 'Administrator' %></small>
                 </td>
                 <td>
-                  <span><%= formatDate(item.tanggal) || '-' %></span>
+                  <span><%= item.kategori || '-' %></span>
                 </td>
               <td>
                 <strong><%= item.nama_barang || '-' %></strong>
