@@ -1,0 +1,111 @@
+<%- include('../partials/head', { title: 'Detail Audit Laporan' }) %>
+<main class="admin-page" id="adminPage">
+  <%- include('../partials/sidebar', { active: 'audit-laporan' }) %>
+  <section class="main-content">
+    <%- include('../partials/topbar', { pageTitle: 'Detail Audit Laporan', pageSubtitle: 'Lihat seluruh hasil trigger audit untuk satu kode laporan.' }) %>
+    <%
+      const parseAuditData = (value) => {
+        if (!value) return {}
+        try {
+          return typeof value === 'string' ? JSON.parse(value) : value
+        } catch (error) {
+          return { data: value }
+        }
+      }
+
+      const auditLabels = {
+        id: 'ID',
+        kode_laporan: 'Kode Laporan',
+        id_pelapor: 'ID Pelapor',
+        id_inventaris: 'ID Inventaris',
+        id_teknisi: 'ID Teknisi',
+        kategori: 'Kategori',
+        deskripsi: 'Deskripsi',
+        bukti_foto: 'Bukti Foto',
+        kondisi: 'Kondisi',
+        status: 'Status',
+        prioritas: 'Prioritas',
+        keterangan: 'Keterangan',
+        selesai_pada: 'Selesai Pada',
+        rekomendasi_ai: 'Rekomendasi AI',
+        data: 'Data'
+      }
+
+      const formatAuditValue = (value) => {
+        if (value === null || value === undefined || value === '') return '-'
+        if (typeof value === 'object') {
+          const entries = Object.entries(value)
+          if (!entries.length) return '-'
+          return entries.map(([key, item]) => `${auditLabels[key] || key}: ${item ?? '-'}`).join(', ')
+        }
+        return value
+      }
+    %>
+
+    <div class="table-card">
+      <div class="table-top" style="margin:0 0 20px 0">
+        <div>
+          <h2><%= laporanInfo.kode_laporan || '-' %></h2>
+          <p style="margin-top:8px;color:#667085">
+            <%= laporanInfo.nama_pelapor || '-' %>
+            <% if (laporanInfo.email_pelapor) { %>
+              - <%= laporanInfo.email_pelapor %>
+            <% } %>
+          </p>
+        </div>
+        <div class="actions">
+          <a href="/admin/laporan/audit" class="btn-secondary">Kembali</a>
+        </div>
+      </div>
+
+      <div class="audit-log-list">
+        <% auditLaporan.forEach(audit => { %>
+          <%
+            const dataLama = parseAuditData(audit.data_lama)
+            const dataBaru = parseAuditData(audit.data_baru)
+            const fieldNames = Array.from(new Set([...Object.keys(dataLama), ...Object.keys(dataBaru)]))
+          %>
+          <article class="audit-card">
+            <div class="audit-meta">
+              <strong><%= audit.action || '-' %></strong>
+              <span><%= audit.waktu || '-' %></span>
+            </div>
+
+            <div class="audit-table-wrap">
+              <table class="audit-table">
+                <thead>
+                  <tr>
+                    <th>Field</th>
+                    <th>Data Lama</th>
+                    <th>Data Baru</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% fieldNames.forEach(field => { %>
+                    <tr>
+                      <td><%= auditLabels[field] || field %></td>
+                      <td><%= formatAuditValue(dataLama[field]) %></td>
+                      <td><%= formatAuditValue(dataBaru[field]) %></td>
+                    </tr>
+                  <% }) %>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        <% }) %>
+      </div>
+    </div>
+
+    <style>
+      .audit-log-list{display:grid;gap:18px}
+      .audit-card{border:1px solid #e5e7eb;border-radius:16px;background:linear-gradient(180deg,#ffffff,#f8fafc);padding:18px}
+      .audit-meta{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:14px;color:#154879}
+      .audit-meta span{color:#667085;font-size:13px;text-align:right}
+      .audit-table-wrap{overflow:auto;border:1px solid #e5e7eb;border-radius:12px;background:#fff}
+      .audit-table{width:100%;border-collapse:collapse;min-width:640px;font-size:13px}
+      .audit-table th,.audit-table td{padding:10px 12px;border-bottom:1px solid #edf1f6;text-align:left;vertical-align:top;color:#111827}
+      .audit-table th{background:#f1f5f9;color:#475467;font-weight:800}
+      .audit-table tr:last-child td{border-bottom:none}
+    </style>
+  </section>
+<%- include('../partials/footer') %>

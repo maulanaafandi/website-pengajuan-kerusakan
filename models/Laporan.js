@@ -5,6 +5,7 @@ class Laporan {
     return `
       l.id AS id_laporan,
       l.id AS id,
+      l.kode_laporan,
       l.id_pelapor AS id_user,
       l.id_pelapor,
       l.id_inventaris,
@@ -582,6 +583,71 @@ class Laporan {
       return rows
     } catch (error) {
       console.log('Error getAuditLaporan:', error)
+      throw error
+    }
+  }
+
+  static async getAllAuditLaporan(search = '') {
+    try {
+      const params = []
+      let where = ''
+
+      if (search) {
+        const keyword = `%${search}%`
+        where = `WHERE l.kode_laporan LIKE ?
+          OR u.nama LIKE ?
+          OR u.email LIKE ?`
+        params.push(keyword, keyword, keyword)
+      }
+
+      const [rows] = await connection.query(
+        `SELECT
+          a.id_laporan,
+          l.kode_laporan,
+          u.nama AS nama_pelapor,
+          u.email AS email_pelapor,
+          DATE_FORMAT(MAX(a.waktu), '%Y-%m-%d %H:%i:%s') AS waktu_terakhir,
+          COUNT(a.id) AS total_audit
+         FROM audit_laporan a
+         LEFT JOIN laporan l ON a.id_laporan = l.id
+         LEFT JOIN users u ON l.id_pelapor = u.id
+         ${where}
+         GROUP BY a.id_laporan, l.kode_laporan, u.nama, u.email
+         ORDER BY MAX(a.waktu) DESC, a.id_laporan DESC`,
+        params
+      )
+
+      return rows
+    } catch (error) {
+      console.log('Error getAllAuditLaporan:', error)
+      throw error
+    }
+  }
+
+  static async getAuditLaporanDetail(idLaporan) {
+    try {
+      const [rows] = await connection.query(
+        `SELECT
+          a.id,
+          a.id_laporan,
+          a.action,
+          a.data_lama,
+          a.data_baru,
+          DATE_FORMAT(a.waktu, '%Y-%m-%d %H:%i:%s') AS waktu,
+          l.kode_laporan,
+          u.nama AS nama_pelapor,
+          u.email AS email_pelapor
+         FROM audit_laporan a
+         LEFT JOIN laporan l ON a.id_laporan = l.id
+         LEFT JOIN users u ON l.id_pelapor = u.id
+         WHERE a.id_laporan = ?
+         ORDER BY a.waktu DESC, a.id DESC`,
+        [idLaporan]
+      )
+
+      return rows
+    } catch (error) {
+      console.log('Error getAuditLaporanDetail:', error)
       throw error
     }
   }

@@ -3,13 +3,11 @@
   <%- include('../partials/sidebar', { active: 'laporan' }) %>
   <section class="main-content">
     <%- include('../partials/topbar', { pageTitle: 'Detail Laporan User', pageSubtitle: 'Lihat detail laporan dan riwayat audit.' }) %>
-
-    <div class="detail-grid" style="display:grid;grid-template-columns:1.2fr .8fr;gap:20px;align-items:start">
+    <div class="detail-grid" style="display:grid;grid-template-columns:minmax(0,1.35fr) 360px;gap:20px;align-items:start">
       <div class="form-card" style="max-width:100%">
         <div class="table-top" style="margin:0 0 20px 0">
           <h2>Informasi Laporan</h2>
           <div class="actions">
-            <button type="button" class="btn-danger" id="auditToggle" title="Riwayat audit laporan">!</button>
             <a href="/admin/laporan" class="btn-secondary">Kembali</a>
           </div>
         </div>
@@ -43,52 +41,82 @@
         </div>
       </div>
 
-      <div style="display:grid;gap:20px">
-        <div class="form-card" id="auditPanel" style="max-width:100%;display:none">
-          <h2 style="margin-bottom:14px">Trigger Audit Laporan</h2>
-          <% if (!auditLaporan || auditLaporan.length === 0) { %>
-            <div class="empty-state" style="border:1px dashed #d0d5dd;border-radius:14px">Belum ada data audit untuk laporan ini.</div>
-          <% } else { %>
-            <div class="info-list" style="display:grid;gap:12px">
-              <% auditLaporan.forEach(audit => { %>
-                <div class="info-row block">
-                  <span><%= audit.waktu %> - <%= audit.action || '-' %></span>
-                  <p><strong>Data Lama:</strong> <%= audit.data_lama || '-' %></p>
-                  <p><strong>Data Baru:</strong> <%= audit.data_baru || '-' %></p>
-                </div>
-              <% }) %>
-            </div>
-          <% } %>
-        </div>
-
+      <aside style="display:grid;gap:20px">
         <div class="form-card" style="max-width:100%">
           <h2 style="margin-bottom:14px">Foto Bukti</h2>
           <% if (laporan.bukti_foto) { %>
-            <img src="/uploads/<%= laporan.bukti_foto %>" alt="Bukti laporan" style="width:100%;border-radius:14px;border:1px solid #e5e7eb;object-fit:cover;max-height:320px">
+            <button
+              type="button"
+              class="preview-trigger"
+              id="previewTrigger"
+              data-image-src="/uploads/<%= laporan.bukti_foto %>"
+              data-image-alt="Bukti laporan"
+            >
+              <img src="/uploads/<%= laporan.bukti_foto %>" alt="Bukti laporan" style="width:100%;border-radius:14px;border:1px solid #e5e7eb;object-fit:cover;max-height:320px">
+              <span class="preview-badge">Preview</span>
+            </button>
           <% } else { %>
             <div class="empty-state" style="border:1px dashed #d0d5dd;border-radius:14px">Tidak ada foto bukti</div>
           <% } %>
         </div>
-
-        <div class="form-card" style="max-width:100%">
-          <h2 style="margin-bottom:14px">Akses Admin</h2>
-          <div class="empty-state" style="border:1px dashed #d0d5dd;border-radius:14px">
-            Admin hanya dapat melihat laporan. Perubahan status dan keterangan laporan dilakukan oleh role operasional.
-          </div>
-        </div>
-      </div>
+      </aside>
     </div>
 
     <style>
       .info-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:13px 14px;border:1px solid #edf1f6;background:#f8fafc;border-radius:12px}
       .info-row span{color:#667085;font-weight:700}.info-row strong{color:#111827;text-align:right}.info-row.block{display:block}.info-row.block p{margin-top:10px;line-height:1.7;color:#111827}
-      @media(max-width:980px){.detail-grid{grid-template-columns:1fr!important}}
+      .preview-trigger{position:relative;display:block;width:100%;padding:0;border:none;background:transparent;cursor:zoom-in}
+      .preview-trigger img{display:block}
+      .preview-badge{position:absolute;right:14px;bottom:14px;padding:8px 12px;border-radius:999px;background:rgba(17,24,39,.78);color:#fff;font-size:12px;font-weight:700}
+      .image-preview-modal{position:fixed;inset:0;background:rgba(15,23,42,.82);display:none;align-items:center;justify-content:center;padding:24px;z-index:80}
+      .image-preview-modal.open{display:flex}
+      .image-preview-dialog{position:relative;max-width:min(92vw,980px);max-height:88vh}
+      .image-preview-dialog img{display:block;max-width:100%;max-height:88vh;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.35)}
+      .image-preview-close{position:absolute;top:-14px;right:-14px;width:42px;height:42px;border:none;border-radius:50%;background:#fff;color:#111827;font-size:24px;line-height:1;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.18)}
+      aside .form-card{position:sticky;top:20px}
+      @media(max-width:1180px){.detail-grid{grid-template-columns:1fr!important}}
+      @media(max-width:1180px){aside .form-card{position:static}}
     </style>
-    <script>
-      document.getElementById('auditToggle').addEventListener('click', function () {
-        var panel = document.getElementById('auditPanel')
-        panel.style.display = panel.style.display === 'none' ? 'block' : 'none'
-      })
-    </script>
+    <% if (laporan.bukti_foto) { %>
+      <div class="image-preview-modal" id="imagePreviewModal" aria-hidden="true">
+        <div class="image-preview-dialog">
+          <button type="button" class="image-preview-close" id="imagePreviewClose" aria-label="Tutup preview">&times;</button>
+          <img src="" alt="" id="imagePreviewTarget">
+        </div>
+      </div>
+
+      <script>
+        (function () {
+          var trigger = document.getElementById('previewTrigger')
+          var modal = document.getElementById('imagePreviewModal')
+          var closeButton = document.getElementById('imagePreviewClose')
+          var target = document.getElementById('imagePreviewTarget')
+
+          if (!trigger || !modal || !closeButton || !target) return
+
+          function openPreview() {
+            target.src = trigger.dataset.imageSrc || ''
+            target.alt = trigger.dataset.imageAlt || 'Preview gambar'
+            modal.classList.add('open')
+            modal.setAttribute('aria-hidden', 'false')
+          }
+
+          function closePreview() {
+            modal.classList.remove('open')
+            modal.setAttribute('aria-hidden', 'true')
+            target.src = ''
+          }
+
+          trigger.addEventListener('click', openPreview)
+          closeButton.addEventListener('click', closePreview)
+          modal.addEventListener('click', function (event) {
+            if (event.target === modal) closePreview()
+          })
+          document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && modal.classList.contains('open')) closePreview()
+          })
+        })()
+      </script>
+    <% } %>
   </section>
 <%- include('../partials/footer') %>

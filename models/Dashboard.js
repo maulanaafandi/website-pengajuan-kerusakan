@@ -73,17 +73,23 @@ class Dashboard {
     try {
       const [rows] = await connection.query(`
         SELECT
-          DATE_FORMAT(selesai_pada, '%Y-%m') AS bulan_key,
-          CASE MONTH(selesai_pada)
+          data_bulanan.bulan_key,
+          CASE data_bulanan.bulan_num
             WHEN 1 THEN 'Jan' WHEN 2 THEN 'Feb' WHEN 3 THEN 'Mar' WHEN 4 THEN 'Apr'
             WHEN 5 THEN 'Mei' WHEN 6 THEN 'Jun' WHEN 7 THEN 'Jul' WHEN 8 THEN 'Agu'
             WHEN 9 THEN 'Sep' WHEN 10 THEN 'Okt' WHEN 11 THEN 'Nov' WHEN 12 THEN 'Des'
           END AS bulan,
-          COUNT(*) AS total
-        FROM laporan
-        WHERE status = 'selesai' AND selesai_pada IS NOT NULL
-        GROUP BY DATE_FORMAT(selesai_pada, '%Y-%m'), MONTH(selesai_pada)
-        ORDER BY bulan_key ASC
+          data_bulanan.total
+        FROM (
+          SELECT
+            DATE_FORMAT(selesai_pada, '%Y-%m') AS bulan_key,
+            MONTH(selesai_pada) AS bulan_num,
+            COUNT(*) AS total
+          FROM laporan
+          WHERE status = 'selesai' AND selesai_pada IS NOT NULL
+          GROUP BY DATE_FORMAT(selesai_pada, '%Y-%m'), MONTH(selesai_pada)
+        ) AS data_bulanan
+        ORDER BY data_bulanan.bulan_key ASC
       `)
 
       return rows || []

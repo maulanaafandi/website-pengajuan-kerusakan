@@ -23,7 +23,7 @@
         </div>
         <div class="filter-right">
           <div class="search-box">
-            <input type="text" name="search" placeholder="Cari nomor/user..." value="<%= search || '' %>">
+            <input type="text" name="search" placeholder="Cari kode laporan/user..." value="<%= search || '' %>">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
           </div>
         </div>
@@ -34,7 +34,7 @@
           <thead>
             <tr>
               <th style="width:58px">No</th>
-              <th>Nomor Pengajuan</th>
+              <th>Kode Laporan</th>
               <th>User</th>
               <th>Tanggal</th>
               <th>Barang</th>
@@ -53,10 +53,9 @@
             <% laporan.forEach((item, index) => { %>
               <% const statusValue = item.status || 'pending'; %>
               <% const statusClass = statusValue === 'selesai' ? 'badge-green' : statusValue === 'ditolak' ? 'badge-red' : 'badge-yellow'; %>
-              <% const nomor = 'PGJ-' + ((item.tanggal || '').slice(0,4) || new Date().getFullYear()) + '-' + String(item.id_laporan).padStart(4, '0'); %>
               <tr>
                 <td><%= index + 1 %></td>
-                <td><%= nomor %></td>
+                <td><%= item.kode_laporan || '-' %></td>
                 <td>
                   <strong><%= item.email || '-' %></strong>
                   <small><%= item.role ? (item.role.charAt(0).toUpperCase() + item.role.slice(1)) : 'Administrator' %></small>
