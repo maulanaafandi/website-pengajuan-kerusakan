@@ -1,35 +1,31 @@
-const jwt = require('jsonwebtoken');
+const jwt = require('jsonwebtoken')
 
-const authUser = (req, res, next) => {
-  try {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader) {
-      return res.status(401).json({
-        success: false,
-        message: 'Token tidak ditemukan'
-      });
-    }
-
-    const token = authHeader.split(' ')[1];
-
+function verifyToken(req, res, next) {
+    const token = req.header('Authorization')?.replace('Bearer', '').trim()
     if (!token) {
-      return res.status(401).json({
-        success: false,
-        message: 'Token tidak valid'
-      });
+        return res.status(403).json({ message: 'Token tidak diberikan'})
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+            return res.status(403).json({ message: 'Token tidak valid atau sudah kedaluwarsa'})
+        }
+        req.user = decoded
+        next()
+    })
+}
 
-    next();
-  } catch (err) {
-    return res.status(401).json({
-      success: false,
-      message: 'Token tidak valid'
-    });
-  }
-};
+function authorize(AllowedRoles = []) {
+    return (req, res, next) => {
+        if (!req.user) {
+            return res.status(403).json ({ message: 'Pengguna tidak diautentikasi'})
+        }
+        const userRole = req.user.userType || req.user.role
+        if (!AllowedRoles.includes(userRole)) {
+            return res.status(403).json ({ message: 'Akses ditolak: Anda tidak memiliki izin'}) 
+        }
+        next()
+    }
+}
 
-module.exports = authUser;
+module.exports = {verifyToken, authorize}
