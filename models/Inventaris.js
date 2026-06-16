@@ -145,6 +145,29 @@ class Inventaris {
     }
   }
 
+  static async getInventarisByIds(ids = []) {
+    try {
+      const uniqueIds = [...new Set(ids.map(id => Number(id)).filter(Number.isFinite))]
+
+      if (!uniqueIds.length) {
+        return []
+      }
+
+      const placeholders = uniqueIds.map(() => '?').join(', ')
+      const [rows] = await connection.query(
+        `SELECT id, nama_barang, kode_barang
+         FROM inventaris
+         WHERE id IN (${placeholders})`,
+        uniqueIds
+      )
+
+      return rows
+    } catch (error) {
+      console.log('Error getInventarisByIds:', error)
+      throw error
+    }
+  }
+
   static async getInventarisByNamaBarang(namaBarang) {
     try {
       const [rows] = await connection.query(

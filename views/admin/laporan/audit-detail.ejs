@@ -40,6 +40,32 @@
         }
         return value
       }
+
+      const formatAuditFieldValue = (field, value) => {
+        if (value === null || value === undefined || value === '') return '-'
+
+        if (field === 'id_pelapor') {
+          const user = userMap && userMap[String(value)]
+          return user ? `${user.email || user.nama || value}` : value
+        }
+
+        if (field === 'id_inventaris') {
+          const inventaris = inventarisMap && inventarisMap[String(value)]
+          return inventaris
+            ? `${inventaris.nama_barang || inventaris.kode_barang || value} `
+            : value
+        }
+
+        return formatAuditValue(value)
+      }
+
+      const normalizeAuditCompareValue = (value) => {
+        if (value === null || value === undefined || value === '') return null
+        if (typeof value === 'object') {
+          return JSON.stringify(value)
+        }
+        return String(value)
+      }
     %>
 
     <div class="table-card">
@@ -64,6 +90,7 @@
             const dataLama = parseAuditData(audit.data_lama)
             const dataBaru = parseAuditData(audit.data_baru)
             const fieldNames = Array.from(new Set([...Object.keys(dataLama), ...Object.keys(dataBaru)]))
+              .filter(field => normalizeAuditCompareValue(dataLama[field]) !== normalizeAuditCompareValue(dataBaru[field]))
           %>
           <article class="audit-card">
             <div class="audit-meta">
@@ -81,11 +108,16 @@
                   </tr>
                 </thead>
                 <tbody>
+                  <% if (!fieldNames.length) { %>
+                    <tr>
+                      <td colspan="3">Tidak ada perubahan nilai pada field yang tercatat.</td>
+                    </tr>
+                  <% } %>
                   <% fieldNames.forEach(field => { %>
                     <tr>
                       <td><%= auditLabels[field] || field %></td>
-                      <td><%= formatAuditValue(dataLama[field]) %></td>
-                      <td><%= formatAuditValue(dataBaru[field]) %></td>
+                      <td><%= formatAuditFieldValue(field, dataLama[field]) %></td>
+                      <td><%= formatAuditFieldValue(field, dataBaru[field]) %></td>
                     </tr>
                   <% }) %>
                 </tbody>

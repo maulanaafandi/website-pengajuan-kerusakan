@@ -72,6 +72,29 @@ class User {
     }
   }
 
+  static async getUsersByIds(ids = []) {
+    try {
+      const uniqueIds = [...new Set(ids.map(id => Number(id)).filter(Number.isFinite))]
+
+      if (!uniqueIds.length) {
+        return []
+      }
+
+      const placeholders = uniqueIds.map(() => '?').join(', ')
+      const [rows] = await connection.query(
+        `SELECT id, nama, email
+         FROM users
+         WHERE id IN (${placeholders})`,
+        uniqueIds
+      )
+
+      return rows
+    } catch (error) {
+      console.log('Error getUsersByIds:', error)
+      throw error
+    }
+  }
+
   static async getProfile(idUser) {
     try {
       const [rows] = await connection.query(

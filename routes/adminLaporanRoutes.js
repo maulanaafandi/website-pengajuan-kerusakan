@@ -3,6 +3,8 @@ const router = express.Router()
 
 const authAdmin = require('../middleware/auth')
 const Laporan = require('../models/Laporan')
+const User = require('../models/User')
+const Inventaris = require('../models/Inventaris')
 
 const {
   formatDate
@@ -55,9 +57,54 @@ router.get('/admin/laporan/audit/:id', authAdmin, async (req, res) => {
       return res.redirect('/admin/laporan/audit')
     }
 
+    const parseAuditData = (value) => {
+      if (!value) return {}
+
+      try {
+        return typeof value === 'string' ? JSON.parse(value) : value
+      } catch (error) {
+        return {}
+      }
+    }
+
+    const userIds = []
+    const inventarisIds = []
+
+    auditLaporan.forEach((audit) => {
+      const dataLama = parseAuditData(audit.data_lama)
+      const dataBaru = parseAuditData(audit.data_baru)
+
+      ;[dataLama, dataBaru].forEach((data) => {
+        if (data && data.id_pelapor !== undefined && data.id_pelapor !== null && data.id_pelapor !== '') {
+          userIds.push(data.id_pelapor)
+        }
+
+        if (data && data.id_inventaris !== undefined && data.id_inventaris !== null && data.id_inventaris !== '') {
+          inventarisIds.push(data.id_inventaris)
+        }
+      })
+    })
+
+    const [users, inventarisList] = await Promise.all([
+      User.getUsersByIds(userIds),
+      Inventaris.getInventarisByIds(inventarisIds)
+    ])
+
+    const userMap = users.reduce((acc, user) => {
+      acc[String(user.id)] = user
+      return acc
+    }, {})
+
+    const inventarisMap = inventarisList.reduce((acc, inventaris) => {
+      acc[String(inventaris.id)] = inventaris
+      return acc
+    }, {})
+
     return res.render('admin/laporan/audit-detail', {
       auditLaporan,
-      laporanInfo: auditLaporan[0]
+      laporanInfo: auditLaporan[0],
+      userMap,
+      inventarisMap
     })
   } catch (err) {
     console.log(err)
