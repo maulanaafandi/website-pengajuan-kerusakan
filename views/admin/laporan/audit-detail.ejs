@@ -2,7 +2,7 @@
 <main class="admin-page" id="adminPage">
   <%- include('../partials/sidebar', { active: 'audit-laporan' }) %>
   <section class="main-content">
-    <%- include('../partials/topbar', { pageTitle: 'Detail Audit Laporan', pageSubtitle: 'Lihat seluruh hasil trigger audit untuk satu kode laporan.' }) %>
+    <%- include('../partials/topbar', { pageTitle: 'Detail Audit Laporan', pageSubtitle: 'Lihat seluruh hasil trigger' }) %>
     <%
       const parseAuditData = (value) => {
         if (!value) return {}
@@ -72,12 +72,12 @@
       <div class="table-top" style="margin:0 0 20px 0">
         <div>
           <h2><%= laporanInfo.kode_laporan || '-' %></h2>
-          <p style="margin-top:8px;color:#667085">
+          <!-- <p style="margin-top:8px;color:#667085">
             <%= laporanInfo.nama_pelapor || '-' %>
             <% if (laporanInfo.email_pelapor) { %>
               - <%= laporanInfo.email_pelapor %>
             <% } %>
-          </p>
+          </p> -->
         </div>
         <div class="actions">
           <a href="/admin/laporan/audit" class="btn-secondary">Kembali</a>
