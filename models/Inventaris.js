@@ -114,11 +114,7 @@ class Inventaris {
   static async getAllInventarisPengguna() {
     try {
       const [rows] = await connection.query(
-        `SELECT 
-          id,
-          nama_barang,
-          merk,
-          tipe
+        `SELECT id, CONCAT_WS(' - ', kode_barang, nama_barang, merk) AS barang
          FROM inventaris
          ORDER BY id DESC`
       )

@@ -79,16 +79,16 @@ class Laporan {
     try {
       const [result] = await connection.query(
         `INSERT INTO laporan
-        (id_pelapor, id_inventaris, kategori, deskripsi, status, bukti_foto, kondisi)
+        (id_pelapor, id_inventaris, kategori, deskripsi, bukti_foto, kondisi, kode_laporan)
         VALUES (?, ?, ?, ?, ?, ?, ?)`,
         [
-          data.id_pelapor || data.id_user,
+          data.id_pelapor,
           data.id_inventaris,
-          data.kategori || 'kerusakan',
-          data.deskripsi || data.keterangan,
-          data.status || 'pending',
+          data.kategori,
+          data.deskripsi,
           data.bukti_foto || null,
-          Laporan.normalizeKondisi(data.kondisi)
+          Laporan.normalizeKondisi(data.kondisi),
+          data.kode_laporan
         ]
       )
 
@@ -102,9 +102,10 @@ class Laporan {
   static async getRiwayatLaporan(idUser) {
     try {
       const [rows] = await connection.query(
-        `SELECT ${Laporan.selectFields}
+        `SELECT l.id, l.kode_laporan, r.nama AS ruangan, i.nama_barang, l.status
          FROM laporan l
-         ${Laporan.joins}
+         LEFT JOIN inventaris i ON l.id_inventaris = i.id
+         LEFT JOIN ruangan r ON i.id_ruangan = r.id
          WHERE l.id_pelapor = ?
          ORDER BY l.id DESC`,
         [idUser]
@@ -142,9 +143,36 @@ class Laporan {
   static async getDetailLaporan(idLaporan, idUser) {
     try {
       const [rows] = await connection.query(
-        `SELECT ${Laporan.selectFields}
+        `SELECT
+          lok.nama AS nama_lokasi,
+          lan.nama AS nama_lantai,
+          CONCAT(r.nama, ' - ', r.kode_ruangan) AS ruangan,
+          kaleb.nama AS nama_kalep,
+          l.waktu_lapor AS waktu_laporan,
+          l.kode_laporan,
+          l.kategori AS kategori_laporan,
+          i.kode_barang,
+          i.NUP,
+          i.nama_barang,
+          i.merk,
+          i.tipe,
+          i.kategori AS kategori_inventaris,
+          l.kondisi,
+          l.bukti_foto,
+          l.deskripsi,
+          l.rekomendasi_ai,
+          l.prioritas,
+          l.status,
+          teknisi.nama AS nama_teknisi,
+          l.keterangan,
+          l.selesai_pada
          FROM laporan l
-         ${Laporan.joins}
+         LEFT JOIN inventaris i ON l.id_inventaris = i.id
+         LEFT JOIN ruangan r ON i.id_ruangan = r.id
+         LEFT JOIN lokasi lok ON r.id_lokasi = lok.id
+         LEFT JOIN lantai lan ON r.id_lantai = lan.id
+         LEFT JOIN users kaleb ON r.id_kaleb = kaleb.id
+         LEFT JOIN users teknisi ON l.id_teknisi = teknisi.id
          WHERE l.id = ? AND l.id_pelapor = ?
          LIMIT 1`,
         [idLaporan, idUser]
@@ -174,16 +202,17 @@ class Laporan {
     }
   }
 
-  static async updateStatusDanKeteranganKaleb(idLaporan, status, keteranganAdmin) {
+  static async updateStatusDanKeteranganKaleb(idLaporan, status, keteranganAdmin, teknisiId = null) {
     try {
       const [result] = await connection.query(
         `UPDATE laporan
          SET status = ?,
              keterangan = ?,
+             id_teknisi = IF(? = 'selesai' AND ? IS NOT NULL, ?, id_teknisi),
              selesai_pada = IF(? = 'selesai', COALESCE(selesai_pada, NOW()), selesai_pada)
          WHERE id = ?
            AND status != 'selesai'`,
-        [status, keteranganAdmin, status, idLaporan]
+        [status, keteranganAdmin, status, teknisiId, teknisiId, status, idLaporan]
       )
 
       return result.affectedRows
@@ -193,7 +222,7 @@ class Laporan {
     }
   }
 
-  static async updateStatusDanKeteranganByPemilikRuangan(idLaporan, idUser, status, keteranganAdmin) {
+  static async updateStatusDanKeteranganByPemilikRuangan(idLaporan, idUser, status, keteranganAdmin, teknisiId = null) {
     try {
       const [result] = await connection.query(
         `UPDATE laporan l
@@ -201,11 +230,12 @@ class Laporan {
          INNER JOIN ruangan r ON i.id_ruangan = r.id
          SET l.status = ?,
              l.keterangan = ?,
+             l.id_teknisi = IF(? = 'selesai' AND ? IS NOT NULL, ?, l.id_teknisi),
              l.selesai_pada = IF(? = 'selesai', COALESCE(l.selesai_pada, NOW()), l.selesai_pada)
          WHERE l.id = ?
            AND r.id_kaleb = ?
            AND l.status != 'selesai'`,
-        [status, keteranganAdmin, status, idLaporan, idUser]
+        [status, keteranganAdmin, status, teknisiId, teknisiId, status, idLaporan, idUser]
       )
 
       return result.affectedRows
@@ -215,16 +245,196 @@ class Laporan {
     }
   }
 
-  static async getAllRiwayatLaporanPlp() {
-    return Laporan.getLaporan()
+  static async getAllRiwayatLaporanPlp(prioritas = null) {
+    try {
+      const params = []
+      let where = ''
+
+      if (prioritas) {
+        where = 'WHERE l.prioritas = ?'
+        params.push(prioritas)
+      }
+
+      const [rows] = await connection.query(
+        `SELECT l.id, l.kode_laporan, u.nama AS nama_pelapor, r.kode_ruangan, l.status, l.rekomendasi_ai
+         FROM laporan l
+         LEFT JOIN users u ON l.id_pelapor = u.id
+         LEFT JOIN inventaris i ON l.id_inventaris = i.id
+         LEFT JOIN ruangan r ON i.id_ruangan = r.id
+         ${where}
+         ORDER BY l.id DESC`,
+        params
+      )
+
+      return rows
+    } catch (error) {
+      console.log('Error getAllRiwayatLaporanPlp:', error)
+      throw error
+    }
   }
 
-  static async updateStatusDanKeteranganByPlp(idLaporan, status, keteranganAdmin) {
-    return Laporan.updateStatusDanKeteranganKaleb(idLaporan, status, keteranganAdmin)
+  static async getAllRiwayatLaporanKaleb(idUser) {
+    try {
+      const [rows] = await connection.query(
+        `SELECT l.id, l.kode_laporan, u.nama AS nama_pelapor, i.nama_barang, l.status, l.rekomendasi_ai
+         FROM laporan l
+         LEFT JOIN users u ON l.id_pelapor = u.id
+         LEFT JOIN inventaris i ON l.id_inventaris = i.id
+         LEFT JOIN ruangan r ON i.id_ruangan = r.id
+         WHERE r.id_kaleb = ?
+         ORDER BY l.id DESC`,
+        [idUser]
+      )
+
+      return rows
+    } catch (error) {
+      console.log('Error getAllRiwayatLaporanKaleb:', error)
+      throw error
+    }
+  }
+
+  static async getLaporanByIdKaleb(idLaporan, idUser) {
+    try {
+      const [rows] = await connection.query(
+        `SELECT
+          l.waktu_lapor AS waktu_laporan,
+          l.kode_laporan,
+          u.nama AS nama_pelapor,
+          l.kategori AS kategori_laporan,
+          i.kode_barang,
+          i.NUP,
+          i.nama_barang,
+          i.merk,
+          i.tipe,
+          i.kategori AS kategori_inventaris,
+          l.kondisi,
+          l.bukti_foto,
+          l.deskripsi,
+          l.rekomendasi_ai,
+          l.prioritas,
+          l.status,
+          teknisi.nama AS nama_teknisi,
+          l.keterangan,
+          l.selesai_pada
+         FROM laporan l
+         LEFT JOIN users u ON l.id_pelapor = u.id
+         LEFT JOIN users teknisi ON l.id_teknisi = teknisi.id
+         LEFT JOIN inventaris i ON l.id_inventaris = i.id
+         LEFT JOIN ruangan r ON i.id_ruangan = r.id
+         WHERE l.id = ?
+           AND r.id_kaleb = ?
+         LIMIT 1`,
+        [idLaporan, idUser]
+      )
+
+      return rows[0] || null
+    } catch (error) {
+      console.log('Error getLaporanByIdKaleb:', error)
+      throw error
+    }
+  }
+
+  static async getLaporanUntukRekomendasiAiKaleb(idUser, limit = 30) {
+    try {
+      const safeLimit = Number.isFinite(Number(limit)) ? Math.max(1, Math.min(100, Number(limit))) : 30
+      const [rows] = await connection.query(
+        `SELECT
+          l.id,
+          l.waktu_lapor AS waktu_laporan,
+          l.kategori AS kategori_laporan,
+          i.NUP,
+          i.nama_barang,
+          i.merk,
+          i.tipe,
+          i.kategori AS kategori_inventaris,
+          l.kondisi,
+          l.deskripsi,
+          l.kode_laporan
+         FROM laporan l
+         LEFT JOIN inventaris i ON l.id_inventaris = i.id
+         LEFT JOIN ruangan r ON i.id_ruangan = r.id
+         WHERE r.id_kaleb = ?
+         ORDER BY l.id DESC
+         LIMIT ${safeLimit}`,
+        [idUser]
+      )
+
+      return rows
+    } catch (error) {
+      console.log('Error getLaporanUntukRekomendasiAiKaleb:', error)
+      throw error
+    }
+  }
+
+  static async applyRekomendasiAiPrioritas(idLaporan, idUser, prioritas) {
+    try {
+      const [result] = await connection.query(
+        `UPDATE laporan l
+         INNER JOIN inventaris i ON l.id_inventaris = i.id
+         INNER JOIN ruangan r ON i.id_ruangan = r.id
+         SET l.prioritas = ?,
+             l.rekomendasi_ai = 1
+         WHERE l.id = ?
+           AND r.id_kaleb = ?`,
+        [prioritas, idLaporan, idUser]
+      )
+
+      return result.affectedRows
+    } catch (error) {
+      console.log('Error applyRekomendasiAiPrioritas:', error)
+      throw error
+    }
+  }
+
+  static async updateStatusDanKeteranganByPlp(idLaporan, status, keteranganAdmin, teknisiId = null) {
+    return Laporan.updateStatusDanKeteranganKaleb(idLaporan, status, keteranganAdmin, teknisiId)
   }
 
   static async getLaporanByIdPlp(idLaporan) {
-    return Laporan.getLaporanById(idLaporan)
+    try {
+      const [rows] = await connection.query(
+        `SELECT
+          lok.nama AS nama_lokasi,
+          lan.nama AS nama_lantai,
+          CONCAT(r.nama, ' - ', r.kode_ruangan) AS ruangan,
+          kaleb.nama AS nama_kalep,
+          l.waktu_lapor AS waktu_laporan,
+          l.kode_laporan,
+          u.nama AS nama_pelapor,
+          l.kategori AS kategori_laporan,
+          i.kode_barang,
+          i.NUP,
+          i.nama_barang,
+          i.merk,
+          i.tipe,
+          i.kategori AS kategori_inventaris,
+          l.kondisi,
+          l.bukti_foto,
+          l.deskripsi,
+          l.rekomendasi_ai,
+          l.prioritas,
+          l.status,
+          teknisi.nama AS nama_teknisi,
+          l.keterangan,
+          l.selesai_pada
+         FROM laporan l
+         LEFT JOIN users u ON l.id_pelapor = u.id
+         LEFT JOIN inventaris i ON l.id_inventaris = i.id
+         LEFT JOIN ruangan r ON i.id_ruangan = r.id
+         LEFT JOIN lokasi lok ON r.id_lokasi = lok.id
+         LEFT JOIN lantai lan ON r.id_lantai = lan.id
+         LEFT JOIN users kaleb ON r.id_kaleb = kaleb.id
+         LEFT JOIN users teknisi ON l.id_teknisi = teknisi.id
+         WHERE l.id = ?
+         LIMIT 1`,
+        [idLaporan]
+      )
+
+      return rows[0] || null
+    } catch (error) {
+      console.log('Error getLaporanByIdPlp:', error)
+      throw error
+    }
   }
 
   static async updatePrioritasByPemilikRuangan(idLaporan, idUser, prioritas) {
