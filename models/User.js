@@ -75,9 +75,18 @@ class User {
   static async getProfile(idUser) {
     try {
       const [rows] = await connection.query(
-        `SELECT ${User.selectFields}
-         FROM users
-         WHERE id = ?`,
+        `SELECT u.nama, u.email, u.role,
+          CASE
+            WHEN u.kaleb = '1' THEN (
+              SELECT CONCAT(r.kode_ruangan, ' - ', r.nama)
+              FROM ruangan r
+              WHERE r.id_kaleb = u.id
+              LIMIT 1
+            )
+            ELSE NULL
+          END AS ruangan
+         FROM users u
+         WHERE u.id = ?`,
         [idUser]
       )
 
@@ -91,7 +100,7 @@ class User {
   static async findUserById(idUser) {
     try {
       const [rows] = await connection.query(
-        `SELECT id AS id_user, nama, email, kata_sandi AS password, role, kaleb, status
+        `SELECT id, nama, email, kata_sandi, role, kaleb, status
          FROM users
          WHERE id = ?`,
         [idUser]
@@ -110,24 +119,6 @@ class User {
       return rows[0]
     } catch (error) {
       console.log('Error findUserByEmail:', error)
-      throw error
-    }
-  }
-
-  static async createUser(data) {
-    try {
-      const hashedPassword = await bcrypt.hash(data.password || data.kata_sandi || 'user123', 10)
-      const nama = data.nama || String(data.email || '').split('@')[0] || 'User'
-
-      const [result] = await connection.query(
-        `INSERT INTO users (nama, email, kata_sandi, role, kaleb, status)
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [nama, data.email, hashedPassword, data.role, data.kaleb || '0', data.status || 'proses']
-      )
-
-      return result.insertId
-    } catch (error) {
-      console.log('Error createUser:', error)
       throw error
     }
   }
@@ -186,6 +177,19 @@ class User {
       )
     } catch (error) {
       console.log('Error updatePassword:', error)
+      throw error
+    }
+  }
+
+  static async updatePasswordMobile(idUser, data) {
+    try {
+      const hashedPassword = await bcrypt.hash(data.kata_sandi_baru, 10)
+      await connection.query(
+        `UPDATE users SET kata_sandi = ? WHERE id = ?`,
+        [hashedPassword, idUser]
+      )
+    } catch (error) {
+      console.log('Error updatePasswordMobile:', error)
       throw error
     }
   }
