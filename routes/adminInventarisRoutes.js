@@ -221,7 +221,13 @@ router.delete('/admin/inventaris/delete/:id', authAdmin, async (req, res) => {
 
   } catch (err) {
     console.log(err)
-    req.flash('error', 'Gagal hapus inventaris')
+
+    if (err.code === 'INVENTARIS_USED_IN_LAPORAN') {
+      req.flash('error', err.message)
+    } else {
+      req.flash('error', 'Gagal hapus inventaris')
+    }
+
     return res.redirect('/admin/inventaris')
 
   }
