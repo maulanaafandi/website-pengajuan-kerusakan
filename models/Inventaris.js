@@ -342,6 +342,20 @@ class Inventaris {
 
   static async deleteInventaris(idInventaris) {
     try {
+      const [inventarisRows] = await connection.query(
+        `SELECT id
+         FROM inventaris
+         WHERE id = ?
+         LIMIT 1`,
+        [idInventaris]
+      )
+
+      if (!inventarisRows.length) {
+        const error = new Error('Inventaris tidak ditemukan')
+        error.code = 'INVENTARIS_NOT_FOUND'
+        throw error
+      }
+
       const [laporanRows] = await connection.query(
         `SELECT COUNT(*) AS total
          FROM laporan
@@ -355,10 +369,12 @@ class Inventaris {
         throw error
       }
 
-      await connection.query(
+      const [result] = await connection.query(
         `DELETE FROM inventaris WHERE id = ?`,
         [idInventaris]
       )
+
+      return result
     } catch (error) {
       console.log('Error deleteInventaris:', error)
       throw error

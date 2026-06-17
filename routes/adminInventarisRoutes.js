@@ -214,18 +214,27 @@ router.patch('/admin/inventaris/edit/:id', authAdmin, updateInventaris)
 
 router.delete('/admin/inventaris/delete/:id', authAdmin, async (req, res) => {
   try {
+    const result = await Inventaris.deleteInventaris(req.params.id)
 
-    await Inventaris.deleteInventaris(req.params.id)
+    if (!result || result.affectedRows === 0) {
+      req.flash('error', 'Inventaris tidak ditemukan')
+      return res.redirect('/admin/inventaris')
+    }
+
     req.flash('success', 'Inventaris berhasil dihapus')
     return res.redirect('/admin/inventaris')
 
   } catch (err) {
     console.log(err)
 
-    if (err.code === 'INVENTARIS_USED_IN_LAPORAN') {
+    if (err.code === 'INVENTARIS_NOT_FOUND') {
+      req.flash('error', err.message)
+    } else if (err.code === 'INVENTARIS_USED_IN_LAPORAN') {
+      req.flash('error', err.message)
+    } else if (err.code === 'ER_ROW_IS_REFERENCED_2') {
       req.flash('error', err.message)
     } else {
-      req.flash('error', 'Gagal hapus inventaris')
+      req.flash('error', err.message || 'Gagal hapus inventaris')
     }
 
     return res.redirect('/admin/inventaris')
