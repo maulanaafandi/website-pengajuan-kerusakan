@@ -212,7 +212,7 @@ class Laporan {
              id_teknisi = IF(? = 'selesai' AND ? IS NOT NULL, ?, id_teknisi),
              selesai_pada = IF(? = 'selesai', COALESCE(selesai_pada, NOW()), selesai_pada)
          WHERE id = ?
-           AND status != 'selesai'`,
+           AND (status IS NULL OR status != 'selesai')`,
         [status, keteranganAdmin, status, teknisiId, teknisiId, status, idLaporan]
       )
 
@@ -235,7 +235,7 @@ class Laporan {
              l.selesai_pada = IF(? = 'selesai', COALESCE(l.selesai_pada, NOW()), l.selesai_pada)
          WHERE l.id = ?
            AND r.id_kaleb = ?
-           AND l.status != 'selesai'`,
+           AND (l.status IS NULL OR l.status != 'selesai')`,
         [status, keteranganAdmin, status, teknisiId, teknisiId, status, idLaporan, idUser]
       )
 

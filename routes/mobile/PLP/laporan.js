@@ -68,4 +68,14 @@ router.get('/API/detail-laporan-plp/:id', verifyToken, authorize(['plp']), async
   }
 })
 
+router.get('/API/status-laporan-options', verifyToken, authorize(['plp']), async (req, res) => {
+  try {
+    const result = ['diproses_internal', 'diproses_eksternal', 'pending', 'ditolak', 'selesai']
+    res.status(200).json({ result })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: 'Internal Server Error' })
+  }
+})
+
 module.exports = router

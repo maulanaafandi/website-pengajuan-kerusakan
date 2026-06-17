@@ -40,9 +40,11 @@ router.get('/API/ruangan', verifyToken, authorize(allowedRoles), async (req, res
   }
 })
 
-router.get('/API/inventaris', verifyToken, authorize(allowedRoles), async (req, res) => {
+router.get('/API/inventaris/:id', verifyToken, authorize(allowedRoles), async (req, res) => {
   try {
-    const result = await Inventaris.getAllInventarisPengguna()
+    const { id } = req.params
+
+    const result = await Inventaris.getAllInventarisPenggunaByRuangan(id)
     res.status(200).json({ result })
   } catch (err) {
     console.error(err)
@@ -61,10 +63,6 @@ router.post('/API/buat-laporan', verifyToken, authorize(allowedRoles), generateK
       return res.status(400).json({ message: 'Inventaris diperlukan.' })
     }
 
-    if (!req.file) {
-      return res.status(400).json({ message: 'Bukti foto diperlukan.' })
-    }
-
     if (!kategori) {
       deleteUploadedFile(req.file)
       return res.status(400).json({ message: 'Kategori diperlukan.' })
@@ -81,20 +79,51 @@ router.post('/API/buat-laporan', verifyToken, authorize(allowedRoles), generateK
       return res.status(400).json({ message: 'Deskripsi diperlukan.' })
     }
 
-    if (kondisi === undefined || kondisi === null || kondisi === '') {
-      deleteUploadedFile(req.file)
-      return res.status(400).json({ message: 'Kondisi diperlukan.' })
+    if (kategori === 'kerusakan') {
+      if (!req.file) {
+        return res.status(400).json({ message: 'Bukti foto diperlukan.' })
+      }
+
+      if (kondisi === undefined || kondisi === null || kondisi === '') {
+        deleteUploadedFile(req.file)
+        return res.status(400).json({ message: 'Kondisi diperlukan.' })
+      }
+
+      if (req.file && req.file.size > 5 * 1024 * 1024) {
+        deleteUploadedFile(req.file)
+        return res.status(400).json({ message: 'Ukuran bukti foto tidak boleh lebih dari 5Mb.' })
+      }
+
+      const allowedMimeTypes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/x-png',
+        'image/webp',
+        'application/octet-stream',
+      ]
+      const allowedExt = ['.jpg', '.jpeg', '.png', '.webp']
+      const ext = path.extname(req.file.originalname || '').toLowerCase()
+
+      if (
+        req.file &&
+        (!allowedMimeTypes.includes(req.file.mimetype) ||
+          (req.file.mimetype === 'application/octet-stream' && !allowedExt.includes(ext)))
+      ) {
+        deleteUploadedFile(req.file)
+        return res.status(400).json({ message: 'Format foto harus JPG, JPEG, PNG, atau WEBP.' })
+      }
     }
 
-    if (req.file && req.file.size > 5 * 1024 * 1024) {
-      deleteUploadedFile(req.file)
-      return res.status(400).json({ message: 'Ukuran bukti foto tidak boleh lebih dari 5Mb.' })
-    }
+    if (kategori === 'kehilangan') {
+      if (req.file) {
+        deleteUploadedFile(req.file)
+        return res.status(400).json({ message: 'Bukti foto tidak diperlukan.' })
+      }
 
-    const allowedFormats = ['image/jpeg', 'image/png', 'image/jpg', 'image/webp']
-    if (req.file && !allowedFormats.includes(req.file.mimetype)) {
-      deleteUploadedFile(req.file)
-      return res.status(400).json({ message: 'Format foto harus JPG, JPEG, PNG, atau WEBP.' })
+      if (!(kondisi === undefined || kondisi === null || kondisi === '')) {
+        return res.status(400).json({ message: 'Kondisi tidak diperlukan.' })
+      }
     }
 
     const inventaris = await Inventaris.getInventarisById(id_inventaris)
@@ -108,8 +137,8 @@ router.post('/API/buat-laporan', verifyToken, authorize(allowedRoles), generateK
       id_inventaris,
       kategori,
       deskripsi,
-      bukti_foto,
-      kondisi,
+      bukti_foto: kategori === 'kehilangan' ? null : bukti_foto,
+      kondisi: kategori === 'kehilangan' ? null : kondisi,
       kode_laporan: req.kode_laporan
     }
 

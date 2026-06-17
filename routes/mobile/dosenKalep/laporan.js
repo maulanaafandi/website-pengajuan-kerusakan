@@ -134,15 +134,15 @@ router.patch('/API/update-status-laporan/:id', verifyToken, authorize(['plp', 'd
     const { status, keterangan } = req.body
     const allowedStatus = ['diproses_internal', 'diproses_eksternal', 'pending', 'ditolak', 'selesai']
 
-    if (!status) {
+    if (status === undefined) {
       return res.status(400).json({ message: 'Status diperlukan.' })
     }
 
-    if (!keterangan) {
+    if (keterangan === undefined) {
       return res.status(400).json({ message: 'Keterangan diperlukan.' })
     }
 
-    if (!allowedStatus.includes(status)) {
+    if (status !== null && !allowedStatus.includes(status)) {
       return res.status(400).json({ message: 'Status tidak valid.' })
     }
 

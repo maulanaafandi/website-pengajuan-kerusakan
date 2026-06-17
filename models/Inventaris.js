@@ -126,6 +126,23 @@ class Inventaris {
     }
   }
 
+  static async getAllInventarisPenggunaByRuangan(id) {
+    try {
+      const [rows] = await connection.query(
+        `SELECT id, CONCAT_WS(' - ', kode_barang, nama_barang, merk) AS barang
+         FROM inventaris
+         WHERE id_ruangan = ?
+         ORDER BY id DESC`,
+        [id]
+      )
+
+      return rows
+    } catch (error) {
+      console.log('Error getAllInventarisPenggunaByRuangan:', error)
+      throw error
+    }
+  }
+
   static async getInventarisById(idInventaris) {
     try {
       const [rows] = await connection.query(
@@ -325,6 +342,19 @@ class Inventaris {
 
   static async deleteInventaris(idInventaris) {
     try {
+      const [laporanRows] = await connection.query(
+        `SELECT COUNT(*) AS total
+         FROM laporan
+         WHERE id_inventaris = ?`,
+        [idInventaris]
+      )
+
+      if (laporanRows[0]?.total > 0) {
+        const error = new Error('Inventaris tidak bisa dihapus karena sudah digunakan pada laporan')
+        error.code = 'INVENTARIS_USED_IN_LAPORAN'
+        throw error
+      }
+
       await connection.query(
         `DELETE FROM inventaris WHERE id = ?`,
         [idInventaris]
