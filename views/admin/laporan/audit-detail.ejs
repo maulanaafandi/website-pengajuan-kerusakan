@@ -1,8 +1,8 @@
-<%- include('../partials/head', { title: 'Detail Audit Laporan' }) %>
+<%- include('../partials/head', { title: 'Detail Trigger Laporan' }) %>
 <main class="admin-page" id="adminPage">
   <%- include('../partials/sidebar', { active: 'audit-laporan' }) %>
   <section class="main-content">
-    <%- include('../partials/topbar', { pageTitle: 'Detail Audit Laporan', pageSubtitle: 'Lihat seluruh hasil trigger' }) %>
+    <%- include('../partials/topbar', { pageTitle: 'Detail Trigger Laporan', pageSubtitle: 'Lihat seluruh hasil trigger' }) %>
     <%
       const parseAuditData = (value) => {
         if (!value) return {}
@@ -16,9 +16,9 @@
       const auditLabels = {
         id: 'ID',
         kode_laporan: 'Kode Laporan',
-        id_pelapor: 'ID Pelapor',
+        id_pelapor: 'User',
         id_inventaris: 'ID Inventaris',
-        id_teknisi: 'ID Teknisi',
+        id_teknisi: 'User',
         kategori: 'Kategori',
         deskripsi: 'Deskripsi',
         bukti_foto: 'Bukti Foto',
@@ -45,6 +45,11 @@
         if (value === null || value === undefined || value === '') return '-'
 
         if (field === 'id_pelapor') {
+          const user = userMap && userMap[String(value)]
+          return user ? `${user.email || user.nama || value}` : value
+        }
+
+        if (field === 'id_teknisi') {
           const user = userMap && userMap[String(value)]
           return user ? `${user.email || user.nama || value}` : value
         }

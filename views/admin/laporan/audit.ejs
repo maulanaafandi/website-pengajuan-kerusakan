@@ -1,8 +1,8 @@
-<%- include('../partials/head', { title: 'Audit Laporan' }) %>
+<%- include('../partials/head', { title: 'Trigger Laporan' }) %>
 <main class="admin-page" id="adminPage">
   <%- include('../partials/sidebar', { active: 'audit-laporan' }) %>
   <section class="main-content">
-    <%- include('../partials/topbar', { pageTitle: 'Audit Laporan', pageSubtitle: 'Lihat hasil trigger audit dari perubahan data laporan.' }) %>
+    <%- include('../partials/topbar', { pageTitle: 'Trigger Laporan', pageSubtitle: 'Lihat hasil trigger dari perubahan data laporan.' }) %>
     <div class="table-card">
       <form method="GET" action="/admin/laporan/audit" class="toolbar">
         <div class="filter-left">
@@ -31,7 +31,7 @@
                 <th>Kode Laporan</th>
                 <th>Pelapor</th>
                 <th>Update Terakhir</th>
-                <th>Total Audit</th>
+                <th>Total Trigger</th>
                 <th class="center">Aksi</th>
               </tr>
             </thead>
@@ -48,7 +48,7 @@
                   <td><%= audit.total_audit || 0 %></td>
                   <td>
                     <div class="actions" style="justify-content:center">
-                      <a href="/admin/laporan/audit/<%= audit.id_laporan %>" class="btn-view" title="Detail audit laporan">
+                      <a href="/admin/laporan/audit/<%= audit.id_laporan %>" class="btn-view" title="Detail trigger laporan">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" style="width:20px;height:20px"><path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>
                       </a>
                     </div>
