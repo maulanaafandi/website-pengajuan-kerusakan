@@ -79,6 +79,10 @@ router.get('/admin/laporan/audit/:id', authAdmin, async (req, res) => {
           userIds.push(data.id_pelapor)
         }
 
+        if (data && data.id_teknisi !== undefined && data.id_teknisi !== null && data.id_teknisi !== '') {
+          userIds.push(data.id_teknisi)
+        }
+
         if (data && data.id_inventaris !== undefined && data.id_inventaris !== null && data.id_inventaris !== '') {
           inventarisIds.push(data.id_inventaris)
         }
