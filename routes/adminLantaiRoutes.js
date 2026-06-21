@@ -88,12 +88,28 @@ router.patch('/admin/master/lantai/edit/:id', authAdmin, async (req, res) => {
 
 router.delete('/admin/master/lantai/delete/:id', authAdmin, async (req, res) => {
   try {
-    await Lantai.delete(req.params.id)
+    const result = await Lantai.delete(req.params.id)
+
+    if (!result || result.affectedRows === 0) {
+      req.flash('error', 'Lantai tidak ditemukan')
+      return res.redirect('/admin/master/lantai')
+    }
+
     req.flash('success', 'Lantai berhasil dihapus')
     return res.redirect('/admin/master/lantai')
   } catch (err) {
     console.log(err)
-    req.flash('error', 'Gagal hapus lantai')
+
+    if (err.code === 'LANTAI_NOT_FOUND') {
+      req.flash('error', err.message)
+    } else if (err.code === 'LANTAI_USED_IN_LAPORAN') {
+      req.flash('error', err.message)
+    } else if (err.code === 'ER_ROW_IS_REFERENCED_2') {
+      req.flash('error', err.message)
+    } else {
+      req.flash('error', err.message || 'Gagal hapus lantai')
+    }
+
     return res.redirect('/admin/master/lantai')
   }
 })

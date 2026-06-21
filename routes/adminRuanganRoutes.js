@@ -107,12 +107,28 @@ router.patch('/admin/ruangan/edit/:id', authAdmin, async (req, res) => {
 
 router.delete('/admin/ruangan/delete/:id', authAdmin, async (req, res) => {
   try {
-    await Ruangan.deleteRuangan(req.params.id)
+    const result = await Ruangan.deleteRuangan(req.params.id)
+
+    if (!result || result.affectedRows === 0) {
+      req.flash('error', 'Ruangan tidak ditemukan')
+      return res.redirect('/admin/ruangan')
+    }
+
     req.flash('success', 'Ruangan berhasil dihapus')
     return res.redirect('/admin/ruangan')
   } catch (err) {
     console.log(err)
-    req.flash('error', 'Gagal hapus ruangan')
+
+    if (err.code === 'RUANGAN_NOT_FOUND') {
+      req.flash('error', err.message)
+    } else if (err.code === 'RUANGAN_USED_IN_LAPORAN') {
+      req.flash('error', err.message)
+    } else if (err.code === 'ER_ROW_IS_REFERENCED_2') {
+      req.flash('error', err.message)
+    } else {
+      req.flash('error', err.message || 'Gagal hapus ruangan')
+    }
+
     return res.redirect('/admin/ruangan')
   }
 })

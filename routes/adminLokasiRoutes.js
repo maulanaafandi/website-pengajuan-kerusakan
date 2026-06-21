@@ -88,12 +88,28 @@ router.patch('/admin/master/lokasi/edit/:id', authAdmin, async (req, res) => {
 
 router.delete('/admin/master/lokasi/delete/:id', authAdmin, async (req, res) => {
   try {
-    await Lokasi.delete(req.params.id)
+    const result = await Lokasi.delete(req.params.id)
+
+    if (!result || result.affectedRows === 0) {
+      req.flash('error', 'Lokasi tidak ditemukan')
+      return res.redirect('/admin/master/lokasi')
+    }
+
     req.flash('success', 'Lokasi berhasil dihapus')
     return res.redirect('/admin/master/lokasi')
   } catch (err) {
     console.log(err)
-    req.flash('error', 'Gagal hapus lokasi')
+
+    if (err.code === 'LOKASI_NOT_FOUND') {
+      req.flash('error', err.message)
+    } else if (err.code === 'LOKASI_USED_IN_LAPORAN') {
+      req.flash('error', err.message)
+    } else if (err.code === 'ER_ROW_IS_REFERENCED_2') {
+      req.flash('error', err.message)
+    } else {
+      req.flash('error', err.message || 'Gagal hapus lokasi')
+    }
+
     return res.redirect('/admin/master/lokasi')
   }
 })

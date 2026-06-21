@@ -53,7 +53,37 @@ class Lantai {
 
   static async delete(id) {
     try {
-      await connection.query('DELETE FROM lantai WHERE id = ?', [id])
+      const [lantaiRows] = await connection.query(
+        `SELECT id
+         FROM lantai
+         WHERE id = ?
+         LIMIT 1`,
+        [id]
+      )
+
+      if (!lantaiRows.length) {
+        const error = new Error('Lantai tidak ditemukan')
+        error.code = 'LANTAI_NOT_FOUND'
+        throw error
+      }
+
+      const [laporanRows] = await connection.query(
+        `SELECT COUNT(*) AS total
+         FROM laporan l
+         INNER JOIN inventaris i ON l.id_inventaris = i.id
+         INNER JOIN ruangan r ON i.id_ruangan = r.id
+         WHERE r.id_lantai = ?`,
+        [id]
+      )
+
+      if (laporanRows[0]?.total > 0) {
+        const error = new Error('Lantai tidak bisa dihapus karena sudah digunakan pada laporan')
+        error.code = 'LANTAI_USED_IN_LAPORAN'
+        throw error
+      }
+
+      const [result] = await connection.query('DELETE FROM lantai WHERE id = ?', [id])
+      return result
     } catch (error) {
       console.log('Error delete lantai:', error)
       throw error

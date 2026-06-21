@@ -20,6 +20,7 @@ const pool = mysql.createPool ({
     } catch (err) {
         console.log('Koneksi Gagal:', err)
     }
+    
 })()
 
 module.exports = pool
