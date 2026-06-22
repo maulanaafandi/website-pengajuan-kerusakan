@@ -19,7 +19,7 @@
               <%= String(item.id_kaleb || item.id_user || '') === String(user.id_user) ? 'selected' : '' %>>
               
               <%= user.nama || user.email %> - <%= user.role %>
-              <%= user.role !== 'dosen' && String(user.kaleb) === '1' ? ' (Kaleb)' : '' %>
+              <%= String(user.kaleb) === '1' ? ' - Kaleb' : '' %>
 
             </option>
           <% }) %>

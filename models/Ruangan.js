@@ -1,6 +1,30 @@
 const connection = require('../config/db')
 
 class Ruangan {
+  static async syncKalebFlag(conn, userId) {
+    const normalizedUserId = Number(userId)
+
+    if (!Number.isInteger(normalizedUserId) || normalizedUserId <= 0) {
+      return
+    }
+
+    const [usageRows] = await conn.query(
+      `SELECT COUNT(*) AS total
+       FROM ruangan
+       WHERE id_kaleb = ?`,
+      [normalizedUserId]
+    )
+
+    const kalebValue = usageRows[0]?.total > 0 ? '1' : '0'
+
+    await conn.query(
+      `UPDATE users
+       SET kaleb = ?
+       WHERE id = ?`,
+      [kalebValue, normalizedUserId]
+    )
+  }
+
   static get selectFields() {
     return `
       r.id AS id_ruangan,
@@ -106,26 +130,48 @@ class Ruangan {
   }
 
   static async createRuangan(data) {
+    const conn = await connection.getConnection()
     try {
-      await connection.query(
+      const selectedUserId = data.id_kaleb || data.id_user || null
+
+      await conn.beginTransaction()
+      await conn.query(
         `INSERT INTO ruangan (nama, kode_ruangan, id_lokasi, id_lantai, id_kaleb) VALUES (?, ?, ?, ?, ?)`,
         [
           data.nama_ruangan || data.nama,
           data.kode_ruangan,
           data.id_lokasi || null,
           data.id_lantai || null,
-          data.id_kaleb || data.id_user || null
+          selectedUserId
         ]
       )
+
+      await Ruangan.syncKalebFlag(conn, selectedUserId)
+      await conn.commit()
     } catch (error) {
+      await conn.rollback()
       console.log('Error createRuangan:', error)
       throw error
+    } finally {
+      conn.release()
     }
   }
 
   static async updateRuangan(idRuangan, data) {
+    const conn = await connection.getConnection()
     try {
-      await connection.query(
+      const selectedUserId = data.id_kaleb || data.id_user || null
+      const [currentRows] = await conn.query(
+        `SELECT id_kaleb
+         FROM ruangan
+         WHERE id = ?`,
+        [idRuangan]
+      )
+
+      const previousUserId = currentRows[0]?.id_kaleb || null
+
+      await conn.beginTransaction()
+      await conn.query(
         `UPDATE ruangan
          SET nama = ?, kode_ruangan = ?, id_lokasi = ?, id_lantai = ?, id_kaleb = ?
          WHERE id = ?`,
@@ -134,20 +180,30 @@ class Ruangan {
           data.kode_ruangan,
           data.id_lokasi || null,
           data.id_lantai || null,
-          data.id_kaleb || data.id_user || null,
+          selectedUserId,
           idRuangan
         ]
       )
+
+      await Ruangan.syncKalebFlag(conn, previousUserId)
+      await Ruangan.syncKalebFlag(conn, selectedUserId)
+      await conn.commit()
     } catch (error) {
+      await conn.rollback()
       console.log('Error updateRuangan:', error)
       throw error
+    } finally {
+      conn.release()
     }
   }
 
   static async deleteRuangan(idRuangan) {
+    const conn = await connection.getConnection()
     try {
-      const [ruanganRows] = await connection.query(
-        `SELECT id
+      await conn.beginTransaction()
+
+      const [ruanganRows] = await conn.query(
+        `SELECT id, id_kaleb
          FROM ruangan
          WHERE id = ?
          LIMIT 1`,
@@ -160,7 +216,7 @@ class Ruangan {
         throw error
       }
 
-      const [laporanRows] = await connection.query(
+      const [laporanRows] = await conn.query(
         `SELECT COUNT(*) AS total
          FROM laporan l
          INNER JOIN inventaris i ON l.id_inventaris = i.id
@@ -174,11 +230,17 @@ class Ruangan {
         throw error
       }
 
-      const [result] = await connection.query(`DELETE FROM ruangan WHERE id = ?`, [idRuangan])
+      const previousUserId = ruanganRows[0]?.id_kaleb || null
+      const [result] = await conn.query(`DELETE FROM ruangan WHERE id = ?`, [idRuangan])
+      await Ruangan.syncKalebFlag(conn, previousUserId)
+      await conn.commit()
       return result
     } catch (error) {
+      await conn.rollback()
       console.log('Error deleteRuangan:', error)
       throw error
+    } finally {
+      conn.release()
     }
   }
 }

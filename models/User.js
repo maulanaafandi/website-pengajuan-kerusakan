@@ -48,9 +48,9 @@ class User {
       const [rows] = await connection.query(
         `SELECT ${User.selectFields}
          FROM users
-         WHERE kaleb = ?
+         WHERE role = ? OR kaleb = ?
          ORDER BY nama ASC, email ASC`,
-        ['1']
+        ['dosen', '1']
       )
       return rows
     } catch (error) {
