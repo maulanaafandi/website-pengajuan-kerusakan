@@ -1,0 +1,120 @@
+<%- include('../partials/head', { title: 'Laporan Per Ruangan' }) %>
+<main class="admin-page" id="adminPage">
+  <%- include('../partials/sidebar', { active: 'laporan-per-ruangan' }) %>
+  <section class="main-content">
+    <%- include('../partials/topbar', { pageTitle: 'Laporan Per Ruangan', pageSubtitle: 'Pilih ruangan untuk melihat preview dan mencetak PDF laporan.' }) %>
+
+    <div class="table-card">
+      <form method="GET" action="/admin/laporan/ruangan" class="toolbar">
+        <div class="filter-left">
+          <select name="id_ruangan" class="control" aria-label="Pilih ruangan">
+            <option value="">Pilih Ruangan</option>
+            <% ruanganList.forEach((ruangan) => { %>
+              <option value="<%= ruangan.id %>" <%= String(selectedRuanganId) === String(ruangan.id) ? 'selected' : '' %>><%= ruangan.nama %></option>
+            <% }) %>
+          </select>
+          <button class="btn-primary" type="submit">Preview</button>
+          <% if (selectedRuanganId) { %>
+            <a href="/admin/laporan/ruangan" class="btn-secondary">Reset</a>
+            <a href="/admin/laporan/ruangan/pdf?id_ruangan=<%= encodeURIComponent(selectedRuanganId) %>" class="btn-primary" target="_blank" rel="noopener noreferrer" id="printPdfButton">Cetak PDF</a>
+            <button type="button" class="btn-secondary" id="resetCheckboxesButton">Reset Checkbox</button>
+          <% } %>
+        </div>
+      </form>
+
+      <% if (selectedRuanganId) { %>
+        <div style="margin-bottom:16px">
+          <strong>Ruangan:</strong> <%= selectedRuangan ? selectedRuangan.nama : '-' %>
+        </div>
+
+        <div class="table-wrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width:58px">No</th>
+                <th>Kode Barang</th>
+                <th>NUP</th>
+                <th>Nama Barang</th>
+                <th>Merk</th>
+                <th>Kerusakan</th>
+                <th>Kehilangan</th>
+              </tr>
+            </thead>
+            <tbody>
+              <% if (!inventarisItems || inventarisItems.length === 0) { %>
+                <tr>
+                  <td colspan="7" class="empty-state">Belum ada data inventaris pada ruangan ini</td>
+                </tr>
+              <% } %>
+
+              <% inventarisItems.forEach((item, index) => { %>
+                <tr>
+                  <td><%= index + 1 %></td>
+                  <td><%= item.kode_barang || '-' %></td>
+                  <td><%= item.nup || '-' %></td>
+                  <td><%= item.nama_barang || '-' %></td>
+                  <td><%= item.merk || '-' %></td>
+                  <td class="center">
+                    <input type="checkbox" class="laporan-kondisi-checkbox checkbox-kerusakan" data-item-id="<%= item.id_inventaris %>" aria-label="Checklist kerusakan barang <%= item.nama_barang || index + 1 %>">
+                  </td>
+                  <td class="center">
+                    <input type="checkbox" class="laporan-kondisi-checkbox checkbox-kehilangan" data-item-id="<%= item.id_inventaris %>" aria-label="Checklist kehilangan barang <%= item.nama_barang || index + 1 %>">
+                  </td>
+                </tr>
+              <% }) %>
+            </tbody>
+          </table>
+        </div>
+      <% } else { %>
+        <div class="empty-state">Pilih ruangan terlebih dahulu untuk melihat preview laporan.</div>
+      <% } %>
+    </div>
+  </section>
+  <% if (selectedRuanganId) { %>
+    <script>
+      (function() {
+        var resetButton = document.getElementById('resetCheckboxesButton')
+        var printButton = document.getElementById('printPdfButton')
+
+        if (resetButton) {
+          resetButton.addEventListener('click', function() {
+            var checkboxes = document.querySelectorAll('.laporan-kondisi-checkbox')
+            checkboxes.forEach(function(checkbox) {
+              checkbox.checked = false
+            })
+          })
+        }
+
+        if (printButton) {
+          printButton.addEventListener('click', function(event) {
+            event.preventDefault()
+
+            var kerusakanIds = Array.from(document.querySelectorAll('.checkbox-kerusakan:checked'))
+              .map(function(checkbox) { return checkbox.getAttribute('data-item-id') })
+              .filter(Boolean)
+
+            var kehilanganIds = Array.from(document.querySelectorAll('.checkbox-kehilangan:checked'))
+              .map(function(checkbox) { return checkbox.getAttribute('data-item-id') })
+              .filter(Boolean)
+
+            var url = new URL(printButton.href, window.location.origin)
+
+            if (kerusakanIds.length) {
+              url.searchParams.set('kerusakan_ids', kerusakanIds.join(','))
+            } else {
+              url.searchParams.delete('kerusakan_ids')
+            }
+
+            if (kehilanganIds.length) {
+              url.searchParams.set('kehilangan_ids', kehilanganIds.join(','))
+            } else {
+              url.searchParams.delete('kehilangan_ids')
+            }
+
+            window.open(url.toString(), '_blank', 'noopener')
+          })
+        }
+      })()
+    </script>
+  <% } %>
+<%- include('../partials/footer') %>

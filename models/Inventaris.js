@@ -143,6 +143,53 @@ class Inventaris {
     }
   }
 
+  static async getRuanganDenganInventaris() {
+    try {
+      const [rows] = await connection.query(
+        `SELECT DISTINCT
+          r.id,
+          r.nama AS nama_ruangan,
+          r.kode_ruangan,
+          CONCAT(r.nama, ' - ', r.kode_ruangan) AS nama
+         FROM inventaris i
+         INNER JOIN ruangan r ON i.id_ruangan = r.id
+         ORDER BY nama_ruangan ASC, kode_ruangan ASC`
+      )
+
+      return rows
+    } catch (error) {
+      console.log('Error getRuanganDenganInventaris:', error)
+      throw error
+    }
+  }
+
+  static async getInventarisLaporanPerRuangan(idRuangan) {
+    try {
+      const [rows] = await connection.query(
+        `SELECT
+          i.id AS id_inventaris,
+          i.kode_barang,
+          i.NUP AS nup,
+          i.nama_barang,
+          i.merk,
+          i.kategori,
+          r.id AS id_ruangan,
+          r.nama AS nama_ruangan,
+          r.kode_ruangan
+         FROM inventaris i
+         INNER JOIN ruangan r ON i.id_ruangan = r.id
+         WHERE r.id = ?
+         ORDER BY i.id DESC`,
+        [idRuangan]
+      )
+
+      return rows
+    } catch (error) {
+      console.log('Error getInventarisLaporanPerRuangan:', error)
+      throw error
+    }
+  }
+
   static async getInventarisById(idInventaris) {
     try {
       const [rows] = await connection.query(
