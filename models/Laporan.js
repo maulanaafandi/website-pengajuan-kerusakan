@@ -166,7 +166,8 @@ class Laporan {
           l.status,
           teknisi.nama AS nama_teknisi,
           l.keterangan,
-          l.selesai_pada
+          l.selesai_pada,
+          l.foto_selesai
          FROM laporan l
          LEFT JOIN inventaris i ON l.id_inventaris = i.id
          LEFT JOIN ruangan r ON i.id_ruangan = r.id
@@ -203,17 +204,18 @@ class Laporan {
     }
   }
 
-  static async updateStatusDanKeteranganKaleb(idLaporan, status, keteranganAdmin, teknisiId = null) {
+  static async updateStatusDanKeteranganKaleb(idLaporan, status, keteranganAdmin, teknisiId = null, fotoSelesai = null) {
     try {
       const [result] = await connection.query(
         `UPDATE laporan
          SET status = ?,
              keterangan = ?,
              id_teknisi = IF(? = 'selesai' AND ? IS NOT NULL, ?, id_teknisi),
-             selesai_pada = IF(? = 'selesai', COALESCE(selesai_pada, NOW()), selesai_pada)
+             selesai_pada = IF(? = 'selesai', COALESCE(selesai_pada, NOW()), selesai_pada),
+             foto_selesai = IF(? = 'selesai' AND ? IS NOT NULL, ?, foto_selesai)
          WHERE id = ?
            AND (status IS NULL OR status != 'selesai')`,
-        [status, keteranganAdmin, status, teknisiId, teknisiId, status, idLaporan]
+        [status, keteranganAdmin, status, teknisiId, teknisiId, status, status, fotoSelesai, fotoSelesai, idLaporan]
       )
 
       return result.affectedRows
@@ -223,7 +225,7 @@ class Laporan {
     }
   }
 
-  static async updateStatusDanKeteranganByPemilikRuangan(idLaporan, idUser, status, keteranganAdmin, teknisiId = null) {
+  static async updateStatusDanKeteranganByPemilikRuangan(idLaporan, idUser, status, keteranganAdmin, teknisiId = null, fotoSelesai = null) {
     try {
       const [result] = await connection.query(
         `UPDATE laporan l
@@ -232,11 +234,12 @@ class Laporan {
          SET l.status = ?,
              l.keterangan = ?,
              l.id_teknisi = IF(? = 'selesai' AND ? IS NOT NULL, ?, l.id_teknisi),
-             l.selesai_pada = IF(? = 'selesai', COALESCE(l.selesai_pada, NOW()), l.selesai_pada)
+             l.selesai_pada = IF(? = 'selesai', COALESCE(l.selesai_pada, NOW()), l.selesai_pada),
+             l.foto_selesai = IF(? = 'selesai' AND ? IS NOT NULL, ?, l.foto_selesai)
          WHERE l.id = ?
            AND r.id_kaleb = ?
            AND (l.status IS NULL OR l.status != 'selesai')`,
-        [status, keteranganAdmin, status, teknisiId, teknisiId, status, idLaporan, idUser]
+        [status, keteranganAdmin, status, teknisiId, teknisiId, status, status, fotoSelesai, fotoSelesai, idLaporan, idUser]
       )
 
       return result.affectedRows
@@ -316,7 +319,8 @@ class Laporan {
           l.status,
           teknisi.nama AS nama_teknisi,
           l.keterangan,
-          l.selesai_pada
+          l.selesai_pada,
+          l.foto_selesai
          FROM laporan l
          LEFT JOIN users u ON l.id_pelapor = u.id
          LEFT JOIN users teknisi ON l.id_teknisi = teknisi.id
@@ -387,8 +391,8 @@ class Laporan {
     }
   }
 
-  static async updateStatusDanKeteranganByPlp(idLaporan, status, keteranganAdmin, teknisiId = null) {
-    return Laporan.updateStatusDanKeteranganKaleb(idLaporan, status, keteranganAdmin, teknisiId)
+  static async updateStatusDanKeteranganByPlp(idLaporan, status, keteranganAdmin, teknisiId = null, fotoSelesai = null) {
+    return Laporan.updateStatusDanKeteranganKaleb(idLaporan, status, keteranganAdmin, teknisiId, fotoSelesai)
   }
 
   static async getLaporanByIdPlp(idLaporan) {
@@ -417,7 +421,8 @@ class Laporan {
           l.status,
           teknisi.nama AS nama_teknisi,
           l.keterangan,
-          l.selesai_pada
+          l.selesai_pada,
+          l.foto_selesai
          FROM laporan l
          LEFT JOIN users u ON l.id_pelapor = u.id
          LEFT JOIN inventaris i ON l.id_inventaris = i.id
