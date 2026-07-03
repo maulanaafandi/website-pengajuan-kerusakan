@@ -3,6 +3,12 @@
   <%- include('../partials/sidebar', { active: 'laporan' }) %>
   <section class="main-content">
     <%- include('../partials/topbar', { pageTitle: 'Detail Laporan User', pageSubtitle: 'Lihat detail laporan dan riwayat audit.' }) %>
+    <%
+      const kategori = String(laporan.kategori || '').toLowerCase()
+      const showBuktiFoto = Boolean(laporan.bukti_foto) && kategori !== 'kehilangan'
+      const showFotoSelesai = Boolean(laporan.foto_selesai) && ['kerusakan', 'kehilangan'].includes(kategori)
+      const hasPhotoCard = showBuktiFoto || showFotoSelesai
+    %>
     <div class="detail-grid" style="display:grid;grid-template-columns:minmax(0,1.35fr) 360px;gap:20px;align-items:start">
       <div class="form-card" style="max-width:100%">
         <div class="table-top" style="margin:0 0 20px 0">
@@ -43,18 +49,39 @@
 
       <aside style="display:grid;gap:20px">
         <div class="form-card" style="max-width:100%">
-          <h2 style="margin-bottom:14px">Foto Bukti</h2>
-          <% if (laporan.bukti_foto) { %>
-            <button
-              type="button"
-              class="preview-trigger"
-              id="previewTrigger"
-              data-image-src="/uploads/<%= laporan.bukti_foto %>"
-              data-image-alt="Bukti laporan"
-            >
-              <img src="/uploads/<%= laporan.bukti_foto %>" alt="Bukti laporan" style="width:100%;border-radius:14px;border:1px solid #e5e7eb;object-fit:cover;max-height:320px">
-              <span class="preview-badge">Preview</span>
-            </button>
+          <h2 style="margin-bottom:14px">Foto Laporan</h2>
+          <% if (hasPhotoCard) { %>
+            <div style="display:grid;gap:18px">
+              <% if (showBuktiFoto) { %>
+                <div style="display:grid;gap:10px">
+                  <strong style="font-size:14px;color:#111827">Bukti Foto</strong>
+                  <button
+                    type="button"
+                    class="preview-trigger"
+                    data-image-src="/uploads/<%= laporan.bukti_foto %>"
+                    data-image-alt="Bukti laporan"
+                  >
+                    <img src="/uploads/<%= laporan.bukti_foto %>" alt="Bukti laporan" style="width:100%;border-radius:14px;border:1px solid #e5e7eb;object-fit:cover;max-height:320px">
+                    <span class="preview-badge">Preview</span>
+                  </button>
+                </div>
+              <% } %>
+
+              <% if (showFotoSelesai) { %>
+                <div style="display:grid;gap:10px">
+                  <strong style="font-size:14px;color:#111827">Foto Selesai</strong>
+                  <button
+                    type="button"
+                    class="preview-trigger"
+                    data-image-src="/uploads/<%= laporan.foto_selesai %>"
+                    data-image-alt="Foto selesai laporan"
+                  >
+                    <img src="/uploads/<%= laporan.foto_selesai %>" alt="Foto selesai laporan" style="width:100%;border-radius:14px;border:1px solid #e5e7eb;object-fit:cover;max-height:320px">
+                    <span class="preview-badge">Preview</span>
+                  </button>
+                </div>
+              <% } %>
+            </div>
           <% } else { %>
             <div class="empty-state" style="border:1px dashed #d0d5dd;border-radius:14px">Tidak ada foto bukti</div>
           <% } %>
@@ -77,7 +104,7 @@
       @media(max-width:1180px){.detail-grid{grid-template-columns:1fr!important}}
       @media(max-width:1180px){aside .form-card{position:static}}
     </style>
-    <% if (laporan.bukti_foto) { %>
+    <% if (hasPhotoCard) { %>
       <div class="image-preview-modal" id="imagePreviewModal" aria-hidden="true">
         <div class="image-preview-dialog">
           <button type="button" class="image-preview-close" id="imagePreviewClose" aria-label="Tutup preview">&times;</button>
@@ -87,14 +114,14 @@
 
       <script>
         (function () {
-          var trigger = document.getElementById('previewTrigger')
+          var triggers = document.querySelectorAll('.preview-trigger')
           var modal = document.getElementById('imagePreviewModal')
           var closeButton = document.getElementById('imagePreviewClose')
           var target = document.getElementById('imagePreviewTarget')
 
-          if (!trigger || !modal || !closeButton || !target) return
+          if (!triggers.length || !modal || !closeButton || !target) return
 
-          function openPreview() {
+          function openPreview(trigger) {
             target.src = trigger.dataset.imageSrc || ''
             target.alt = trigger.dataset.imageAlt || 'Preview gambar'
             modal.classList.add('open')
@@ -107,7 +134,11 @@
             target.src = ''
           }
 
-          trigger.addEventListener('click', openPreview)
+          triggers.forEach(function (trigger) {
+            trigger.addEventListener('click', function () {
+              openPreview(trigger)
+            })
+          })
           closeButton.addEventListener('click', closePreview)
           modal.addEventListener('click', function (event) {
             if (event.target === modal) closePreview()

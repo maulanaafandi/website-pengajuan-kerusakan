@@ -22,6 +22,7 @@ class Laporan {
       l.status,
       l.prioritas,
       l.bukti_foto,
+      l.foto_selesai,
       l.kondisi,
       l.selesai_pada,
       l.rekomendasi_ai,
