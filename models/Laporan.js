@@ -360,6 +360,8 @@ class Laporan {
          LEFT JOIN inventaris i ON l.id_inventaris = i.id
          LEFT JOIN ruangan r ON i.id_ruangan = r.id
          WHERE r.id_kaleb = ?
+           AND l.status IS NULL
+           AND l.prioritas IS NULL
          ORDER BY l.id DESC
          LIMIT ${safeLimit}`,
         [idUser]

@@ -67,6 +67,9 @@ router.get('/API/rekomendasi-laporan-ai', verifyToken, authorize(['dosen']), asy
 
     const limit = req.query.limit
     const laporan = await Laporan.getLaporanUntukRekomendasiAiKaleb(req.user.id, limit)
+    if (!laporan.length) {
+      return res.status(200).json({ data: [] })
+    }
     const data = await rekomendasiPrioritasLaporan(laporan)
     res.status(200).json({ data })
   } catch (err) {
