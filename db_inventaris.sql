@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.2
+-- version 5.2.3
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 01, 2026 at 08:54 PM
--- Server version: 11.4.12-MariaDB
--- PHP Version: 8.4.22
+-- Generation Time: Jul 26, 2026 at 04:20 AM
+-- Server version: 8.0.30
+-- PHP Version: 8.3.30
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -18,30 +18,8 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `siforsmy_db_pengajuan`
+-- Database: `db_inventaris`
 --
-
--- --------------------------------------------------------
-
---
--- Table structure for table `audit_laporan`
---
-
-CREATE TABLE `audit_laporan` (
-  `id` int(11) NOT NULL,
-  `id_laporan` int(11) DEFAULT NULL,
-  `action` varchar(100) DEFAULT NULL,
-  `data_lama` text DEFAULT NULL,
-  `data_baru` text DEFAULT NULL,
-  `waktu` datetime DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `audit_laporan`
---
-
-INSERT INTO `audit_laporan` (`id`, `id_laporan`, `action`, `data_lama`, `data_baru`, `waktu`) VALUES
-(11, 13, 'INSERT', NULL, '{\"id\": 13, \"id_pelapor\": 9, \"id_inventaris\": 136, \"id_teknisi\": null, \"kategori\": \"kerusakan\", \"deskripsi\": \"PC rusak\", \"bukti_foto\": \"1782914068533-566753781.jpg\", \"kondisi\": 24.00, \"status\": null, \"prioritas\": null, \"keterangan\": null, \"selesai_pada\": null, \"rekomendasi_ai\": null, \"kode_laporan\": \"20260701-205428-0T0C\"}', '2026-07-01 20:54:28');
 
 -- --------------------------------------------------------
 
@@ -50,14 +28,14 @@ INSERT INTO `audit_laporan` (`id`, `id_laporan`, `action`, `data_lama`, `data_ba
 --
 
 CREATE TABLE `inventaris` (
-  `id` int(11) NOT NULL,
-  `id_ruangan` int(11) DEFAULT NULL,
-  `kode_barang` varchar(100) NOT NULL,
-  `NUP` varchar(100) DEFAULT NULL,
-  `nama_barang` varchar(150) NOT NULL,
-  `merk` varchar(100) DEFAULT NULL,
-  `tipe` varchar(100) DEFAULT NULL,
-  `kategori` enum('Alat','Habis Pakai') NOT NULL DEFAULT 'Alat',
+  `id` int NOT NULL,
+  `id_ruangan` int DEFAULT NULL,
+  `kode_barang` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `NUP` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `nama_barang` varchar(150) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `merk` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `tipe` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `kategori` enum('Alat','Habis Pakai') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Alat',
   `tanggal_buku_pertama` date DEFAULT NULL,
   `tanggal_perolehan` date DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -236,13 +214,13 @@ INSERT INTO `inventaris` (`id`, `id_ruangan`, `kode_barang`, `NUP`, `nama_barang
 (168, 5, '3100102001', '160', 'P.C Unit', 'DELL INSPIRON 3881', 'DELL INSPIRON 3881', 'Alat', '2021-12-31', '2021-11-16'),
 (169, 5, '3100102001', '161', 'P.C Unit', 'DELL INSPIRON 3881', 'DELL INSPIRON 3881', 'Alat', '2021-12-31', '2021-11-16'),
 (170, 5, '3100102001', '162', 'P.C Unit', 'DELL INSPIRON 3881', 'DELL INSPIRON 3881', 'Alat', '2021-12-31', '2021-11-16'),
-(171, 3, '3100204002', '10', 'Router', 'MIKROTIK', 'MIKROTIK', 'Alat', '2021-12-31', '2012-12-12'),
-(172, 6, '3100204002', '11', 'Router', 'MIKROTIK', 'MIKROTIK', 'Alat', '2021-12-31', '2012-12-12'),
-(173, 8, '3100204023', '1', 'Wireless Access Point', 'DUAL BAND', 'DUAL BAND', 'Alat', '2021-12-31', '2012-12-12'),
-(174, 8, '3100204023', '2', 'Wireless Access Point', 'DUAL BAND', 'DUAL BAND', 'Alat', '2021-12-31', '2012-12-12'),
-(175, 8, '3100204024', '1', 'Switch', 'ALLIED TELESIS', 'ALLIED TELESIS', 'Alat', '2021-12-31', '2012-12-18'),
-(176, 8, '3100204024', '2', 'Switch', 'ALLIED TELESIS', 'ALLIED TELESIS', 'Alat', '2021-12-31', '2012-12-18'),
-(179, 8, '3030205014', '1', 'Crimping Tolls', 'DIGILINK', 'DIGILINK', 'Alat', '2021-12-31', '2012-12-12');
+(171, NULL, '3100204002', '10', 'Router', 'MIKROTIK', 'MIKROTIK', 'Alat', '2021-12-31', '2012-12-12'),
+(172, NULL, '3100204002', '11', 'Router', 'MIKROTIK', 'MIKROTIK', 'Alat', '2021-12-31', '2012-12-12'),
+(173, NULL, '3100204023', '1', 'Wireless Access Point', 'DUAL BAND', 'DUAL BAND', 'Alat', '2021-12-31', '2012-12-12'),
+(174, NULL, '3100204023', '2', 'Wireless Access Point', 'DUAL BAND', 'DUAL BAND', 'Alat', '2021-12-31', '2012-12-12'),
+(175, NULL, '3100204024', '1', 'Switch', 'ALLIED TELESIS', 'ALLIED TELESIS', 'Alat', '2021-12-31', '2012-12-18'),
+(176, NULL, '3100204024', '2', 'Switch', 'ALLIED TELESIS', 'ALLIED TELESIS', 'Alat', '2021-12-31', '2012-12-18'),
+(179, NULL, '3030205014', '1', 'Crimping Tolls', 'DIGILINK', 'DIGILINK', 'Alat', '2021-12-31', '2012-12-12');
 
 -- --------------------------------------------------------
 
@@ -251,8 +229,8 @@ INSERT INTO `inventaris` (`id`, `id_ruangan`, `kode_barang`, `NUP`, `nama_barang
 --
 
 CREATE TABLE `lantai` (
-  `id` int(11) NOT NULL,
-  `nama` varchar(100) NOT NULL
+  `id` int NOT NULL,
+  `nama` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -270,99 +248,28 @@ INSERT INTO `lantai` (`id`, `nama`) VALUES
 --
 
 CREATE TABLE `laporan` (
-  `id` int(11) NOT NULL,
-  `id_pelapor` int(11) DEFAULT NULL,
-  `id_inventaris` int(11) DEFAULT NULL,
-  `id_teknisi` int(11) DEFAULT NULL,
-  `waktu_lapor` datetime DEFAULT current_timestamp(),
-  `kategori` enum('kerusakan','kehilangan') NOT NULL,
-  `deskripsi` text DEFAULT NULL,
-  `bukti_foto` varchar(255) DEFAULT NULL,
-  `kondisi` decimal(5,2) DEFAULT NULL,
-  `status` enum('diproses_internal','diproses_eksternal','pending','ditolak','selesai') DEFAULT NULL,
-  `prioritas` enum('Penting dan Mendesak','Penting tapi Tidak Mendesak','Tidak Penting tapi Mendesak','Tidak Penting dan Tidak Mendesak') DEFAULT NULL,
-  `keterangan` text DEFAULT NULL,
+  `id` int NOT NULL,
+  `id_pelapor` int DEFAULT NULL,
+  `id_inventaris` int DEFAULT NULL,
+  `id_ruangan` int DEFAULT NULL,
+  `id_teknisi` int DEFAULT NULL,
+  `waktu_lapor` datetime DEFAULT CURRENT_TIMESTAMP,
+  `kategori` enum('kerusakan','kehilangan','barang_baru') COLLATE utf8mb4_general_ci NOT NULL,
+  `deskripsi` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `bukti_foto` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `tingkat_kerusakan` enum('ringan','sedang','berat','rusak_total') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `status` enum('diproses_internal','diproses_eksternal','ditolak','selesai','diajukan') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `prioritas` enum('Penting dan Mendesak','Penting tapi Tidak Mendesak','Tidak Penting tapi Mendesak','Tidak Penting dan Tidak Mendesak') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `keterangan` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `selesai_pada` datetime DEFAULT NULL,
   `rekomendasi_ai` tinyint(1) DEFAULT NULL,
-  `kode_laporan` varchar(255) DEFAULT NULL,
-  `foto_selesai` varchar(255) DEFAULT NULL
+  `kode_laporan` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `foto_selesai` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `waktu_lapor_semester` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `spesifikasi` text COLLATE utf8mb4_general_ci,
+  `harga` decimal(15,2) DEFAULT NULL,
+  `jumlah` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data for table `laporan`
---
-
-INSERT INTO `laporan` (`id`, `id_pelapor`, `id_inventaris`, `id_teknisi`, `waktu_lapor`, `kategori`, `deskripsi`, `bukti_foto`, `kondisi`, `status`, `prioritas`, `keterangan`, `selesai_pada`, `rekomendasi_ai`, `kode_laporan`, `foto_selesai`) VALUES
-(13, 9, 136, NULL, '2026-07-01 20:54:28', 'kerusakan', 'PC rusak', '1782914068533-566753781.jpg', 24.00, NULL, NULL, NULL, NULL, NULL, '20260701-205428-0T0C', NULL);
-
---
--- Triggers `laporan`
---
-DELIMITER $$
-CREATE TRIGGER `after_insert_laporan` AFTER INSERT ON `laporan` FOR EACH ROW INSERT INTO audit_laporan (id_laporan, action, data_lama, data_baru)
-VALUES (
-  NEW.id,
-  'INSERT',
-  NULL,
-  JSON_OBJECT(
-    'id', NEW.id,
-    'id_pelapor', NEW.id_pelapor,
-    'id_inventaris', NEW.id_inventaris,
-    'id_teknisi', NEW.id_teknisi,
-    'kategori', NEW.kategori,
-    'deskripsi', NEW.deskripsi,
-    'bukti_foto', NEW.bukti_foto,
-    'kondisi', NEW.kondisi,
-    'status', NEW.status,
-    'prioritas', NEW.prioritas,
-    'keterangan', NEW.keterangan,
-    'selesai_pada', NEW.selesai_pada,
-    'rekomendasi_ai', NEW.rekomendasi_ai,
-    'kode_laporan', NEW.kode_laporan
-  )
-)
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `after_update_laporan` AFTER UPDATE ON `laporan` FOR EACH ROW INSERT INTO audit_laporan (id_laporan, action, data_lama, data_baru)
-VALUES (
-  NEW.id,
-  'UPDATE',
-  JSON_OBJECT(
-    'id', OLD.id,
-    'id_pelapor', OLD.id_pelapor,
-    'id_inventaris', OLD.id_inventaris,
-    'id_teknisi', OLD.id_teknisi,
-    'kategori', OLD.kategori,
-    'deskripsi', OLD.deskripsi,
-    'bukti_foto', OLD.bukti_foto,
-    'kondisi', OLD.kondisi,
-    'status', OLD.status,
-    'prioritas', OLD.prioritas,
-    'keterangan', OLD.keterangan,
-    'selesai_pada', OLD.selesai_pada,
-    'rekomendasi_ai', OLD.rekomendasi_ai,
-    'kode_laporan', OLD.kode_laporan
-  ),
-  JSON_OBJECT(
-    'id', NEW.id,
-    'id_pelapor', NEW.id_pelapor,
-    'id_inventaris', NEW.id_inventaris,
-    'id_teknisi', NEW.id_teknisi,
-    'kategori', NEW.kategori,
-    'deskripsi', NEW.deskripsi,
-    'bukti_foto', NEW.bukti_foto,
-    'kondisi', NEW.kondisi,
-    'status', NEW.status,
-    'prioritas', NEW.prioritas,
-    'keterangan', NEW.keterangan,
-    'selesai_pada', NEW.selesai_pada,
-    'rekomendasi_ai', NEW.rekomendasi_ai,
-    'kode_laporan', NEW.kode_laporan
-  )
-)
-$$
-DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -371,8 +278,8 @@ DELIMITER ;
 --
 
 CREATE TABLE `lokasi` (
-  `id` int(11) NOT NULL,
-  `nama` varchar(100) NOT NULL
+  `id` int NOT NULL,
+  `nama` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -390,12 +297,12 @@ INSERT INTO `lokasi` (`id`, `nama`) VALUES
 --
 
 CREATE TABLE `ruangan` (
-  `id` int(11) NOT NULL,
-  `nama` varchar(100) NOT NULL,
-  `kode_ruangan` varchar(50) NOT NULL,
-  `id_lokasi` int(11) DEFAULT NULL,
-  `id_lantai` int(11) DEFAULT NULL,
-  `id_kaleb` int(11) DEFAULT NULL
+  `id` int NOT NULL,
+  `nama` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `kode_ruangan` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `id_lokasi` int DEFAULT NULL,
+  `id_lantai` int DEFAULT NULL,
+  `id_kaleb` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -407,7 +314,7 @@ INSERT INTO `ruangan` (`id`, `nama`, `kode_ruangan`, `id_lokasi`, `id_lantai`, `
 (3, 'Kelas', 'K-102', 2, 1, NULL),
 (4, 'Lab', 'Lab. 201', 2, 2, NULL),
 (5, 'Lab', 'Lab. 202', 2, 2, NULL),
-(6, 'Lab ', 'Lab. 203', 2, 2, 8),
+(6, 'Lab ', 'Lab. 203', 2, 2, NULL),
 (7, 'Lab ', 'Lab. 204', 2, 2, NULL),
 (8, 'Gudang', 'Gdg', 2, 2, NULL);
 
@@ -418,13 +325,13 @@ INSERT INTO `ruangan` (`id`, `nama`, `kode_ruangan`, `id_lokasi`, `id_lantai`, `
 --
 
 CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
-  `nama` varchar(100) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `kata_sandi` varchar(255) NOT NULL,
-  `role` enum('mahasiswa','dosen','satpam','tendik','plp','admin') NOT NULL,
-  `kaleb` enum('0','1') DEFAULT '0',
-  `status` enum('proses','aktif','nonaktif') DEFAULT 'proses'
+  `id` int NOT NULL,
+  `nama` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `kata_sandi` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `role` enum('mahasiswa','dosen','satpam','tendik','plp','admin') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
+  `kaleb` enum('0','1') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '0',
+  `status` enum('proses','aktif','nonaktif') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT 'proses'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -432,21 +339,11 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `nama`, `email`, `kata_sandi`, `role`, `kaleb`, `status`) VALUES
-(1, 'Administrator', 'adminpsdku@pens.ac.id', '$2b$10$OTgdMCqMfIMn10xgoEPMnu4HDzzdHU9SXNAoCYR9JDycOkVvOuDlu', 'admin', '0', 'aktif'),
-(7, 'mahasiswa', 'mahasiswademo@pens.ac.id', '$2b$10$SrxdukHJsE..IA2PdbVOue9OBObQWx4QmiW9bONaTWMJNUc.NyuAe', 'mahasiswa', '0', 'aktif'),
-(8, 'Kalebdemo', 'kalebdemo@pens.ac.id', '$2b$10$AAmwLyZpn3GVyXNcbZTmQuVUp.KWZxIVnq0fJOkTh6O3Y2HpBXPWS', 'dosen', '1', 'aktif'),
-(9, 'Plpdemo', 'plpdemo@pens.ac.id', '$2b$10$t9VhOkTRAR3gAf1r94ZXIudEr.DQRTT6LfMf6X.JGztBWoeCPWd52', 'plp', '0', 'aktif');
+(1, 'Administrator', 'adminpsdku@pens.ac.id', '$2b$10$OTgdMCqMfIMn10xgoEPMnu4HDzzdHU9SXNAoCYR9JDycOkVvOuDlu', 'plp', '0', 'aktif');
 
 --
 -- Indexes for dumped tables
 --
-
---
--- Indexes for table `audit_laporan`
---
-ALTER TABLE `audit_laporan`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `id_laporan` (`id_laporan`);
 
 --
 -- Indexes for table `inventaris`
@@ -469,7 +366,8 @@ ALTER TABLE `laporan`
   ADD UNIQUE KEY `kode_laporan` (`kode_laporan`),
   ADD KEY `id_pelapor` (`id_pelapor`),
   ADD KEY `id_inventaris` (`id_inventaris`),
-  ADD KEY `id_teknisi` (`id_teknisi`);
+  ADD KEY `id_teknisi` (`id_teknisi`),
+  ADD KEY `laporan_ibfk_4` (`id_ruangan`);
 
 --
 -- Indexes for table `lokasi`
@@ -499,56 +397,44 @@ ALTER TABLE `users`
 --
 
 --
--- AUTO_INCREMENT for table `audit_laporan`
---
-ALTER TABLE `audit_laporan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
-
---
 -- AUTO_INCREMENT for table `inventaris`
 --
 ALTER TABLE `inventaris`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=180;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=180;
 
 --
 -- AUTO_INCREMENT for table `lantai`
 --
 ALTER TABLE `lantai`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `laporan`
 --
 ALTER TABLE `laporan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `lokasi`
 --
 ALTER TABLE `lokasi`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `ruangan`
 --
 ALTER TABLE `ruangan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- Constraints for dumped tables
 --
-
---
--- Constraints for table `audit_laporan`
---
-ALTER TABLE `audit_laporan`
-  ADD CONSTRAINT `audit_laporan_ibfk_1` FOREIGN KEY (`id_laporan`) REFERENCES `laporan` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `inventaris`
@@ -562,7 +448,8 @@ ALTER TABLE `inventaris`
 ALTER TABLE `laporan`
   ADD CONSTRAINT `laporan_ibfk_1` FOREIGN KEY (`id_pelapor`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `laporan_ibfk_2` FOREIGN KEY (`id_inventaris`) REFERENCES `inventaris` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `laporan_ibfk_3` FOREIGN KEY (`id_teknisi`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+  ADD CONSTRAINT `laporan_ibfk_3` FOREIGN KEY (`id_teknisi`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `laporan_ibfk_4` FOREIGN KEY (`id_ruangan`) REFERENCES `ruangan` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 --
 -- Constraints for table `ruangan`

@@ -26,7 +26,12 @@ const buatLaporanRoutes = require('./routes/mobile/allUser/buatLaporan');
 const profileRoutes = require('./routes/mobile/allUser/profile');
 const riwayatLaporanRoutes = require('./routes/mobile/allUser/riwayetLaporan');
 const laporanPlpRoutes = require('./routes/mobile/PLP/laporan');
+const pengajuanPerbaikanPlpRoutes = require('./routes/mobile/PLP/PengajuanPerbaikan');
+const pengajuanPengadaanPlpRoutes = require('./routes/mobile/PLP/PengajuanPengadaan');
 const laporanKalebRoutes = require('./routes/mobile/dosenKalep/laporan');
+const pengajuanPerbaikanKalebRoutes = require('./routes/mobile/dosenKalep/PengajuanPerbaikan');
+const pengajuanPengadaanKalebRoutes = require('./routes/mobile/dosenKalep/PengajuanPengadaan');
+const aiPengajuanRoutes = require('./routes/mobile/AIPengajuan');
 
 var app = express();
 
@@ -66,7 +71,7 @@ app.use((req, res, next) => {
 });
 
 app.use(authRoutes);
-// app.use(adminRoutes);
+
 app.use(adminDashboardRoutes);
 app.use(adminUserRoutes);
 app.use(adminInventarisRoutes);
@@ -74,12 +79,17 @@ app.use(adminRuanganRoutes);
 app.use(adminLaporanRoutes);
 app.use(adminLantaiRoutes);
 app.use(adminLokasiRoutes);
-// app.use(penggunaRoutes);
+
 app.use(buatLaporanRoutes);
 app.use(profileRoutes);
 app.use(riwayatLaporanRoutes);
 app.use(laporanPlpRoutes);
+app.use(pengajuanPerbaikanPlpRoutes);
+app.use(pengajuanPengadaanPlpRoutes);
 app.use(laporanKalebRoutes);
+app.use(pengajuanPerbaikanKalebRoutes);
+app.use(pengajuanPengadaanKalebRoutes);
+app.use(aiPengajuanRoutes);
 
 app.use(function(req, res, next) {
   next(createError(404));

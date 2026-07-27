@@ -5,7 +5,7 @@ const path = require('path')
 const fs = require('fs')
 const Laporan = require('../../../models/Laporan')
 const { verifyToken, authorize } = require('../../../middleware/jwt')
-const { rekomendasiPrioritasLaporan, allowedPrioritas } = require('../../../services/openaiRekomendasi')
+const { getWaktuLaporSemester } = require('../../../middleware/generateWaktuLaporSemester')
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -26,14 +26,56 @@ const deleteUploadedFile = (file) => {
   }
 }
 
+router.get('/API/semester-laporan-kaleb', verifyToken, authorize(['dosen']), async (req, res) => {
+  try {
+    if (String(req.user.kaleb) !== '1') {
+      return res.status(403).json({ message: 'Akses ditolak' })
+    }
+
+    const result = await Laporan.getSemesterOptionsRiwayatLaporanKaleb(req.user.id)
+    res.status(200).json({
+      semesterSaatIni: getWaktuLaporSemester(new Date()),
+      result
+    })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: 'Internal Server Error' })
+  }
+})
+
 router.get('/API/laporan-kaleb', verifyToken, authorize(['dosen']), async (req, res) => {
   try {
     if (String(req.user.kaleb) !== '1') {
       return res.status(403).json({ message: 'Akses ditolak' })
     }
 
-    const result = await Laporan.getAllRiwayatLaporanKaleb(req.user.id)
-    res.status(200).json({ result })
+    const { result, pagination } = await Laporan.getAllRiwayatLaporanKalebPaginated(
+      req.user.id,
+      req.query.page,
+      req.query.limit,
+      req.query.semester
+    )
+    res.status(200).json({ result, pagination })
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ message: 'Internal Server Error' })
+  }
+})
+
+router.get('/API/cari-laporan-kaleb', verifyToken, authorize(['dosen']), async (req, res) => {
+  try {
+    if (String(req.user.kaleb) !== '1') {
+      return res.status(403).json({ message: 'Akses ditolak' })
+    }
+
+    const { result, pagination } = await Laporan.cariRiwayatLaporanKaleb(
+      req.user.id,
+      req.query.keyword,
+      req.query.page,
+      req.query.limit,
+      req.query.semester
+    )
+    res.status(200).json({ result, pagination })
   } catch (err) {
     console.error(err)
     res.status(500).json({ message: 'Internal Server Error' })
@@ -59,142 +101,68 @@ router.get('/API/detail-laporan-kaleb/:id', verifyToken, authorize(['dosen']), a
   }
 })
 
-router.get('/API/rekomendasi-laporan-ai', verifyToken, authorize(['dosen']), async (req, res) => {
+
+
+router.patch('/API/update-laporan-kaleb/:id', verifyToken, authorize(['dosen']), upload.single('foto_selesai'), async (req, res) => {
   try {
     if (String(req.user.kaleb) !== '1') {
-      return res.status(403).json({ message: 'Akses ditolak' })
-    }
-
-    const limit = req.query.limit
-    const laporan = await Laporan.getLaporanUntukRekomendasiAiKaleb(req.user.id, limit)
-    if (!laporan.length) {
-      return res.status(200).json({ data: [] })
-    }
-    const data = await rekomendasiPrioritasLaporan(laporan)
-    res.status(200).json({ data })
-  } catch (err) {
-    console.error(err)
-    res.status(500).json({ message: 'Internal Server Error' })
-  }
-})
-
-router.patch('/API/rekomendasi-laporan-ai/:id', verifyToken, authorize(['dosen']), async (req, res) => {
-  try {
-    if (String(req.user.kaleb) !== '1') {
-      return res.status(403).json({ message: 'Akses ditolak' })
-    }
-
-    if (!req.body || Object.keys(req.body).length === 0) {
-      return res.status(400).json({ message: 'Prioritas diperlukan.' })
-    }
-
-    const { prioritas } = req.body
-
-    if (!prioritas) {
-      return res.status(400).json({ message: 'Prioritas diperlukan.' })
-    }
-
-    if (!allowedPrioritas.includes(prioritas)) {
-      return res.status(400).json({ message: 'Prioritas tidak valid.' })
-    }
-
-    const affectedRows = await Laporan.applyRekomendasiAiPrioritas(req.params.id, req.user.id, prioritas)
-
-    if (!affectedRows) {
-      return res.status(404).json({ message: 'Laporan tidak ditemukan atau bukan dari ruangan Anda' })
-    }
-
-    res.status(200).json({ message: 'Rekomendasi AI berhasil diterapkan' })
-  } catch (err) {
-    console.error(err)
-    res.status(500).json({ message: 'Internal Server Error' })
-  }
-})
-
-router.patch('/API/update-prioritas-laporan/:id', verifyToken, authorize(['dosen']), async (req, res) => {
-  try {
-    if (String(req.user.kaleb) !== '1') {
-      return res.status(403).json({ message: 'Akses ditolak' })
-    }
-
-    if (!req.body || Object.keys(req.body).length === 0) {
-      return res.status(400).json({ message: 'Prioritas diperlukan.' })
-    }
-
-    const { prioritas } = req.body
-
-    if (!prioritas) {
-      return res.status(400).json({ message: 'Prioritas diperlukan.' })
-    }
-
-    if (!allowedPrioritas.includes(prioritas)) {
-      return res.status(400).json({ message: 'Prioritas tidak valid.' })
-    }
-
-    const affectedRows = await Laporan.updatePrioritasByPemilikRuangan(req.params.id, req.user.id, prioritas)
-
-    if (!affectedRows) {
-      return res.status(404).json({ message: 'Laporan tidak ditemukan atau bukan dari ruangan Anda' })
-    }
-
-    res.status(200).json({ message: 'Prioritas berhasil diperbarui' })
-  } catch (err) {
-    console.error(err)
-    res.status(500).json({ message: 'Internal Server Error' })
-  }
-})
-
-router.patch('/API/update-status-laporan/:id', verifyToken, authorize(['plp', 'dosen']), upload.single('foto_selesai'), async (req, res) => {
-  try {
-    const role = req.user.userType || req.user.role
-
-    if (role === 'dosen' && String(req.user.kaleb) !== '1') {
       deleteUploadedFile(req.file)
       return res.status(403).json({ message: 'Akses ditolak' })
     }
 
-    if (!req.body || Object.keys(req.body).length === 0) {
+    const { tingkat_kerusakan, status, prioritas, keterangan } = req.body || {}
+
+    if (tingkat_kerusakan === undefined && status === undefined && prioritas === undefined) {
       deleteUploadedFile(req.file)
-      return res.status(400).json({ message: 'Status diperlukan.' })
+      return res.status(400).json({ message: 'Minimal satu field diperlukan.' })
     }
 
-    const { status, keterangan } = req.body
-    const allowedStatus = ['diproses_internal', 'diproses_eksternal', 'pending', 'ditolak', 'selesai']
-
-    if (status === undefined) {
-      deleteUploadedFile(req.file)
-      return res.status(400).json({ message: 'Status diperlukan.' })
+    if (status === 'selesai') {
+      if (keterangan === undefined || String(keterangan).trim() === '') {
+        deleteUploadedFile(req.file)
+        return res.status(400).json({ message: 'Keterangan diperlukan.' })
+      }
+      if (!req.file) {
+        return res.status(400).json({ message: 'Foto selesai diperlukan.' })
+      }
     }
 
-    if (keterangan === undefined) {
-      deleteUploadedFile(req.file)
-      return res.status(400).json({ message: 'Keterangan diperlukan.' })
+    if (status === 'ditolak') {
+      if (keterangan === undefined || String(keterangan).trim() === '') {
+        deleteUploadedFile(req.file)
+        return res.status(400).json({ message: 'Keterangan diperlukan.' })
+      }
     }
 
-    if (status !== null && !allowedStatus.includes(status)) {
-      deleteUploadedFile(req.file)
-      return res.status(400).json({ message: 'Status tidak valid.' })
-    }
-
-    if (status === 'selesai' && !req.file) {
-      return res.status(400).json({ message: 'Foto selesai diperlukan.' })
-    }
-
-    const fotoSelesai = req.file ? req.file.filename : null
-    const teknisiId = status === 'selesai' ? req.user.id : null
-
-    const affectedRows = role === 'plp'
-      ? await Laporan.updateStatusDanKeteranganByPlp(req.params.id, status, keterangan || null, teknisiId, fotoSelesai)
-      : await Laporan.updateStatusDanKeteranganByPemilikRuangan(req.params.id, req.user.id, status, keterangan || null, teknisiId, fotoSelesai)
+    const affectedRows = await Laporan.updateLaporanByKaleb(
+      req.params.id,
+      req.user.id,
+      {
+        tingkat_kerusakan,
+        status,
+        prioritas,
+        keterangan: (status === 'selesai' || status === 'ditolak') ? String(keterangan).trim() : undefined
+      },
+      {
+        teknisiId: (status === 'selesai' || status === 'ditolak') ? req.user.id : null,
+        fotoSelesai: status === 'selesai' && req.file ? req.file.filename : null
+      }
+    )
 
     if (!affectedRows) {
       deleteUploadedFile(req.file)
-      return res.status(404).json({ message: 'Laporan tidak ditemukan atau tidak bisa diperbarui' })
+      return res.status(404).json({ message: 'Laporan tidak ditemukan.' })
     }
 
-    res.status(200).json({ message: 'Status berhasil diperbarui' })
+    res.status(200).json({ message: 'Laporan berhasil diperbarui' })
   } catch (err) {
     deleteUploadedFile(req.file)
+    if (err.message === 'Tingkat kerusakan tidak valid' ||
+        err.message === 'Status tidak valid' ||
+        err.message === 'Prioritas tidak valid' ||
+        err.message === 'Minimal satu field diperlukan') {
+      return res.status(400).json({ message: err.message })
+    }
     console.error(err)
     res.status(500).json({ message: 'Internal Server Error' })
   }
