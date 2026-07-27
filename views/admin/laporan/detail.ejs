@@ -5,9 +5,15 @@
     <%- include('../partials/topbar', { pageTitle: 'Detail Laporan User', pageSubtitle: 'Lihat detail laporan dan riwayat audit.' }) %>
     <%
       const kategori = String(laporan.kategori || '').toLowerCase()
+      const showPengadaanFields = ['barang_baru', 'kehilangan', 'kerusakan'].includes(kategori) && laporan.id_laporan != null
+      const showTingkatKerusakan = kategori === 'kerusakan' && laporan.tingkat_kerusakan
       const showBuktiFoto = Boolean(laporan.bukti_foto) && kategori !== 'kehilangan'
       const showFotoSelesai = Boolean(laporan.foto_selesai) && ['kerusakan', 'kehilangan'].includes(kategori)
       const hasPhotoCard = showBuktiFoto || showFotoSelesai
+      const hargaNumber = Number(laporan.harga)
+      const hargaDisplay = Number.isFinite(hargaNumber)
+        ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(hargaNumber)
+        : '-'
     %>
     <div class="detail-grid" style="display:grid;grid-template-columns:minmax(0,1.35fr) 360px;gap:20px;align-items:start">
       <div class="form-card" style="max-width:100%">
@@ -33,15 +39,18 @@
           <div class="info-row"><span>Kode Barang</span><strong><%= laporan.kode_barang || '-' %></strong></div>
           <div class="info-row"><span>NUP</span><strong><%= laporan.nup || '-' %></strong></div>
           <div class="info-row"><span>Merk</span><strong><%= laporan.merk || '-' %></strong></div>
-          <%
-            const kondisiRaw = String(laporan.kondisi || '-')
-            const kondisiNumber = parseFloat(kondisiRaw.replace(',', '.'))
-            const kondisiText = Number.isNaN(kondisiNumber)
-              ? kondisiRaw
-              : kondisiNumber.toFixed(2).replace(/\.00$/, '').replace(/(\.\d)0$/, '$1')
-            const kondisiDisplay = Number.isNaN(kondisiNumber) ? kondisiRaw : `${kondisiText}%`
-          %>
-          <div class="info-row"><span>Kondisi</span><strong><%= kondisiDisplay %></strong></div>
+          <% if (showTingkatKerusakan) { %>
+            <div class="info-row"><span>Tingkat Kerusakan</span><strong><%= laporan.tingkat_kerusakan || '-' %></strong></div>
+          <% } %>
+          <% if (showPengadaanFields && laporan.spesifikasi) { %>
+            <div class="info-row block"><span>Spesifikasi</span><p><%= laporan.spesifikasi %></p></div>
+          <% } %>
+          <% if (showPengadaanFields && laporan.jumlah != null) { %>
+            <div class="info-row"><span>Jumlah</span><strong><%= laporan.jumlah %></strong></div>
+          <% } %>
+          <% if (showPengadaanFields && laporan.harga != null) { %>
+            <div class="info-row"><span>Harga</span><strong><%= hargaDisplay %></strong></div>
+          <% } %>
           <div class="info-row block"><span>Deskripsi Pelapor</span><p><%= laporan.deskripsi || laporan.keterangan || '-' %></p></div>
           <div class="info-row block"><span>Keterangan Laporan</span><p><%= laporan.keterangan_admin || '-' %></p></div>
         </div>
