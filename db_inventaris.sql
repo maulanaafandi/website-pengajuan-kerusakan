@@ -458,6 +458,105 @@ ALTER TABLE `ruangan`
   ADD CONSTRAINT `ruangan_ibfk_1` FOREIGN KEY (`id_lokasi`) REFERENCES `lokasi` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `ruangan_ibfk_2` FOREIGN KEY (`id_lantai`) REFERENCES `lantai` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `ruangan_ibfk_3` FOREIGN KEY (`id_kaleb`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+--
+-- Triggers `laporan`
+--
+DELIMITER $$
+CREATE TRIGGER `trg_laporan_after_insert`
+AFTER INSERT ON `laporan`
+FOR EACH ROW
+BEGIN
+  INSERT INTO `audit_laporan` (`id_laporan`, `action`, `data_lama`, `data_baru`, `waktu`)
+  VALUES (
+    NEW.id,
+    'INSERT',
+    NULL,
+    JSON_OBJECT(
+      'id', NEW.id,
+      'id_pelapor', NEW.id_pelapor,
+      'id_inventaris', NEW.id_inventaris,
+      'id_ruangan', NEW.id_ruangan,
+      'id_teknisi', NEW.id_teknisi,
+      'waktu_lapor', NEW.waktu_lapor,
+      'kategori', NEW.kategori,
+      'deskripsi', NEW.deskripsi,
+      'bukti_foto', NEW.bukti_foto,
+      'tingkat_kerusakan', NEW.tingkat_kerusakan,
+      'status', NEW.status,
+      'prioritas', NEW.prioritas,
+      'keterangan', NEW.keterangan,
+      'selesai_pada', NEW.selesai_pada,
+      'rekomendasi_ai', NEW.rekomendasi_ai,
+      'kode_laporan', NEW.kode_laporan,
+      'foto_selesai', NEW.foto_selesai,
+      'waktu_lapor_semester', NEW.waktu_lapor_semester,
+      'spesifikasi', NEW.spesifikasi,
+      'harga', NEW.harga,
+      'jumlah', NEW.jumlah
+    ),
+    NOW()
+  );
+END$$
+
+CREATE TRIGGER `trg_laporan_after_update`
+AFTER UPDATE ON `laporan`
+FOR EACH ROW
+BEGIN
+  INSERT INTO `audit_laporan` (`id_laporan`, `action`, `data_lama`, `data_baru`, `waktu`)
+  VALUES (
+    NEW.id,
+    'UPDATE',
+    JSON_OBJECT(
+      'id', OLD.id,
+      'id_pelapor', OLD.id_pelapor,
+      'id_inventaris', OLD.id_inventaris,
+      'id_ruangan', OLD.id_ruangan,
+      'id_teknisi', OLD.id_teknisi,
+      'waktu_lapor', OLD.waktu_lapor,
+      'kategori', OLD.kategori,
+      'deskripsi', OLD.deskripsi,
+      'bukti_foto', OLD.bukti_foto,
+      'tingkat_kerusakan', OLD.tingkat_kerusakan,
+      'status', OLD.status,
+      'prioritas', OLD.prioritas,
+      'keterangan', OLD.keterangan,
+      'selesai_pada', OLD.selesai_pada,
+      'rekomendasi_ai', OLD.rekomendasi_ai,
+      'kode_laporan', OLD.kode_laporan,
+      'foto_selesai', OLD.foto_selesai,
+      'waktu_lapor_semester', OLD.waktu_lapor_semester,
+      'spesifikasi', OLD.spesifikasi,
+      'harga', OLD.harga,
+      'jumlah', OLD.jumlah
+    ),
+    JSON_OBJECT(
+      'id', NEW.id,
+      'id_pelapor', NEW.id_pelapor,
+      'id_inventaris', NEW.id_inventaris,
+      'id_ruangan', NEW.id_ruangan,
+      'id_teknisi', NEW.id_teknisi,
+      'waktu_lapor', NEW.waktu_lapor,
+      'kategori', NEW.kategori,
+      'deskripsi', NEW.deskripsi,
+      'bukti_foto', NEW.bukti_foto,
+      'tingkat_kerusakan', NEW.tingkat_kerusakan,
+      'status', NEW.status,
+      'prioritas', NEW.prioritas,
+      'keterangan', NEW.keterangan,
+      'selesai_pada', NEW.selesai_pada,
+      'rekomendasi_ai', NEW.rekomendasi_ai,
+      'kode_laporan', NEW.kode_laporan,
+      'foto_selesai', NEW.foto_selesai,
+      'waktu_lapor_semester', NEW.waktu_lapor_semester,
+      'spesifikasi', NEW.spesifikasi,
+      'harga', NEW.harga,
+      'jumlah', NEW.jumlah
+    ),
+    NOW()
+  );
+END$$
+DELIMITER ;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -2,6 +2,10 @@ const connection = require('../config/db')
 const { getWaktuLaporSemester } = require('../middleware/generateWaktuLaporSemester')
 
 class Laporan {
+  static isMissingAuditTableError(error) {
+    return error && (error.code === 'ER_NO_SUCH_TABLE' || /audit_laporan/i.test(String(error.message || '')))
+  }
+
   static get selectFields() {
     return `
       l.id AS id_laporan,
@@ -2385,6 +2389,9 @@ class Laporan {
 
       return rows
     } catch (error) {
+      if (Laporan.isMissingAuditTableError(error)) {
+        return []
+      }
       console.log('Error getAuditLaporan:', error)
       throw error
     }
@@ -2422,6 +2429,9 @@ class Laporan {
 
       return rows
     } catch (error) {
+      if (Laporan.isMissingAuditTableError(error)) {
+        return []
+      }
       console.log('Error getAllAuditLaporan:', error)
       throw error
     }
@@ -2450,6 +2460,9 @@ class Laporan {
 
       return rows
     } catch (error) {
+      if (Laporan.isMissingAuditTableError(error)) {
+        return []
+      }
       console.log('Error getAuditLaporanDetail:', error)
       throw error
     }
