@@ -1,9 +1,9 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.3
+-- version 5.2.0
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jul 26, 2026 at 04:20 AM
+-- Generation Time: Jul 31, 2026 at 11:13 AM
 -- Server version: 8.0.30
 -- PHP Version: 8.3.30
 
@@ -18,8 +18,23 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `db_inventaris`
+-- Database: `tes`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `audit_laporan`
+--
+
+CREATE TABLE `audit_laporan` (
+  `id` int NOT NULL,
+  `id_laporan` int DEFAULT NULL,
+  `action` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `data_lama` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `data_baru` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
+  `waktu` datetime DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -254,7 +269,7 @@ CREATE TABLE `laporan` (
   `id_ruangan` int DEFAULT NULL,
   `id_teknisi` int DEFAULT NULL,
   `waktu_lapor` datetime DEFAULT CURRENT_TIMESTAMP,
-  `kategori` enum('kerusakan','kehilangan','barang_baru') COLLATE utf8mb4_general_ci NOT NULL,
+  `kategori` enum('kerusakan','kehilangan','barang_baru') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `deskripsi` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `bukti_foto` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `tingkat_kerusakan` enum('ringan','sedang','berat','rusak_total') CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -265,11 +280,107 @@ CREATE TABLE `laporan` (
   `rekomendasi_ai` tinyint(1) DEFAULT NULL,
   `kode_laporan` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `foto_selesai` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `waktu_lapor_semester` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `spesifikasi` text COLLATE utf8mb4_general_ci,
+  `waktu_lapor_semester` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `spesifikasi` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `harga` decimal(15,2) DEFAULT NULL,
   `jumlah` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Triggers `laporan`
+--
+DELIMITER $$
+CREATE TRIGGER `trg_laporan_after_insert` AFTER INSERT ON `laporan` FOR EACH ROW BEGIN
+  INSERT INTO `audit_laporan` (`id_laporan`, `action`, `data_lama`, `data_baru`, `waktu`)
+  VALUES (
+    NEW.id,
+    'INSERT',
+    NULL,
+    JSON_OBJECT(
+      'id', NEW.id,
+      'id_pelapor', NEW.id_pelapor,
+      'id_inventaris', NEW.id_inventaris,
+      'id_ruangan', NEW.id_ruangan,
+      'id_teknisi', NEW.id_teknisi,
+      'waktu_lapor', NEW.waktu_lapor,
+      'kategori', NEW.kategori,
+      'deskripsi', NEW.deskripsi,
+      'bukti_foto', NEW.bukti_foto,
+      'tingkat_kerusakan', NEW.tingkat_kerusakan,
+      'status', NEW.status,
+      'prioritas', NEW.prioritas,
+      'keterangan', NEW.keterangan,
+      'selesai_pada', NEW.selesai_pada,
+      'rekomendasi_ai', NEW.rekomendasi_ai,
+      'kode_laporan', NEW.kode_laporan,
+      'foto_selesai', NEW.foto_selesai,
+      'waktu_lapor_semester', NEW.waktu_lapor_semester,
+      'spesifikasi', NEW.spesifikasi,
+      'harga', NEW.harga,
+      'jumlah', NEW.jumlah
+    ),
+    NOW()
+  );
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `trg_laporan_after_update` AFTER UPDATE ON `laporan` FOR EACH ROW BEGIN
+  INSERT INTO `audit_laporan` (`id_laporan`, `action`, `data_lama`, `data_baru`, `waktu`)
+  VALUES (
+    NEW.id,
+    'UPDATE',
+    JSON_OBJECT(
+      'id', OLD.id,
+      'id_pelapor', OLD.id_pelapor,
+      'id_inventaris', OLD.id_inventaris,
+      'id_ruangan', OLD.id_ruangan,
+      'id_teknisi', OLD.id_teknisi,
+      'waktu_lapor', OLD.waktu_lapor,
+      'kategori', OLD.kategori,
+      'deskripsi', OLD.deskripsi,
+      'bukti_foto', OLD.bukti_foto,
+      'tingkat_kerusakan', OLD.tingkat_kerusakan,
+      'status', OLD.status,
+      'prioritas', OLD.prioritas,
+      'keterangan', OLD.keterangan,
+      'selesai_pada', OLD.selesai_pada,
+      'rekomendasi_ai', OLD.rekomendasi_ai,
+      'kode_laporan', OLD.kode_laporan,
+      'foto_selesai', OLD.foto_selesai,
+      'waktu_lapor_semester', OLD.waktu_lapor_semester,
+      'spesifikasi', OLD.spesifikasi,
+      'harga', OLD.harga,
+      'jumlah', OLD.jumlah
+    ),
+    JSON_OBJECT(
+      'id', NEW.id,
+      'id_pelapor', NEW.id_pelapor,
+      'id_inventaris', NEW.id_inventaris,
+      'id_ruangan', NEW.id_ruangan,
+      'id_teknisi', NEW.id_teknisi,
+      'waktu_lapor', NEW.waktu_lapor,
+      'kategori', NEW.kategori,
+      'deskripsi', NEW.deskripsi,
+      'bukti_foto', NEW.bukti_foto,
+      'tingkat_kerusakan', NEW.tingkat_kerusakan,
+      'status', NEW.status,
+      'prioritas', NEW.prioritas,
+      'keterangan', NEW.keterangan,
+      'selesai_pada', NEW.selesai_pada,
+      'rekomendasi_ai', NEW.rekomendasi_ai,
+      'kode_laporan', NEW.kode_laporan,
+      'foto_selesai', NEW.foto_selesai,
+      'waktu_lapor_semester', NEW.waktu_lapor_semester,
+      'spesifikasi', NEW.spesifikasi,
+      'harga', NEW.harga,
+      'jumlah', NEW.jumlah
+    ),
+    NOW()
+  );
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -339,11 +450,18 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `nama`, `email`, `kata_sandi`, `role`, `kaleb`, `status`) VALUES
-(1, 'Administrator', 'adminpsdku@pens.ac.id', '$2b$10$OTgdMCqMfIMn10xgoEPMnu4HDzzdHU9SXNAoCYR9JDycOkVvOuDlu', 'plp', '0', 'aktif');
+(1, 'Administrator', 'adminpsdku@pens.ac.id', '$2b$10$OTgdMCqMfIMn10xgoEPMnu4HDzzdHU9SXNAoCYR9JDycOkVvOuDlu', 'admin', '0', 'aktif');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `audit_laporan`
+--
+ALTER TABLE `audit_laporan`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `id_laporan` (`id_laporan`);
 
 --
 -- Indexes for table `inventaris`
@@ -397,6 +515,12 @@ ALTER TABLE `users`
 --
 
 --
+-- AUTO_INCREMENT for table `audit_laporan`
+--
+ALTER TABLE `audit_laporan`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+
+--
 -- AUTO_INCREMENT for table `inventaris`
 --
 ALTER TABLE `inventaris`
@@ -437,6 +561,12 @@ ALTER TABLE `users`
 --
 
 --
+-- Constraints for table `audit_laporan`
+--
+ALTER TABLE `audit_laporan`
+  ADD CONSTRAINT `audit_laporan_ibfk_1` FOREIGN KEY (`id_laporan`) REFERENCES `laporan` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
 -- Constraints for table `inventaris`
 --
 ALTER TABLE `inventaris`
@@ -458,145 +588,6 @@ ALTER TABLE `ruangan`
   ADD CONSTRAINT `ruangan_ibfk_1` FOREIGN KEY (`id_lokasi`) REFERENCES `lokasi` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `ruangan_ibfk_2` FOREIGN KEY (`id_lantai`) REFERENCES `lantai` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
   ADD CONSTRAINT `ruangan_ibfk_3` FOREIGN KEY (`id_kaleb`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
-
---
--- Triggers `laporan`
---
-DELIMITER $$
-CREATE TRIGGER `trg_laporan_after_insert`
-AFTER INSERT ON `laporan`
-FOR EACH ROW
-BEGIN
-  INSERT INTO `audit_laporan` (`id_laporan`, `action`, `data_lama`, `data_baru`, `waktu`)
-  VALUES (
-    NEW.id,
-    'INSERT',
-    NULL,
-    JSON_OBJECT(
-      'id', NEW.id,
-      'id_pelapor', NEW.id_pelapor,
-      'id_inventaris', NEW.id_inventaris,
-      'id_ruangan', NEW.id_ruangan,
-      'id_teknisi', NEW.id_teknisi,
-      'waktu_lapor', NEW.waktu_lapor,
-      'kategori', NEW.kategori,
-      'deskripsi', NEW.deskripsi,
-      'bukti_foto', NEW.bukti_foto,
-      'tingkat_kerusakan', NEW.tingkat_kerusakan,
-      'status', NEW.status,
-      'prioritas', NEW.prioritas,
-      'keterangan', NEW.keterangan,
-      'selesai_pada', NEW.selesai_pada,
-      'rekomendasi_ai', NEW.rekomendasi_ai,
-      'kode_laporan', NEW.kode_laporan,
-      'foto_selesai', NEW.foto_selesai,
-      'waktu_lapor_semester', NEW.waktu_lapor_semester,
-      'spesifikasi', NEW.spesifikasi,
-      'harga', NEW.harga,
-      'jumlah', NEW.jumlah
-    ),
-    NOW()
-  );
-END$$
-
-CREATE TRIGGER `trg_laporan_after_update`
-AFTER UPDATE ON `laporan`
-FOR EACH ROW
-BEGIN
-  INSERT INTO `audit_laporan` (`id_laporan`, `action`, `data_lama`, `data_baru`, `waktu`)
-  VALUES (
-    NEW.id,
-    'UPDATE',
-    JSON_OBJECT(
-      'id', OLD.id,
-      'id_pelapor', OLD.id_pelapor,
-      'id_inventaris', OLD.id_inventaris,
-      'id_ruangan', OLD.id_ruangan,
-      'id_teknisi', OLD.id_teknisi,
-      'waktu_lapor', OLD.waktu_lapor,
-      'kategori', OLD.kategori,
-      'deskripsi', OLD.deskripsi,
-      'bukti_foto', OLD.bukti_foto,
-      'tingkat_kerusakan', OLD.tingkat_kerusakan,
-      'status', OLD.status,
-      'prioritas', OLD.prioritas,
-      'keterangan', OLD.keterangan,
-      'selesai_pada', OLD.selesai_pada,
-      'rekomendasi_ai', OLD.rekomendasi_ai,
-      'kode_laporan', OLD.kode_laporan,
-      'foto_selesai', OLD.foto_selesai,
-      'waktu_lapor_semester', OLD.waktu_lapor_semester,
-      'spesifikasi', OLD.spesifikasi,
-      'harga', OLD.harga,
-      'jumlah', OLD.jumlah
-    ),
-    JSON_OBJECT(
-      'id', NEW.id,
-      'id_pelapor', NEW.id_pelapor,
-      'id_inventaris', NEW.id_inventaris,
-      'id_ruangan', NEW.id_ruangan,
-      'id_teknisi', NEW.id_teknisi,
-      'waktu_lapor', NEW.waktu_lapor,
-      'kategori', NEW.kategori,
-      'deskripsi', NEW.deskripsi,
-      'bukti_foto', NEW.bukti_foto,
-      'tingkat_kerusakan', NEW.tingkat_kerusakan,
-      'status', NEW.status,
-      'prioritas', NEW.prioritas,
-      'keterangan', NEW.keterangan,
-      'selesai_pada', NEW.selesai_pada,
-      'rekomendasi_ai', NEW.rekomendasi_ai,
-      'kode_laporan', NEW.kode_laporan,
-      'foto_selesai', NEW.foto_selesai,
-      'waktu_lapor_semester', NEW.waktu_lapor_semester,
-      'spesifikasi', NEW.spesifikasi,
-      'harga', NEW.harga,
-      'jumlah', NEW.jumlah
-    ),
-    NOW()
-  );
-END$$
-DELIMITER ;
-CREATE TABLE `audit_laporan` (
-  `id` int NOT NULL,
-  `id_laporan` int DEFAULT NULL,
-  `action` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `data_lama` text COLLATE utf8mb4_general_ci,
-  `data_baru` text COLLATE utf8mb4_general_ci,
-  `waktu` datetime DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Indexes for dumped tables
---
-
---
--- Indexes for table `audit_laporan`
---
-ALTER TABLE `audit_laporan`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `id_laporan` (`id_laporan`);
-
---
--- AUTO_INCREMENT for dumped tables
---
-
---
--- AUTO_INCREMENT for table `audit_laporan`
---
-ALTER TABLE `audit_laporan`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `audit_laporan`
---
-ALTER TABLE `audit_laporan`
-  ADD CONSTRAINT `audit_laporan_ibfk_1` FOREIGN KEY (`id_laporan`) REFERENCES `laporan` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
