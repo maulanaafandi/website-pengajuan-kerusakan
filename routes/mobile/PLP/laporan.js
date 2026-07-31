@@ -95,9 +95,9 @@ router.get('/API/status-laporan-options', verifyToken, authorize(['plp']), async
 
 router.patch('/API/update-laporan-plp/:id', verifyToken, authorize(['plp']), upload.single('foto_selesai'), async (req, res) => {
   try {
-    const { tingkat_kerusakan, status, prioritas, keterangan } = req.body || {}
+    const { tingkat_kerusakan, status, prioritas, keterangan, spesifikasi, harga, jumlah } = req.body || {}
 
-    if (tingkat_kerusakan === undefined && status === undefined && prioritas === undefined) {
+    if (tingkat_kerusakan === undefined && status === undefined && prioritas === undefined && spesifikasi === undefined && harga === undefined && jumlah === undefined) {
       deleteUploadedFile(req.file)
       return res.status(400).json({ message: 'Minimal satu field diperlukan.' })
     }
@@ -125,7 +125,10 @@ router.patch('/API/update-laporan-plp/:id', verifyToken, authorize(['plp']), upl
         tingkat_kerusakan,
         status,
         prioritas,
-        keterangan: (status === 'selesai' || status === 'ditolak') ? String(keterangan).trim() : undefined
+        keterangan: (status === 'selesai' || status === 'ditolak') ? String(keterangan).trim() : undefined,
+        spesifikasi,
+        harga,
+        jumlah
       },
       {
         teknisiId: (status === 'selesai' || status === 'ditolak') ? req.user.id : null,
@@ -144,7 +147,10 @@ router.patch('/API/update-laporan-plp/:id', verifyToken, authorize(['plp']), upl
     if (err.message === 'Tingkat kerusakan tidak valid' ||
         err.message === 'Status tidak valid' ||
         err.message === 'Prioritas tidak valid' ||
-        err.message === 'Minimal satu field diperlukan') {
+        err.message === 'Minimal satu field diperlukan' ||
+        err.message === 'Spesifikasi diperlukan.' ||
+        err.message === 'Harga diperlukan.' ||
+        err.message === 'Jumlah diperlukan.') {
       return res.status(400).json({ message: err.message })
     }
     console.error(err)

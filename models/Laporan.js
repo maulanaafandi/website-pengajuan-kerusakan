@@ -1879,8 +1879,7 @@ class Laporan {
          LEFT JOIN inventaris i ON l.id_inventaris = i.id
          LEFT JOIN ruangan r ON r.id = COALESCE(l.id_ruangan, i.id_ruangan)
          WHERE l.id = ? AND r.id_kaleb = ?
-           AND l.status IS NOT NULL
-           AND l.prioritas IS NOT NULL
+           AND (l.status IS NOT NULL OR l.prioritas IS NOT NULL)
            AND (
              l.kategori IN ('kehilangan', 'barang_baru')
              OR (l.kategori = 'kerusakan' AND l.tingkat_kerusakan = 'rusak_total')
@@ -2188,8 +2187,28 @@ class Laporan {
       const allowedStatus = Laporan.getAllowedStatusByKategori(kategori)
 
       if (data.tingkat_kerusakan !== undefined) {
+        const normalizedTingkat = Laporan.normalizeTingkatKerusakan(data.tingkat_kerusakan)
         sets.push('tingkat_kerusakan = ?')
-        params.push(Laporan.normalizeTingkatKerusakan(data.tingkat_kerusakan))
+        params.push(normalizedTingkat)
+
+        if (normalizedTingkat === 'rusak_total') {
+          if (data.spesifikasi === undefined || String(data.spesifikasi).trim() === '') {
+            throw new Error('Spesifikasi diperlukan.')
+          }
+          if (data.harga === undefined || data.harga === null || String(data.harga).trim() === '') {
+            throw new Error('Harga diperlukan.')
+          }
+          if (data.jumlah === undefined || data.jumlah === null || String(data.jumlah).trim() === '') {
+            throw new Error('Jumlah diperlukan.')
+          }
+
+          sets.push('spesifikasi = ?')
+          params.push(String(data.spesifikasi).trim())
+          sets.push('harga = ?')
+          params.push(parseFloat(data.harga) || 0)
+          sets.push('jumlah = ?')
+          params.push(parseInt(data.jumlah, 10) || 0)
+        }
       }
 
       let nextStatus = null
