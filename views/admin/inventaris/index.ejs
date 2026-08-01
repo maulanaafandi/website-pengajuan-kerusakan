@@ -48,86 +48,88 @@
         <button class="btn-success" type="submit">Import Excel</button>
       </form> -->
 
-      <table>
+      <div class="table-wrap">
+        <table>
 
-        <thead>
-          <tr>
-            <th>Kode Barang</th>
-            <th>NUP</th>
-            <th>Nama Barang</th>
-            <th>Merk</th>
-            <th>Tipe</th>
-            <th>Kategori</th>
-            <th>Tgl Buku</th>
-            <th>Tgl Perolehan</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-
-        <tbody>
-
-          <% if (!inventaris || inventaris.length === 0) { %>
+          <thead>
             <tr>
-              <td colspan="9" class="empty-state">
-                Data inventaris kosong
-              </td>
+              <th>Kode Barang</th>
+              <th>NUP</th>
+              <th>Nama Barang</th>
+              <th>Merk</th>
+              <th>Tipe</th>
+              <th>Kategori</th>
+              <th>Tgl Buku</th>
+              <th>Tgl Perolehan</th>
+              <th>Aksi</th>
             </tr>
-          <% } %>
+          </thead>
 
-          <% inventaris.forEach(item => { %>
+          <tbody>
 
-            <tr>
+            <% if (!inventaris || inventaris.length === 0) { %>
+              <tr>
+                <td colspan="9" class="empty-state">
+                  Data inventaris kosong
+                </td>
+              </tr>
+            <% } %>
 
-              <td><%= item.kode_barang || '-' %></td>
-              <td><%= item.nup || '-' %></td>
-              <td><%= item.nama_barang || '-' %></td>
-              <td><%= item.merk || '-' %></td>
-              <td><%= item.tipe || '-' %></td>
-              <td>
-                <span class="badge badge-blue">
-                  <%= item.kategori || '-' %>
-                </span>
-              </td>
-              <td><%= formatDate(item.tanggal_buku_pertama) || '-' %></td>
-              <td><%= formatDate(item.tanggal_perolehan) || '-' %></td>
+            <% inventaris.forEach(item => { %>
 
-              <td>
+              <tr>
 
-                <div class="actions">
+                <td><%= item.kode_barang || '-' %></td>
+                <td><%= item.nup || '-' %></td>
+                <td><%= item.nama_barang || '-' %></td>
+                <td><%= item.merk || '-' %></td>
+                <td><%= item.tipe || '-' %></td>
+                <td>
+                  <span class="badge badge-blue">
+                    <%= item.kategori || '-' %>
+                  </span>
+                </td>
+                <td><%= formatDate(item.tanggal_buku_pertama) || '-' %></td>
+                <td><%= formatDate(item.tanggal_perolehan) || '-' %></td>
 
-                  <a
-                    href="/admin/inventaris/edit/<%= item.id_inventaris %>"
-                    class="btn-warning"
-                  >
-                    Edit
-                  </a>
+                <td>
 
-                  <form
-                    class="inline"
-                    action="/admin/inventaris/delete/<%= item.id_inventaris %>"
-                    method="POST"
-                    data-confirm-message="Inventaris <%= item.nama_barang || 'ini' %> akan dihapus permanen."
-                  >
-                    <input type="hidden" name="_method" value="DELETE">
-                    <button
-                      type="submit"
-                      class="btn-danger"
+                  <div class="actions">
+
+                    <a
+                      href="/admin/inventaris/edit/<%= item.id_inventaris %>"
+                      class="btn-warning"
                     >
-                      Hapus
-                    </button>
-                  </form>
+                      Edit
+                    </a>
 
-                </div>
+                    <form
+                      class="inline"
+                      action="/admin/inventaris/delete/<%= item.id_inventaris %>"
+                      method="POST"
+                      data-confirm-message="Inventaris <%= item.nama_barang || 'ini' %> akan dihapus permanen."
+                    >
+                      <input type="hidden" name="_method" value="DELETE">
+                      <button
+                        type="submit"
+                        class="btn-danger"
+                      >
+                        Hapus
+                      </button>
+                    </form>
 
-              </td>
+                  </div>
 
-            </tr>
+                </td>
 
-          <% }) %>
+              </tr>
 
-        </tbody>
+            <% }) %>
 
-      </table>
+          </tbody>
+
+        </table>
+      </div>
 
       <%- include('../partials/pagination', { pagination }) %>
 
