@@ -13,31 +13,33 @@
         <button class="btn-primary" type="submit">Cari</button>
         <a class="btn-secondary" href="/admin/master/<%= type %>">Reset</a>
       </form>
-      <table>
-        <thead>
-          <tr><th>No</th><th>Nama</th><th>Aksi</th></tr>
-        </thead>
-        <tbody>
-          <% if (!rows || rows.length === 0) { %>
-            <tr><td colspan="3" class="empty-state">Data <%= label.toLowerCase() %> kosong</td></tr>
-          <% } %>
-          <% rows.forEach(item => { %>
-            <tr>
-              <td><%= item.id %></td>
-              <td><%= item.nama %></td>
-              <td>
-                <div class="actions">
-                  <a href="/admin/master/<%= type %>/edit/<%= item.id %>" class="btn-warning">Edit</a>
-                  <form class="inline" action="/admin/master/<%= type %>/delete/<%= item.id %>" method="POST" data-confirm-message="<%= label %> <%= item.nama || 'ini' %> akan dihapus permanen.">
-                    <input type="hidden" name="_method" value="DELETE">
-                    <button type="submit" class="btn-danger">Hapus</button>
-                  </form>
-                </div>
-              </td>
-            </tr>
-          <% }) %>
-        </tbody>
-      </table>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>No</th><th>Nama</th><th>Aksi</th></tr>
+          </thead>
+          <tbody>
+            <% if (!rows || rows.length === 0) { %>
+              <tr><td colspan="3" class="empty-state">Data <%= label.toLowerCase() %> kosong</td></tr>
+            <% } %>
+            <% rows.forEach(item => { %>
+              <tr>
+                <td><%= item.id %></td>
+                <td><%= item.nama %></td>
+                <td>
+                  <div class="actions">
+                    <a href="/admin/master/<%= type %>/edit/<%= item.id %>" class="btn-warning">Edit</a>
+                    <form class="inline" action="/admin/master/<%= type %>/delete/<%= item.id %>" method="POST" data-confirm-message="<%= label %> <%= item.nama || 'ini' %> akan dihapus permanen.">
+                      <input type="hidden" name="_method" value="DELETE">
+                      <button type="submit" class="btn-danger">Hapus</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
       <%- include('../partials/pagination', { pagination }) %>
     </div>
   </section>
