@@ -2,7 +2,7 @@
 <main class="admin-page" id="adminPage">
   <%- include('../partials/sidebar', { active: 'laporan' }) %>
   <section class="main-content">
-    <%- include('../partials/topbar', { pageTitle: 'Detail Laporan User', pageSubtitle: 'Lihat detail laporan dan riwayat audit.' }) %>
+    <%- include('../partials/topbar', { pageTitle: 'Detail Laporan User', pageSubtitle: 'Lihat detail laporan.' }) %>
     <%
       const kategori = String(laporan.kategori || '').toLowerCase()
       const showPengadaanFields = ['barang_baru', 'kehilangan', 'kerusakan'].includes(kategori) && laporan.id_laporan != null
@@ -45,7 +45,7 @@
           <% if (showPengadaanFields && laporan.spesifikasi) { %>
             <div class="info-row block"><span>Spesifikasi</span><p><%= laporan.spesifikasi %></p></div>
           <% } %>
-          <% if (showPengadaanFields && laporan.jumlah != null) { %>
+          <% if (laporan.jumlah != null && laporan.jumlah !== '') { %>
             <div class="info-row"><span>Jumlah</span><strong><%= laporan.jumlah %></strong></div>
           <% } %>
           <% if (showPengadaanFields && laporan.harga != null) { %>
